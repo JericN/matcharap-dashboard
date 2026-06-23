@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Manila Matcha · Vendor Board ♢ BriarBear</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600;700&family=Shantell+Sans:ital,wght@0,400;0,600;0,700;1,500&family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700&display=swap" rel="stylesheet" />
+<style>
+  /* ===== MANILA MATCHA — hand-drawn café design system (bobo bread / cream cheers vibe) ===== */
+  :root{
+    --cream:#efe7d3; --cream-light:#f3ecdb; --cream-card:#f7f1e3; --cream-deep:#e9e0c9; --kraft:#e3d4b0;
+    --forest:#3f5031; --olive:#56683f; --olive-soft:#6f7f54;
+    --brown:#6b4f2f; --brown-soft:#8a6c45;
+    --matcha:#8aa15a; --matcha-bright:#a7c06a; --matcha-fill:#a9c08a; --clay:#b9542d; --blush:#d98a63;
+    --ink-faint:rgba(63,80,49,.16); --ink-line:rgba(63,80,49,.30); --brown-faint:rgba(107,79,47,.18);
+    --shadow:6px 7px 0 var(--ink-faint); --shadow-sm:3px 4px 0 var(--ink-faint);
+    --display:"Caveat","Comic Sans MS",cursive; --doodle:"Shantell Sans","Comic Sans MS",cursive;
+    --mono:"DM Mono",ui-monospace,monospace; --body:"Nunito Sans",system-ui,sans-serif;
+    --r-card:18px 14px 20px 13px; --r-soft:14px 11px 15px 10px; --r-pill:20px; --line:2.2px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; font-family:var(--body); color:var(--forest); background-color:var(--cream); line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+    background-image:
+      radial-gradient(rgba(107,79,47,.05) 1px, transparent 1.4px),
+      radial-gradient(rgba(63,80,49,.045) 1px, transparent 1.4px),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.045'/%3E%3C/svg%3E"),
+      linear-gradient(125deg, rgba(255,255,255,.28), rgba(255,255,255,0) 45%),
+      radial-gradient(120% 120% at 80% 0%, var(--cream-light), var(--cream-deep));
+    background-size:7px 7px,11px 11px,180px 180px,100% 100%,100% 100%;
+    background-position:0 0,3px 4px,0 0,0 0,0 0;
+  }
+  .wrap{max-width:1140px;margin:0 auto;padding:26px 20px 70px;}
+  a{color:inherit;}
+
+  .mono{font-family:var(--mono);text-transform:uppercase;letter-spacing:.14em;font-size:.66rem;color:var(--brown);}
+  .section-tag{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:.62rem;letter-spacing:.2em;
+    text-transform:uppercase;color:var(--brown);background:var(--cream-light);border:2px solid var(--brown);
+    border-radius:var(--r-pill);padding:4px 13px;margin:0 0 12px;transform:rotate(-1.2deg);}
+  .section-tag b{color:var(--clay);font-weight:500;}
+  section{margin-top:46px;}
+  .sec-title{font-family:var(--doodle);font-weight:700;font-size:1.55rem;color:var(--forest);margin:0 0 16px;line-height:1.15;}
+  .sec-title .sub{font-family:var(--body);font-weight:400;font-size:.85rem;color:var(--olive-soft);display:block;margin-top:3px;}
+  .rule{border:none;border-top:2.2px dashed var(--ink-line);margin:46px 0 0;opacity:.6;}
+
+  /* ---------- HERO ---------- */
+  .hero{position:relative;text-align:center;background:radial-gradient(60% 80% at 50% 12%,rgba(167,192,106,.18),transparent 70%),var(--kraft);
+    border:2.5px solid var(--forest);border-radius:30px 24px 32px 22px;box-shadow:var(--shadow);padding:20px 18px 26px;overflow:hidden;}
+  .hero .corner{position:absolute;font-family:var(--mono);font-size:.58rem;letter-spacing:.16em;text-transform:uppercase;color:var(--brown-soft);}
+  .hero .corner.tl{top:14px;left:18px;} .hero .corner.bl{bottom:16px;left:18px;} .hero .corner.br{bottom:16px;right:18px;}
+  @media(max-width:600px){.hero .corner{display:none;}}
+  .stamp-corner{position:absolute;top:12px;right:14px;width:74px;height:74px;transform:rotate(8deg);}
+  @media(max-width:600px){.stamp-corner{width:54px;height:54px;top:8px;right:8px;}}
+  .arch-wrap{max-width:480px;margin:0 auto;}
+  .arch-wrap svg{width:100%;height:auto;display:block;}
+  .hero .tagline{font-family:var(--mono);font-size:.7rem;letter-spacing:.26em;text-transform:uppercase;color:var(--brown);margin:6px 0 0;}
+  .hero .sub{font-family:var(--display);font-weight:600;font-size:1.5rem;color:var(--olive);margin:2px 0 0;}
+  .stats{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin:16px 0 2px;}
+  .stat{background:var(--cream-light);border:2px solid var(--forest);border-radius:13px 10px 14px 9px;padding:7px 14px;box-shadow:var(--shadow-sm);}
+  .stat b{display:block;font-family:var(--display);font-weight:700;font-size:1.5rem;color:var(--forest);line-height:1;}
+  .stat span{font-family:var(--mono);font-size:.54rem;letter-spacing:.08em;text-transform:uppercase;color:var(--brown-soft);}
+
+  /* ---------- FILTER / TIER CHIP BUTTONS ---------- */
+  .chiprow{display:flex;flex-wrap:wrap;gap:9px;margin:0 0 22px;}
+  .filter,.pfilter,.tierbtn{font-family:var(--mono);font-size:.64rem;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--brown);background:var(--cream-light);border:2px solid var(--brown);border-radius:var(--r-pill);
+    padding:7px 15px;cursor:pointer;transition:transform .1s ease;line-height:1.3;text-align:center;}
+  .filter:hover,.pfilter:hover,.tierbtn:hover{transform:translateY(-2px);}
+  .filter.active,.pfilter.active,.tierbtn.active{background:var(--forest);color:var(--cream-light);border-color:var(--forest);}
+  .tierbtn small{display:block;font-size:.52rem;letter-spacing:.04em;opacity:.8;margin-top:2px;text-transform:none;}
+
+  /* ---------- CARD GRID ---------- */
+  .cardgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px;}
+
+  /* ---------- EVENT CARD ---------- */
+  .event-card{position:relative;background:var(--cream-card);border:var(--line) solid var(--forest);border-radius:var(--r-card);
+    box-shadow:var(--shadow-sm);overflow:hidden;display:flex;flex-direction:column;transition:transform .12s ease,box-shadow .12s ease;}
+  .event-card:hover{transform:translate(-1px,-2px);box-shadow:5px 7px 0 var(--ink-faint);}
+  .event-card.star{background:linear-gradient(180deg,#f9f3e4,var(--cream-card));}
+  .event-top{display:flex;gap:13px;align-items:flex-start;padding:16px 16px 10px;}
+  .event-doodle{flex:0 0 50px;width:50px;height:50px;}
+  .event-meta{flex:1;min-width:0;}
+  .event-name{font-family:var(--doodle);font-weight:700;font-size:1.18rem;color:var(--forest);margin:0 0 5px;line-height:1.13;padding-right:60px;}
+  .event-org{font-family:var(--mono);font-size:.58rem;letter-spacing:.03em;color:var(--olive-soft);text-transform:none;margin-bottom:6px;}
+  .meta-line{font-family:var(--mono);font-size:.64rem;letter-spacing:.01em;color:var(--brown);display:flex;gap:7px;align-items:center;margin:3px 0;text-transform:uppercase;}
+  .meta-line svg{flex:0 0 auto;}
+  .event-body{padding:2px 16px 12px;}
+  .ev-theme{font-size:.84rem;color:var(--olive);margin:4px 0 10px;}
+  .ev-stats{display:flex;flex-wrap:wrap;gap:6px;}
+  .ev-stat{font-family:var(--mono);font-size:.56rem;letter-spacing:.04em;text-transform:uppercase;color:var(--brown);
+    background:rgba(167,192,106,.16);border:1.5px solid var(--ink-line);border-radius:9px;padding:3px 8px;}
+  .event-foot{margin-top:auto;border-top:2px dashed var(--ink-line);padding:11px 16px;background:rgba(167,192,106,.10);
+    display:flex;gap:8px;align-items:center;}
+  .event-foot .tag{font-family:var(--mono);font-size:.6rem;letter-spacing:.04em;line-height:1.35;text-transform:uppercase;display:flex;gap:6px;align-items:flex-start;}
+  .tag.go{color:var(--clay);} .tag.warn{color:var(--olive);} .tag.wait{color:var(--brown-soft);}
+
+  /* stamp status badge */
+  .stamp{position:absolute;top:11px;right:11px;z-index:2;font-family:var(--mono);font-weight:500;text-transform:uppercase;
+    letter-spacing:.08em;font-size:.55rem;color:var(--clay);border:2px solid var(--clay);border-radius:8px 13px 9px 12px;
+    padding:5px 8px;transform:rotate(-7deg);background:rgba(185,84,45,.07);line-height:1;box-shadow:inset 0 0 0 1px rgba(185,84,45,.2);}
+  .stamp.live::before{content:"●";font-size:.45rem;margin-right:5px;vertical-align:middle;}
+  .stamp.soon{color:var(--olive);border-color:var(--olive);background:rgba(86,104,63,.07);box-shadow:inset 0 0 0 1px rgba(86,104,63,.2);}
+  .stamp.ended{color:var(--brown-soft);border-color:var(--brown-soft);background:rgba(138,108,69,.06);box-shadow:none;}
+  .fit-tag{font-family:var(--mono);font-size:.55rem;letter-spacing:.06em;text-transform:uppercase;color:var(--clay);
+    background:rgba(185,84,45,.08);border:1.5px solid var(--clay);border-radius:8px;padding:3px 7px;margin-left:auto;white-space:nowrap;}
+
+  /* ---------- CALCULATOR ---------- */
+  .matchapick{background:var(--kraft);border:var(--line) solid var(--forest);border-radius:var(--r-card);box-shadow:var(--shadow-sm);padding:18px 20px;margin-bottom:6px;}
+  .mp-row{display:flex;gap:18px;flex-wrap:wrap;}
+  .field{flex:1;min-width:220px;}
+  .field label{display:block;font-family:var(--mono);font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:var(--brown);margin-bottom:5px;}
+  .field .rangeval{float:right;color:var(--olive);letter-spacing:.04em;text-transform:none;}
+  .field select{width:100%;font-family:var(--body);font-size:.85rem;color:var(--forest);background:var(--cream-card);
+    border:2px solid var(--olive);border-radius:10px 8px 11px 8px;padding:8px 28px 8px 11px;-webkit-appearance:none;appearance:none;cursor:pointer;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='%233f5031' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M2 4l4 4 4-4'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;}
+  .field input[type=range]{width:100%;-webkit-appearance:none;appearance:none;height:6px;border-radius:6px;background:var(--cream-card);border:1.5px solid var(--olive);outline:none;cursor:pointer;margin-top:6px;}
+  .field input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--forest);border:2px solid var(--cream-light);box-shadow:1px 1px 0 var(--ink-faint);cursor:pointer;}
+  .field input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--forest);border:2px solid var(--cream-light);cursor:pointer;}
+  .mp-read{margin-top:14px;font-family:var(--mono);font-size:.72rem;letter-spacing:.02em;color:var(--forest);background:var(--cream-card);
+    border:2px dashed var(--olive);border-radius:12px;padding:10px 14px;text-align:center;}
+  .mp-read b{color:var(--clay);}
+  .steplabel{font-family:var(--mono);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--brown-soft);text-align:center;margin:18px 0 8px;}
+  .tiers{display:flex;gap:9px;justify-content:center;flex-wrap:wrap;margin-bottom:6px;}
+
+  .ingredients{background:var(--cream-card);border:var(--line) solid var(--forest);border-radius:var(--r-card);box-shadow:var(--shadow-sm);padding:18px 20px;margin:18px 0 6px;}
+  .ingredients h3{font-family:var(--doodle);font-weight:700;font-size:1.05rem;color:var(--forest);margin:0;}
+  .ingredients .ihint{font-size:.78rem;color:var(--olive-soft);margin:4px 0 14px;}
+  .inggrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(255px,1fr));gap:10px;}
+  .ing{background:var(--cream-light);border:1.8px solid var(--ink-line);border-radius:var(--r-soft);padding:11px 13px;display:flex;flex-direction:column;gap:3px;}
+  .ing .il{font-family:var(--mono);font-size:.56rem;letter-spacing:.06em;text-transform:uppercase;color:var(--olive);}
+  .ing .iv{font-size:.8rem;color:var(--forest);font-weight:600;}
+  .ing a{align-self:flex-start;margin-top:3px;font-family:var(--mono);font-size:.56rem;letter-spacing:.06em;text-transform:uppercase;
+    color:var(--cream-light);background:var(--forest);padding:4px 11px;border-radius:999px;text-decoration:none;}
+  .ing a:hover{background:var(--olive);}
+
+  /* DRINK card */
+  .drink-card{position:relative;background:var(--cream-deep);border:var(--line) solid var(--brown);border-radius:var(--r-card);box-shadow:6px 7px 0 var(--brown-faint);padding:17px;display:flex;flex-direction:column;gap:11px;}
+  .drink-head{display:flex;gap:11px;align-items:center;}
+  .drink-name{font-family:var(--doodle);font-weight:700;font-size:1.12rem;color:var(--brown);margin:0;line-height:1.1;}
+  .drink-sub{font-family:var(--mono);font-size:.58rem;letter-spacing:.04em;text-transform:none;color:var(--brown-soft);}
+  .cogs-row{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;}
+  .cogs-cell{text-align:center;border:2px solid var(--brown);border-radius:11px 8px 12px 9px;padding:8px 4px;background:var(--cream-card);}
+  .cogs-cell .k{font-family:var(--mono);font-size:.52rem;letter-spacing:.1em;text-transform:uppercase;color:var(--brown-soft);display:block;}
+  .cogs-cell .v{font-family:var(--mono);font-weight:500;font-size:1.05rem;color:var(--forest);margin-top:3px;display:block;}
+  .cogs-cell.hl{background:var(--forest);border-color:var(--forest);}
+  .cogs-cell.hl .k{color:#cdd9bd;} .cogs-cell.hl .v{color:var(--cream-light);}
+  .bd{font-family:var(--mono);font-size:.58rem;line-height:1.6;letter-spacing:.01em;color:var(--brown);background:var(--cream-card);border:1.5px dashed var(--brown-soft);border-radius:11px;padding:9px 11px;}
+  .bd b{color:var(--forest);}
+  .margin-lab{display:flex;justify-content:space-between;font-family:var(--mono);font-size:.56rem;letter-spacing:.06em;text-transform:uppercase;color:var(--brown-soft);}
+  .margin-bar{height:16px;border:2px solid var(--brown);border-radius:10px;background:var(--cream-card);overflow:hidden;}
+  .margin-fill{height:100%;background:repeating-linear-gradient(45deg,var(--matcha) 0 7px,var(--matcha-bright) 7px 14px);border-right:2px solid var(--brown);border-radius:8px 3px 3px 8px;transition:width .3s ease;}
+
+  /* POWDER card */
+  .powder-card .pdot{flex:0 0 44px;width:44px;height:44px;border-radius:50%;border:2.4px solid var(--forest);}
+  .ptag{font-family:var(--mono);font-size:.55rem;letter-spacing:.08em;text-transform:uppercase;color:var(--clay);margin-bottom:3px;}
+  .p-taste{font-size:.82rem;color:var(--olive);padding:0 16px;margin:0 0 8px;}
+  .p-rows{padding:0 16px 12px;display:flex;flex-direction:column;gap:5px;}
+  .p-rows .meta-line{text-transform:none;letter-spacing:0;align-items:flex-start;}
+  .buylink{margin:auto 16px 16px;font-family:var(--mono);font-size:.58rem;letter-spacing:.04em;text-transform:uppercase;color:var(--cream-light);
+    background:var(--forest);border-radius:12px 9px 13px 9px;padding:9px 13px;text-decoration:none;display:flex;flex-direction:column;gap:2px;}
+  .buylink:hover{background:var(--olive);} .buylink span{opacity:.8;text-transform:none;letter-spacing:0;font-size:.55rem;}
+
+  /* editable SRP cell */
+  .srp-cell{position:relative;}
+  .srp-input{font-family:var(--mono);font-weight:500;font-size:1.05rem;color:var(--clay);background:transparent;border:none;
+    width:100%;text-align:center;margin-top:3px;padding:0 0 1px;outline:none;border-bottom:1.6px dashed var(--clay);-moz-appearance:textfield;}
+  .srp-input:focus{border-bottom-style:solid;}
+  .srp-input::-webkit-outer-spin-button,.srp-input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
+  .margin-v{color:var(--clay);}
+
+  /* powder per-gram hero badge */
+  .perg-box{display:flex;align-items:center;gap:11px;margin:0 16px 11px;padding:8px 14px;background:var(--forest);
+    border-radius:13px 10px 14px 9px;box-shadow:var(--shadow-sm);}
+  .perg-num{font-family:var(--display);font-weight:700;font-size:2rem;line-height:.9;color:var(--cream-light);white-space:nowrap;}
+  .perg-meta{display:flex;flex-direction:column;gap:1px;}
+  .perg-lab{font-family:var(--mono);font-size:.5rem;letter-spacing:.18em;text-transform:uppercase;color:var(--matcha-bright);}
+  .perg-serv{font-family:var(--mono);font-size:.58rem;letter-spacing:.02em;color:#dfe6d2;}
+
+  /* footer */
+  .foot{margin-top:50px;border-top:2.2px dashed var(--ink-line);padding-top:22px;text-align:center;}
+  .foot .note{max-width:720px;margin:0 auto 8px;font-size:.78rem;color:var(--olive-soft);}
+  .foot .sig{font-family:var(--mono);font-size:.58rem;letter-spacing:.16em;text-transform:uppercase;color:var(--brown-soft);margin-top:12px;}
+  .foot code{font-family:var(--mono);background:var(--cream-deep);padding:1px 5px;border-radius:5px;font-size:.72rem;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- reusable doodle set -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+    <symbol id="mm-cup" viewBox="0 0 64 64"><g fill="none" stroke="#3f5031" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 24 h28 l-3 18 q-1 8 -11 8 t-11 -8 z"/><path d="M17 30 q14 6 27 0" stroke="#8aa15a"/><path d="M44 28 q9 0 9 8 t-9 8"/><path d="M25 18 q-4 -6 2 -11 M37 18 q-4 -6 2 -11" stroke="#6b4f2f" stroke-width="2.6"/></g></symbol>
+    <symbol id="mm-whisk" viewBox="0 0 64 64"><g fill="none" stroke="#3f5031" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M32 30 v20" stroke-width="3.6"/><ellipse cx="32" cy="29" rx="13" ry="5" stroke-width="2.6"/><path d="M20 28 l4 -17 M26 27 l2 -18 M32 27 v-19 M38 27 l-2 -18 M44 28 l-4 -17"/><path d="M26 50 q6 5 12 0"/></g></symbol>
+    <symbol id="mm-leaf" viewBox="0 0 64 64"><g fill="none" stroke="#3f5031" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 48 C15 22 33 13 49 13 C49 39 33 50 15 48 Z"/><path d="M18 45 C29 36 40 27 47 16" stroke="#8aa15a"/><path d="M27 36 l6 4 M34 28 l6 4" stroke="#56683f" stroke-width="2.6"/></g></symbol>
+    <symbol id="mm-pin" viewBox="0 0 64 64"><g fill="none" stroke="#3f5031" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M32 56 q-16 -20 -16 -32 a16 16 0 0 1 32 0 q0 12 -16 32z"/><circle cx="32" cy="24" r="6" stroke="#b9542d"/></g></symbol>
+    <symbol id="mm-tent" viewBox="0 0 64 64"><g fill="none" stroke="#3f5031" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M10 28 q22 -14 44 0"/><path d="M10 28 l5 9 6 -8 6 9 6 -9 6 9 6 -8 5 9" stroke="#56683f"/><path d="M14 42 v18 M50 42 v18"/><rect x="22" y="44" width="20" height="16" rx="2"/><path d="M32 44 v16"/></g></symbol>
+    <symbol id="mm-glass" viewBox="0 0 64 64"><g fill="none" stroke="#6b4f2f" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M18 14 h28 l-3 42 q-1 4 -11 4 t-11 -4 z"/><path d="M20 28 q12 5 24 0" stroke="#8aa15a"/><line x1="22" y1="36" x2="42" y2="36" stroke="#a7c06a" stroke-width="2.4"/><line x1="23" y1="44" x2="41" y2="44" stroke="#a7c06a" stroke-width="2.4"/><path d="M40 14 l5 -9" stroke="#b9542d"/></g></symbol>
+  </defs></svg>
+
+  <!-- ===== HERO ===== -->
+  <header class="hero">
+    <span class="corner tl">est. 2026</span>
+    <span class="corner bl">metro manila</span>
+    <span class="corner br">by BriarBear</span>
+    <svg class="stamp-corner" viewBox="0 0 100 100" fill="none" aria-hidden="true">
+      <path d="M50 6c8 4 16 0 22 6s2 14 6 22-2 16 0 22-8 14-16 16-12 8-22 6-16-2-22-8-8-10-10-18 0-16 2-24 6-14 14-18 18-8 26-4Z" stroke="#b9542d" stroke-width="2.4" fill="rgba(185,84,45,.06)"/>
+      <text x="50" y="40" text-anchor="middle" font-family="DM Mono, monospace" font-size="9" fill="#b9542d" letter-spacing="1">EST.</text>
+      <text x="50" y="58" text-anchor="middle" font-family="Caveat, cursive" font-size="24" font-weight="700" fill="#b9542d">2026</text>
+      <text x="50" y="74" text-anchor="middle" font-family="DM Mono, monospace" font-size="7" fill="#b9542d" letter-spacing="1.5">MANILA · PH</text>
+    </svg>
+    <div class="arch-wrap">
+      <svg viewBox="0 0 520 340" role="img" aria-label="Manila Matcha logo with whisking mascot">
+        <defs><path id="archTop" d="M 95 175 A 250 250 0 0 1 425 175" fill="none"/></defs>
+        <text font-family="Caveat, cursive" font-weight="700" fill="#3f5031" font-size="60" letter-spacing="2">
+          <textPath href="#archTop" startOffset="50%" text-anchor="middle">Manila Matcha</textPath>
+        </text>
+        <g stroke="#56683f" stroke-width="2.4" fill="rgba(86,104,63,.18)" stroke-linecap="round">
+          <path d="M96 150 q-16 -10 -8 -28 q18 4 18 24 q0 6 -10 4Z"/>
+          <path d="M424 150 q16 -10 8 -28 q-18 4 -18 24 q0 6 10 4Z"/>
+        </g>
+        <!-- mascot whisking a cup (centered) -->
+        <g transform="translate(63,2)" stroke="#3f5031" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none">
+          <path d="M196 196 c-30 0 -54 22 -54 52 c0 34 26 58 64 58 c40 0 66 -24 66 -58 c0 -30 -24 -52 -54 -52 Z" fill="#a9c08a"/>
+          <path d="M206 196 q4 -22 -8 -34 q20 2 22 26" fill="#7c9b58"/>
+          <path d="M218 188 q14 -16 30 -14 q-4 18 -26 22" fill="#8caa64"/>
+          <circle cx="178" cy="262" r="9" fill="#d98a63" stroke="none" opacity=".7"/>
+          <circle cx="246" cy="262" r="9" fill="#d98a63" stroke="none" opacity=".7"/>
+          <path d="M186 244 q5 -8 11 0" stroke-width="3.4"/>
+          <path d="M229 244 q5 -8 11 0" stroke-width="3.4"/>
+          <path d="M203 256 q9 9 18 0" stroke-width="3"/>
+          <path d="M156 268 q-22 4 -34 22"/>
+          <path d="M268 250 q26 -8 34 -34"/>
+          <g><path d="M96 290 h54 l-6 30 a8 8 0 0 1 -8 7 h-26 a8 8 0 0 1 -8 -7 Z" fill="#eef0e2"/>
+            <path d="M104 298 h38 l-3 16 h-32 Z" fill="#7faa4e" stroke="none"/>
+            <path d="M118 282 q6 -8 0 -16 q-6 -8 0 -16" stroke-width="2.4"/>
+            <path d="M132 282 q6 -8 0 -16 q-6 -8 0 -16" stroke-width="2.4"/></g>
+          <g stroke-width="2.6"><path d="M300 214 l14 -26"/><path d="M306 214 l16 -24"/><path d="M295 218 l10 -28"/><path d="M292 224 h18" stroke-width="3"/><path d="M300 226 l4 18" stroke-width="3.4"/></g>
+        </g>
+      </svg>
+    </div>
+    <p class="tagline">whisked fresh in metro manila</p>
+    <p class="sub">events · cost calculator · powder guide</p>
+    <div class="stats" id="stats"></div>
+  </header>
+
+  <!-- ===== EVENTS ===== -->
+  <section id="events">
+    <span class="section-tag"><b>01</b> pop-up events</span>
+    <h2 class="sec-title">Where to set up a booth
+      <span class="sub">upcoming matcha pop-ups, fests &amp; markets around Metro Manila</span>
+    </h2>
+    <div class="chiprow" id="filters">
+      <button class="filter active" data-f="all">All</button>
+      <button class="filter" data-f="upcoming">Upcoming</button>
+      <button class="filter" data-f="recurring">Recurring</button>
+      <button class="filter" data-f="star">Best fit</button>
+    </div>
+    <div class="cardgrid" id="grid"></div>
+  </section>
+
+  <hr class="rule" />
+
+  <!-- ===== CALCULATOR ===== -->
+  <section id="menu">
+    <span class="section-tag"><b>02</b> cost calculator</span>
+    <h2 class="sec-title">Choose your matcha &amp; milk → costs auto-calculate
+      <span class="sub">₱ per 16oz iced cup · tap the SRP box to set your own price · verified vs PH store data, June 2026</span>
+    </h2>
+    <div class="matchapick">
+      <div class="mp-row">
+        <div class="field"><label>🍵 Matcha powder</label><select id="matchaSel"></select></div>
+        <div class="field"><label>🥛 Milk</label><select id="milkSel"></select></div>
+        <div class="field"><label>⚖️ Matcha dose / cup <span class="rangeval" id="doseVal">3 g</span></label><input type="range" id="dose" min="1.5" max="6" step="0.5" value="3" /></div>
+      </div>
+      <div id="matchaReadout" class="mp-read"></div>
+    </div>
+    <div class="ingredients">
+      <h3>🧾 Ingredients used &amp; price sources</h3>
+      <div class="ihint">Verified June 2026 — tap “price ↗” to open each source. Prices vary by retailer &amp; quantity.</div>
+      <div class="inggrid" id="inggrid"></div>
+    </div>
+    <div class="cardgrid" id="menu-grid" style="margin-top:18px"></div>
+  </section>
+
+  <hr class="rule" />
+
+  <!-- ===== POWDERS ===== -->
+  <section id="powders">
+    <span class="section-tag"><b>03</b> powder picks</span>
+    <h2 class="sec-title">Best matcha to source for the booth
+      <span class="sub">PH-homegrown brands, Japanese names sold in PH &amp; authentic imports · ₱ per 2g serving</span>
+    </h2>
+    <div class="chiprow" id="pfilters">
+      <button class="pfilter active" data-pf="all">All</button>
+      <button class="pfilter" data-pf="ph">🇵🇭 PH Homegrown</button>
+      <button class="pfilter" data-pf="jp">🇯🇵 Japanese · in PH</button>
+      <button class="pfilter" data-pf="import">🌏 Imported</button>
+    </div>
+    <div class="cardgrid" id="powder-grid"></div>
+  </section>
+
+  <footer class="foot">
+    <p class="note">Size &amp; crowd figures marked “est.” are ballpark estimates from venue type &amp; vendor counts — confirm with organizers.</p>
+    <p class="note">A <code>forms.app</code> “vendor application” link in some bazaar FB groups is a false match (a US event). Apply only via each organizer's own IG/FB.</p>
+    <p class="sig">Manila Matcha · a BriarBear brand · cream + forest · hand-drawn · 2026</p>
+  </footer>
+
+</div>
+
+<script>
+/* ===================== EVENTS ===================== */
+const EVENTS = [
+  // ===== UPCOMING (validated against organizer posts, Jun 2026) =====
+  {name:"Pobla Matcha Fest", org:"Souk Pop-up · @soukpopup + @omg_market.ph", tags:["upcoming","star"], status:["🌱 Upcoming","p-up"], star:true,
+   theme:"Matcha, tea & lifestyle street fest", date:"Jul 11, 2026 (Sat PM) · ✓ verified", venue:"The Fun Roof, Poblacion, Makati",
+   size:"Medium rooftop · ~40–60 booths", people:"~2,000–4,000 / day", vendor:{c:"open",ic:"💚",t:"Call OPEN — “looking for matcha merchants & cafés” (@omg_market.ph, Jun 15)"}},
+  {name:"Moonlit Market: Matcha Fest", org:"Moonlit Market Events · @themoonlitevents", tags:["upcoming","star"], status:["🌱 Upcoming","p-up"], star:true,
+   theme:"Matcha night bazaar — food · fashion · finds", date:"Jul 3–5, 2026 · 1–11 PM · ✓ verified", venue:"Burgos Park, Forbestown, BGC",
+   size:"Large · 3-day · ~50–80 booths", people:"~5,000–10,000 / 3 days", vendor:{c:"open",ic:"💚",t:"Call OPEN — food & non-food (quick food, drinks, crafts)"}},
+  {name:"Pride & Matcha Fest", org:"The Manila Market Club · @themanilamarketclub", tags:["upcoming"], status:["🎀 This week","p-soon"],
+   theme:"Pride × Matcha celebration · 12+ matcha booths", date:"Jun 26–28, 2026 · ✓ verified", venue:"Greenhills Mall, San Juan",
+   size:"Medium–large · ~40 booths", people:"~3,000–6,000 (est.)", vendor:{c:"wait",ic:"⏳",t:"Likely full (days away) — follow @themanilamarketclub for the next"}},
+  {name:"Moonlit Market (Aug)", org:"Moonlit Market Events · @themoonlitevents", tags:["upcoming"], status:["🌱 Upcoming","p-up"],
+   theme:"Matcha / lifestyle night market", date:"Aug 7–9, 2026 · ~ to confirm", venue:"Assembly Grounds, The Rise, Makati",
+   size:"Large · 3-day", people:"~4,000–8,000 / 3 days", vendor:{c:"wait",ic:"⏳",t:"Organizer-listed — watch for the merchant call, DM @themoonlitevents"}},
+  {name:"The Merry Matcha Market", org:"Holiday Makers & Art Bazaar", tags:["upcoming"], status:["🌱 Upcoming","p-up"],
+   theme:"Holiday matcha + makers & art bazaar", date:"Dec 19, 2026 · 11–7 · ~ to confirm", venue:"Gimenez Gallery",
+   size:"Small–medium gallery", people:"~500–1,500 (est.)", vendor:{c:"open",ic:"💚",t:"Call for merchants OPEN (seen once — reconfirm nearer date)"}},
+
+  // ===== RECURRING ORGANIZERS — pitch for their next edition =====
+  {name:"Matcha & Hojicha Collective", org:"The Modern Market · @themodernmarket.ph", tags:["recurring","star"], status:["🔁 Recurring","p-rec"], star:true,
+   theme:"Curated matcha & hojicha café collective", date:"~Monthly · last Eastwood Jun 19–21", venue:"Rotating malls (Eastwood · Uptown BGC · Alabang West Parade · Podium)",
+   size:"Large · mall-grade reach (32.6K followers)", people:"Thousands / weekend", vendor:{c:"open",ic:"💚",t:"Onboard via Silk Events Mgt · @silkeventsmgt"}},
+  {name:"Souk Matcha Fest (series)", org:"Souk Pop-up · @soukpopup", tags:["recurring"], status:["🔁 Recurring","p-rec"],
+   theme:"Matcha + tea + lifestyle, 60+ purveyors", date:"~Monthly editions thru 2026", venue:"Glorietta · Trinoma · Eastwood · Poblacion",
+   size:"Large · 60+ vendors / run", people:"Thousands / weekend (est.)", vendor:{c:"open",ic:"💚",t:"Recurring open calls — DM @soukpopup"}},
+  {name:"The Manila Market Club", org:"@themanilamarketclub", tags:["recurring"], status:["🔁 Recurring","p-rec"],
+   theme:"Matcha fests & themed markets (12+ booths)", date:"Ran Nuvali (May) & Greenhills (Jun 26–28)", venue:"Greenhills, San Juan · Nuvali · roving",
+   size:"Medium–large · 12+ matcha booths", people:"~3,000–6,000 (est.)", vendor:{c:"wait",ic:"⏳",t:"Active organizer — DM @themanilamarketclub for the next"}},
+  {name:"The Social Fair: Summer Matcha Fest", org:"@thesocialfair.ph", tags:["recurring"], status:["🔁 Recurring","p-rec"],
+   theme:"Weekday matcha fair — food & non-food", date:"Recurring · last merchant call Apr 2026", venue:"Metro Manila (venue rotates)",
+   size:"Medium · weekday fair", people:"~1,000–2,500 (est.)", vendor:{c:"wait",ic:"⏳",t:"Opens merchant calls — follow @thesocialfair.ph"}},
+  {name:"Matcha & Makers Fest", org:"Assembly Grounds · The Rise", tags:["recurring"], status:["🔁 Recurring","p-rec"],
+   theme:"Matcha × makers/creators community fest", date:"Ran May 4–6 · watch for next", venue:"Assembly Grounds, The Rise, Makati",
+   size:"Medium · creators market", people:"~2,000–4,000 (est.)", vendor:{c:"wait",ic:"⏳",t:"Creators market — watch Assembly Grounds for the next call"}},
+  {name:"Matcha Madness Bazaar", org:"lyf Malate · bazaar org", tags:["recurring"], status:["🔁 Recurring","p-rec"],
+   theme:"3-day matcha pop-up market", date:"Ran Mar 25–27 · watch for next", venue:"lyf Malate, Manila",
+   size:"Medium · 3-day pop-up", people:"~1,500–3,000 (est.)", vendor:{c:"wait",ic:"⏳",t:"Merchant applications open per edition — watch for next"}},
+  {name:"Mini Matcha Festival", org:"Inside Marikina", tags:["recurring"], status:["🔁 Recurring","p-rec"],
+   theme:"Cozy neighborhood matcha festival", date:"Ran Jun 13–14 · watch for next", venue:"Marikina",
+   size:"Small · neighborhood 2-day", people:"~800–2,000 (est.)", vendor:{c:"wait",ic:"⏳",t:"Brands & merchants gather — watch Inside Marikina"}},
+  {name:"Manila Matcha Fest", org:"@manilamatchafest", tags:["recurring"], status:["🔁 Recurring","p-rec"],
+   theme:"Matcha & hojicha festival (themed)", date:"Recurring (e.g. “Love & Matcha”)", venue:"SM Mall of Asia & others",
+   size:"Large · mall atrium", people:"High mall foot traffic", vendor:{c:"wait",ic:"⏳",t:"Follow page for the next merchant call"}},
+  {name:"Matcha & Arts Fest", org:"Wet Market PH · @wetmarketph", tags:["recurring"], status:["🔁 Recurring","p-rec"],
+   theme:"Matcha × art market crossover", date:"Recurring (Feb–May editions)", venue:"Metro Manila",
+   size:"Medium–large · ~15 shops + 40 artists", people:"~2,000–4,000 (est.)", vendor:{c:"wait",ic:"⏳",t:"Follow @wetmarketph for the next call"}},
+  {name:"Matcha Social", org:"Cabana Club · Corner House", tags:["recurring"], status:["🔁 Recurring","p-rec"],
+   theme:"Curated boutique matcha pop-up", date:"Ran May 30–31 · watch for next", venue:"Corner House, San Juan",
+   size:"Boutique · ~18 brands", people:"~1,000–2,500 (est.)", vendor:{c:"wait",ic:"⏳",t:"Track Cabana Club / Corner House"}},
+  {name:"Coffee & Matcha Collective", org:"Pasig", tags:["recurring"], status:["🔁 Recurring","p-rec"],
+   theme:"Coffee × matcha collective", date:"Ran Mar 2026 · watch for next", venue:"Pasig",
+   size:"Medium", people:"~1,500–3,000 (est.)", vendor:{c:"wait",ic:"⏳",t:"Track organizer for the next edition"}},
+  {name:"Matcha Mania", org:"3 Torre Lorenzo", tags:["recurring"], status:["🔁 Recurring","p-rec"],
+   theme:"Matcha + indie art, student-area pop-up", date:"Ran Feb 23–24 · watch for next", venue:"3 Torre Lorenzo (U-belt)",
+   size:"Medium · ~10 brands + 40 artists", people:"~2,000–3,500 (est.)", vendor:{c:"wait",ic:"⏳",t:"Follow for the next pop-up call"}},
+];
+const STAMP = {'p-up':'', 'p-rec':'soon', 'p-soon':'live'};
+const CAL_SVG = '<svg width="12" height="12" viewBox="0 0 14 14" fill="none" stroke="#6b4f2f" stroke-width="1.8"><rect x="1.5" y="2.5" width="11" height="9.5" rx="1.5"/><path d="M1.5 5h11M4 1v3M10 1v3"/></svg>';
+const PIN_SVG = '<svg width="12" height="12" viewBox="0 0 14 14" fill="none" stroke="#6b4f2f" stroke-width="1.8"><path d="M7 1c3 0 5 2.2 5 5 0 3.5-5 7-5 7S2 9.5 2 6c0-2.8 2-5 5-5Z"/><circle cx="7" cy="6" r="1.7"/></svg>';
+const grid = document.getElementById('grid');
+function render(filter){
+  grid.innerHTML='';
+  EVENTS.filter(e=> filter==='all' || e.tags.includes(filter)).forEach(e=>{
+    const stampTxt = e.status[0].replace(/^[^A-Za-z]+/,'').trim();
+    const el=document.createElement('article'); el.className='event-card'+(e.star?' star':'');
+    el.innerHTML=`
+      <span class="stamp ${STAMP[e.status[1]]||''}">${stampTxt}</span>
+      <div class="event-top">
+        <svg class="event-doodle" viewBox="0 0 64 64" aria-hidden="true"><use href="#mm-tent"/></svg>
+        <div class="event-meta">
+          <h3 class="event-name">${e.name}</h3>
+          <div class="event-org">${e.org}</div>
+          <div class="meta-line">${CAL_SVG} ${e.date}</div>
+          <div class="meta-line">${PIN_SVG} ${e.venue}</div>
+        </div>
+      </div>
+      <div class="event-body">
+        <p class="ev-theme">${e.theme}</p>
+        <div class="ev-stats"><span class="ev-stat">🎪 ${e.size}</span><span class="ev-stat">👥 ${e.people}</span></div>
+      </div>
+      <div class="event-foot">
+        <span class="tag ${e.vendor.c==='open'?'go':e.vendor.c==='warn'?'warn':'wait'}">${e.vendor.ic} ${e.vendor.t}</span>
+        ${e.star?'<span class="fit-tag">⭐ fit</span>':''}
+      </div>`;
+    grid.appendChild(el);
+  });
+}
+document.querySelectorAll('#filters .filter').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('#filters .filter').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active'); render(b.dataset.f);
+}));
+const up=EVENTS.filter(e=>e.tags.includes('upcoming')).length, rec=EVENTS.filter(e=>e.tags.includes('recurring')).length;
+document.getElementById('stats').innerHTML=`
+  <div class="stat"><b>${up}</b><span>upcoming</span></div>
+  <div class="stat"><b>${rec}</b><span>recurring</span></div>
+  <div class="stat"><b>16+</b><span>organizers</span></div>
+  <div class="stat"><b>9</b><span>drinks costed</span></div>`;
+render('all');
+
+/* ===================== INGREDIENT SOURCES ===================== */
+const INGREDIENTS = [
+  {il:"🍵 Matcha · budget culinary", iv:"Little Retail Pure Unsweetened — ₱180/100g (₱1.8/g)", url:"https://littleretailph.com/products/pure-unsweetened-matcha-powder"},
+  {il:"🍵 Matcha · latte grade", iv:"JapanMatcha Latte Grade — ₱900/100g (₱9/g)", url:"https://www.japanmatcha.ph/products/matcha-from-japan-ceremonial-and-culinary-grade-uji"},
+  {il:"🍵 Matcha · premium ceremonial", iv:"JapanMatcha Premium Ceremonial — ₱1,590/100g (₱15.9/g)", url:"https://www.japanmatcha.ph/products/matcha-from-japan-ceremonial-and-culinary-grade-uji"},
+  {il:"🥛 Milk · fresh dairy", iv:"Magnolia Fresh Milk 1L — ₱99.25 (SM Markets)", url:"https://smmarkets.ph/10123686-magnolia-fresh-milk-1l.html"},
+  {il:"🌾 Milk · oat (barista)", iv:"Oatside Barista Blend 1L — ₱114.25 (Landers)", url:"https://www.landers.ph/dairy-chilled/oatside-barista-blend-oat-milk-1-l-145862-40293"},
+  {il:"🍦 Cream · whipping", iv:"Emborg Whipping Cream 1L — ~₱448 (Shopee)", url:"https://shopee.ph/Emborg-UHT-Whipping-Cream-1L-i.144900856.5540159124"},
+  {il:"🍯 Syrup · flavor (Monin)", iv:"Monin 700ml — ~₱700–850 (imported)", url:"https://manila-wine.com/manila-wine-others/monin"},
+  {il:"🥤 Cup + dome lid · 16oz", iv:"Packaging Lab — ₱5.50 + ₱2.00 / pc (100s)", url:"https://packaginglabph.com/products/elegant-pet-plastic-cup"},
+  {il:"🍋 Calamansi", iv:"₱80–120/kg (PSA / public market)", url:"https://psa.gov.ph/statistics/price-situationer/selected-agri-commodities"},
+  {il:"🍓 Strawberry", iv:"₱100–300/kg (Baguio market)", url:"https://tribune.net.ph/2026/04/02/strawberry-prices-in-baguio-drop-as-tourist-numbers-fall"},
+];
+const ig=document.getElementById('inggrid');
+INGREDIENTS.forEach(x=>{const el=document.createElement('div');el.className='ing';
+  el.innerHTML=`<div class="il">${x.il}</div><div class="iv">${x.iv}</div><a href="${x.url}" target="_blank" rel="noopener">price ↗</a>`;ig.appendChild(el);});
+
+/* ===================== COST CALCULATOR ===================== */
+const MATCHA_OPTS=[
+  {l:"Little Retail · Culinary 1kg (bulk)",g:1.19},{l:"Little Retail · Culinary 250g",g:1.78},
+  {l:"Equilibrium · Culinary 1.36kg",g:1.88},{l:"Little Retail · Ceremonial 1kg",g:2.10},
+  {l:"Little Retail · Ceremonial 250g",g:2.96},{l:"Little Retail · Ceremonial 100g",g:3.25},
+  {l:"JapanMatcha · Latte grade 100g",g:9.00},{l:"JapanMatcha · Ceremonial 100g",g:14.50},
+  {l:"JapanMatcha · Premium Ceremonial 100g",g:15.90},
+];
+const MILK_OPTS=[
+  {l:"Magnolia fresh dairy — ₱99/L",ml:0.09925},{l:"Oatside oat · barista — ₱114/L",ml:0.11425},
+  {l:"Barista dairy — ~₱130/L",ml:0.130},{l:"Evap/UHT budget — ~₱85/L",ml:0.085},
+];
+const EXTRAS=11;  // cup + lid + ice + sugar, per 16oz cup
+const DRINKS=[
+  {name:"Basic Matcha Latte", note:"the everyday hero", flavor:"", milkMl:180, fl:0, srp:150},
+  {name:"Ichigo Matcha Latte", note:"strawberry compote", flavor:"🍓 strawberry", milkMl:180, fl:14, srp:180},
+  {name:"Seasalt Matcha Latte", note:"salted cream foam", flavor:"🧀 cream foam", milkMl:180, fl:15, srp:180},
+  {name:"Shoyu Matcha", note:"umami-sweet novelty", flavor:"🍶 soy+caramel", milkMl:180, fl:5, srp:160},
+  {name:"Pistachio Matcha Latte", note:"nutty pistachio", flavor:"🥜 pistachio", milkMl:180, fl:34, srp:200},
+  {name:"Sakura Matcha Latte", note:"floral, seasonal", flavor:"🌸 sakura", milkMl:180, fl:36, srp:200},
+  {name:"Calamansi Matcha", note:"citrus, light/no milk", flavor:"🍋 calamansi+honey", milkMl:80, fl:8, srp:160},
+  {name:"Iced Lychee Matcha", note:"light & fruity", flavor:"🫧 lychee", milkMl:80, fl:28, srp:180},
+  {name:"Horchata Matcha", note:"cinnamon-rice cream", flavor:"🥛 horchata", milkMl:150, fl:13, srp:170},
+];
+const mgrid=document.getElementById('menu-grid');
+const matchaSel=document.getElementById('matchaSel'), milkSel=document.getElementById('milkSel');
+const doseEl=document.getElementById('dose'), doseVal=document.getElementById('doseVal'), mread=document.getElementById('matchaReadout');
+let mi=4, ki=1, dose=3;
+const srpVals=DRINKS.map(d=>d.srp);
+MATCHA_OPTS.forEach((o,i)=>{const op=document.createElement('option');op.value=i;op.textContent=`${o.l} — ₱${o.g.toFixed(2)}/g`;matchaSel.appendChild(op);});
+MILK_OPTS.forEach((o,i)=>{const op=document.createElement('option');op.value=i;op.textContent=o.l;milkSel.appendChild(op);});
+matchaSel.value=mi; milkSel.value=ki;
+function cogsOf(d){
+  const mCost=Math.round(MATCHA_OPTS[mi].g*dose), milkCost=d.milkMl*MILK_OPTS[ki].ml;
+  return {mCost, milkCost, cogs:Math.round(mCost+milkCost+d.fl+EXTRAS)};
+}
+function paintMargin(card, cogs, srp){
+  const profit=srp-cogs, margin=srp>0?Math.round(profit/srp*100):0;
+  card.querySelector('.profit-v').textContent='₱'+profit;
+  card.querySelector('.margin-v').textContent=margin+'%';
+  card.querySelector('.margin-fill').style.width=Math.max(0,margin)+'%';
+  card.querySelector('.margin-word').textContent= margin>=65?'healthy ✓':(margin>=45?'ok':'tight');
+}
+function renderMenu(){
+  const mPerG=MATCHA_OPTS[mi].g, mCost=Math.round(mPerG*dose), kPerMl=MILK_OPTS[ki].ml;
+  mread.innerHTML=`🍵 Matcha <b>₱${mCost}</b>/cup (${dose}g × ₱${mPerG.toFixed(2)}/g) &nbsp;·&nbsp; 🥛 Milk <b>₱${Math.round(180*kPerMl)}</b>/180ml &nbsp;·&nbsp; 🥤 cup+ice+sugar <b>₱${EXTRAS}</b>`;
+  mgrid.innerHTML='';
+  DRINKS.forEach((d,idx)=>{
+    const {milkCost, cogs}=cogsOf(d);
+    const srp=srpVals[idx], profit=srp-cogs, margin=srp>0?Math.round(profit/srp*100):0;
+    const flavorBit=d.fl>0?` + ${d.flavor} ₱${d.fl}`:``;
+    const el=document.createElement('article'); el.className='drink-card';
+    el.innerHTML=`
+      <div class="drink-head">
+        <svg width="42" height="42" viewBox="0 0 64 64" aria-hidden="true"><use href="#mm-glass"/></svg>
+        <div><h3 class="drink-name">${d.name}</h3><span class="drink-sub">${d.note}</span></div>
+      </div>
+      <div class="cogs-row">
+        <div class="cogs-cell"><span class="k">COGS</span><span class="v">₱${cogs}</span></div>
+        <div class="cogs-cell srp-cell"><span class="k">SRP ✎</span><input class="srp-input" type="number" min="0" step="5" value="${srp}" data-i="${idx}" inputmode="numeric" aria-label="Selling price for ${d.name}"></div>
+        <div class="cogs-cell hl"><span class="k">Profit</span><span class="v profit-v">₱${profit}</span></div>
+      </div>
+      <div class="margin-lab"><span>gross margin · <b class="margin-v">${margin}%</b></span><span class="margin-word">${margin>=65?'healthy ✓':(margin>=45?'ok':'tight')}</span></div>
+      <div class="margin-bar"><div class="margin-fill" style="width:${Math.max(0,margin)}%"></div></div>
+      <div class="bd">🧮 matcha ₱${mCost} + milk ₱${Math.round(milkCost)}${flavorBit} + cup/ice/sugar ₱${EXTRAS} = <b>₱${cogs}</b> · type your price in SRP ✎</div>`;
+    mgrid.appendChild(el);
+  });
+  mgrid.querySelectorAll('.srp-input').forEach(inp=>inp.addEventListener('input',()=>{
+    const i=+inp.dataset.i; srpVals[i]=+inp.value||0;
+    paintMargin(inp.closest('.drink-card'), cogsOf(DRINKS[i]).cogs, srpVals[i]);
+  }));
+}
+matchaSel.addEventListener('change',()=>{mi=+matchaSel.value;renderMenu();});
+milkSel.addEventListener('change',()=>{ki=+milkSel.value;renderMenu();});
+doseEl.addEventListener('input',()=>{dose=+doseEl.value;doseVal.textContent=dose+' g';renderMenu();});
+renderMenu();
+
+/* ===================== POWDER PICKS ===================== */
+const PDOT={ph:'#5e7b3a', jp:'#7a9447', import:'#9bb15c'};
+const POWDERS=[
+  {cat:"ph", catlabel:"🇵🇭 PH Homegrown", star:true, name:"Ritual Matcha Co.", origin:"“Kasane” · 1st-harvest ceremonial · Shizuoka → PH · wholesale + private label",
+   taste:"Deep umami, delicate sweetness, low bitterness — holds up in milk. Built to SUPPLY cafés (1kg bulk + OEM).",
+   price:"₱1,250 / 40g · ₱31/g (far less at 1kg)", serving:"~₱62 retail (much less wholesale)",
+   hype:"“Trusted by 300+ PH cafés” — the B2B insider pick. Best path to protected margins.", buy:"ritualmatcha.ph + wholesale form", url:"https://ritualmatcha.ph"},
+  {cat:"ph", catlabel:"🇵🇭 PH Homegrown", star:true, name:"Matcha Moments", origin:"“Miyu” café blend · 2nd-harvest · Yame, Fukuoka",
+   taste:"Nutty, toasted almond + pecan, savory umami, low bitterness. Best quality-for-price latte base; 500g / 1kg.",
+   price:"₱1,760 / 100g · ₱17.6/g", serving:"~₱35", hype:"Approachable-premium with transparent cultivar/harvest sourcing.", buy:"matchamoments.ph · Shopee", url:"https://matchamoments.ph"},
+  {cat:"ph", catlabel:"🇵🇭 PH Homegrown", name:"Maison Midori", origin:"“Tenshi” Samidori · premium single-cultivar ceremonial · Kyoto",
+   taste:"Creamy, earthy, balanced umami-sweetness, minimal astringency. DTC-only (no wholesale tier yet).",
+   price:"₱990 / 40g · ₱24.75/g", serving:"~₱50", hype:"🔥 Most viral + press-covered PH brand of 2025–26 — the marketing magnet. Sells out fast.", buy:"maisonmidori.com · IG/TikTok", url:"https://maisonmidori.com"},
+  {cat:"ph", catlabel:"🇵🇭 PH Homegrown", star:true, name:"Nokori", origin:"“Komo” · latte-tuned everyday ceremonial blend · Uji, Kyoto",
+   taste:"Mild, creamy, soft pistachio, custard-like, low astringency — designed not to fight the milk.",
+   price:"from ₱839 / 60g · ₱14/g", serving:"~₱28 (best boutique margin)", hype:"Strong TikTok presence; the everyday-latte favorite. Small-batch drops sell out.", buy:"nokorimatcha.com · Lazada", url:"https://nokorimatcha.com"},
+  {cat:"ph", catlabel:"🇵🇭 PH Homegrown", name:"Sobamatsu", origin:"budget latte-oriented · Japan-sourced",
+   taste:"Light, grassy, latte-leaning. The cheapest verified everyday option for high-volume value pricing.",
+   price:"~₱600 / 50g · ₱12/g (cheapest)", serving:"~₱24", hype:"Strong viral TikTok buzz as the affordable everyday pick.", buy:"Shopee / Lazada", url:"https://shopee.ph/search?keyword=sobamatsu%20matcha"},
+  {cat:"jp", catlabel:"🇯🇵 Japanese · in PH", star:true, name:"Yamamasa Koyamaen", origin:"“Matsukaze / Ogurayama” · ceremonial · Uji, Kyoto (est. 1704)",
+   taste:"Ogurayama: creamy, velvety, umami + sweet, floral-nutty. Matsukaze: vegetal, light, holds color in milk.",
+   price:"30g cans ~₱800–2,100 · ₱27–70/g", serving:"~₱53 – ₱93", hype:"Very high on TikTok, near Ippodo tier — in stock at Midori PH, sells out fast.", buy:"Midori Matcha PH · japanmatcha.ph", url:"https://midorimatchaph.com/collections/yamamasa-koyamaen"},
+  {cat:"jp", catlabel:"🇯🇵 Japanese · in PH", name:"The Matcha Tokyo", origin:"“Tokyo Rich / Japan Premium” · 100% organic · Kagoshima/Uji leaf",
+   taste:"Bold umami, low astringency, grassy, rich bitter finish. Tokyo Rich is latte-optimized.",
+   price:"Tokyo Rich ₱1,540/20g (₱77/g)", serving:"~₱154–220 (retail — negotiate B2B)", hype:"High — viral on TikTok, top Manila matcha; 13+ PH cafés.", buy:"PH cafés · GrabFood · order site", url:"https://thematchatokyo-ph.tablevibe.co/"},
+  {cat:"import", catlabel:"🌏 Imported", star:true, name:"Marukyu-Koyamaen", origin:"“Aoarashi” (hero) / “Wakatake” (bulk) · Uji, Kyoto (est. ~1704)",
+   taste:"Aoarashi: brisk, bold, grassy, vibrant green — a ceremonial that SURVIVES milk. Wakatake = culinary bulk.",
+   price:"PH ₱1,300 / 40g · ₱33/g", serving:"~₱40–65", hype:"Prestige tea-ceremony supplier; Aoarashi is the PH cult-favorite. Chronic sellouts.", buy:"Midori Matcha PH · Japan Matcha PH", url:"https://midorimatchaph.com/collections/marukyu-koyamaen"},
+  {cat:"import", catlabel:"🌏 Imported", name:"Ippodo", origin:"“Ikuyo” (latte) / “Sayaka” (premium) · Uji/Kyoto (est. 1717)",
+   taste:"Ikuyo: balanced, mild umami, snappy, nutty/white-chocolate, photogenic green. The prestige benchmark.",
+   price:"PH café 100g ₱3,000 · ₱30/g", serving:"~₱60 (₱90 at 3g)", hype:"Top benchmark; won't ship to PH direct — buy via resellers. Shortage + sellouts.", buy:"MODO @ Mitsukoshi BGC · Matcha Tana", url:"https://modo.ph/collections/ippodo-tea"},
+  {cat:"import", catlabel:"🌏 Imported", star:true, name:"Naoki Matcha", origin:"“Barista Blend” · latte/barista grade · Kagoshima + Uji leaf",
+   taste:"Bold, earthy, roasty — built to cut through milk. Great-value café-quality; B2B program available.",
+   price:"40g ≈ ₱1,025 · ₱26/g (culinary ~₱8.5/g)", serving:"~₱52", hype:"Loved on TikTok/Lemon8 as best-value café-quality; gripe: duller color.", buy:"Shopee PH · direct import · B2B", url:"https://naokimatcha.com/products/barista-blend-matcha"},
+  {cat:"import", catlabel:"🌏 Imported", name:"Encha", origin:"“Latte / Barista Grade” · organic single-origin Uji",
+   taste:"Latte Grade: bold, cuts through milk. Barista: nutty, toasted, chocolate. Best value in 500g bulk.",
+   price:"Latte 500g ₱17/g · Barista 500g ₱11/g", serving:"Latte ~₱34 · Barista ~₱22", hype:"Popular organic/value pick — import-only, and a 2025 heavy-metals flag worth knowing.", buy:"Import-only · Lazada cross-border", url:"https://encha.com/collections/all"},
+  {cat:"import", catlabel:"🌏 Imported", name:"Aiya", origin:"“Culinary” (Ceremonial for premium) · Nishio, Aichi (since 1888)",
+   taste:"Culinary: bolder, mildly astringent, strong enough for milk. World's largest producer — café bulk workhorse.",
+   price:"Culinary 100g ₱18/g · 1kg ~₱9.7/g", serving:"~₱19–20 (bulk culinary)", hype:"Reliable café workhorse; enthusiasts rate ceremonial “mid”. No confirmed PH distributor.", buy:"Import via Aiya America / wholesale", url:"https://aiya-america.com/retail/matcha-products/"},
+  {cat:"import", catlabel:"🌏 Imported", name:"Rocky's Matcha", origin:"ceremonial blends + single cultivars · Japanese (Uji) matcha",
+   taste:"Smooth, creamy, nutty, natural sweetness, low bitterness. A TikTok cult darling.",
+   price:"PH reseller ₱3,995 / 20g · ₱200/g 😵", serving:"~₱400 (PH) / ₱150–200 import", hype:"Huge on TikTok but widely called “overhyped/overpriced.” NOT reliably in PH.", buy:"The Glow PH (often OOS) · import", url:"https://www.lazada.com.ph/shop/the-glow-philippines/"},
+];
+const pgrid=document.getElementById('powder-grid');
+function renderPowders(f){
+  pgrid.innerHTML='';
+  POWDERS.filter(p=> f==='all' || p.cat===f).forEach(p=>{
+    const perg=(p.price.match(/₱[\d.]+(?:[–-][\d.]+)?\s*\/\s*g/)||['—'])[0].replace(/\s*\/\s*g/,'');
+    const el=document.createElement('article'); el.className='event-card powder-card'+(p.star?' star':'');
+    el.innerHTML=`
+      ${p.star?'<span class="stamp">top pick</span>':''}
+      <div class="event-top">
+        <span class="pdot" style="background:${PDOT[p.cat]}"></span>
+        <div class="event-meta">
+          <div class="ptag">${p.catlabel}</div>
+          <h3 class="event-name">${p.name}</h3>
+          <div class="event-org">🌿 ${p.origin}</div>
+        </div>
+      </div>
+      <div class="perg-box"><span class="perg-num">${perg}</span><span class="perg-meta"><span class="perg-lab">per gram</span><span class="perg-serv">☕ ${p.serving} / serving</span></span></div>
+      <p class="p-taste">${p.taste}</p>
+      <div class="p-rows">
+        <div class="meta-line">💴 ${p.price}</div>
+        <div class="meta-line">🔥 ${p.hype}</div>
+      </div>
+      <a class="buylink" href="${p.url}" target="_blank" rel="noopener">🛒 Where to buy ↗<span>${p.buy}</span></a>`;
+    pgrid.appendChild(el);
+  });
+}
+document.querySelectorAll('#pfilters .pfilter').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('#pfilters .pfilter').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active'); renderPowders(b.dataset.pf);
+}));
+renderPowders('all');
+</script>
+</body>
+</html>
