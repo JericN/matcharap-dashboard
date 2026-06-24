@@ -1,6 +1,14 @@
 // region swatch colours reuse the powder-category greens (themeable via :root --c-cat-*)
 const RDOT = { north: "rgb(var(--c-cat-ph))", central: "rgb(var(--c-cat-jp))", south: "rgb(var(--c-cat-import))" };
 const BAND = { budget: "₱", mid: "₱₱", premium: "₱₱₱" };
+const LINK_META = {
+  web: { icon: "🌐", label: "Website" },
+  ig: { icon: "📷", label: "Instagram" },
+  fb: { icon: "📘", label: "Facebook" },
+  tiktok: { icon: "🎵", label: "TikTok" },
+  maps: { icon: "🗺️", label: "Reviews" },
+  order: { icon: "🛒", label: "Order" },
+};
 
 function fmtK(n) {
   if (n == null) return "—";
@@ -62,17 +70,31 @@ export default function CompetitorCard({ c }) {
         )}
       </div>
 
-      <div className="px-4 pb-3 mt-auto flex items-center justify-between gap-2">
+      <div className="px-4 pb-2 mt-auto flex items-center justify-between gap-2">
         <span className={`font-mono text-[.55rem] tracking-[.06em] uppercase px-[9px] py-[4px] rounded-pill border-2 ${healthCls}`}>
           {c.healthTxt}
         </span>
-        <span className="font-mono text-[.52rem] tracking-[.08em] uppercase text-olive-soft">Maps ✓</span>
+        <span className="font-mono text-[.52rem] tracking-[.08em] uppercase text-olive-soft">✓ Maps-checked</span>
       </div>
 
-      <a className="buylink !mt-0" href={c.url} target="_blank" rel="noopener">
-        🔗 Store / menu ↗
-        <span className="opacity-80 normal-case tracking-normal text-[.55rem]">{c.linkLabel}</span>
-      </a>
+      <div className="px-4 pb-4 flex flex-wrap gap-[6px]">
+        {c.links.map((l) => {
+          const meta = LINK_META[l.kind];
+          return (
+            <a
+              key={l.kind + l.url}
+              href={l.url}
+              target="_blank"
+              rel="noopener"
+              title={`${meta.label} — opens in a new tab`}
+              className="font-mono text-[.56rem] tracking-[.04em] uppercase text-forest bg-cream-light border-2 border-forest rounded-pill px-[9px] py-[5px] no-underline inline-flex items-center gap-[4px] transition-transform hover:-translate-y-px hover:bg-forest hover:text-cream-light"
+            >
+              <span aria-hidden="true">{meta.icon}</span>
+              {meta.label}
+            </a>
+          );
+        })}
+      </div>
     </article>
   );
 }

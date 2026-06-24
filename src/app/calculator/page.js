@@ -1,13 +1,19 @@
-import { getSiteData } from "@/config/store";
-import { getState } from "@/config/state";
+import { repo } from "@/config/repo";
+import { toMatchaOptions } from "@/features/powders/pricing";
 import SectionHeader from "@/components/SectionHeader";
 import Calculator from "@/features/calculator/Calculator";
 
 export const dynamic = "force-dynamic"; // read the shared state fresh each request
 
 export default async function CalculatorPage() {
-  const { matchaOptions, milkOptions, drinks, ingredients, pricing } = await getSiteData();
-  const { srp } = await getState();
+  // The matcha list is derived from the powder guide (single source of truth),
+  // so it always spans the full price range and never drifts.
+  const matchaOptions = toMatchaOptions(await repo.powders());
+  const milkOptions = await repo.milkOptions();
+  const drinks = await repo.drinks();
+  const ingredients = await repo.ingredients();
+  const pricing = await repo.pricing();
+  const srp = await repo.prices.map();
   return (
     <section>
       <SectionHeader

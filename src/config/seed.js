@@ -60,14 +60,8 @@ export const seed = {
       size: 'Medium · ~10 brands + 40 artists', people: '~2,000–3,500 (est.)', vendor: { c: 'wait', ic: '⏳', t: 'Follow for the next pop-up call' } },
   ],
 
-  matchaOptions: [
-    { l: 'Nokori · Komo everyday ceremonial (₱14/g)', g: 14 },
-    { l: 'Matcha Moments · Miyu café blend (₱17.6/g)', g: 17.6 },
-    { l: 'Naoki · Barista Blend (₱26/g)', g: 26 },
-    { l: 'Ritual · Kasane ceremonial (₱31/g)', g: 31 },
-    { l: 'Marukyu-Koyamaen · Aoarashi (₱33/g)', g: 33 },
-    { l: 'Yamamasa Koyamaen · ceremonial (₱40/g)', g: 40 },
-  ],
+  // matchaOptions removed — the calculator now derives its matcha list from
+  // `powders` (full ₱1.8–₱104/g range), so there is one source of truth.
   milkOptions: [
     { l: 'Magnolia fresh dairy — ₱99/L', ml: 0.09925 },
     { l: 'Oatside oat · barista — ₱114/L', ml: 0.11425 },
@@ -191,7 +185,8 @@ export const seed = {
       sourcing: 'Claims 100% organic Kyoto matcha, hand-whisked; pick strength levels 1–3.',
       hook: "Bills itself as Manila's first homegrown specialty matcha bar — customizable strength, accessible price.",
       scale: '2 mall kiosks + mobile event bar', channels: 'Kiosk · cococart online · mobile bar · IG/TikTok',
-      health: 'go', healthTxt: '🟢 Growing', url: 'https://matchanese.com/', linkLabel: 'matchanese.com' },
+      health: 'go', healthTxt: '🟢 Growing',
+      links: [{ kind: 'web', url: 'https://matchanese.com/' }, { kind: 'ig', url: 'https://www.instagram.com/matchaneseph/' }, { kind: 'fb', url: 'https://www.facebook.com/matchanese/' }, { kind: 'tiktok', url: 'https://www.tiktok.com/@matchaneseph' }, { kind: 'order', url: 'https://matchanese.cococart.co/' }, { kind: 'maps', url: 'https://www.google.com/maps/search/?api=1&query=Matchanese%20SM%20North%20EDSA%20Quezon%20City' }] },
 
     { rank: 2, name: 'Matcha Later', region: 'central', format: 'Slow bar · women-owned', area: 'Poblacion, Makati', price: 240, band: 'premium', rating: 4.6, reviews: 157, open: true, ig: 13000, tt: 178, star: true,
       sig: 'Kumo (cloud-milk matcha)',
@@ -199,7 +194,8 @@ export const seed = {
       sourcing: "Ceremonial matcha + premium hojicha, Uji/Kyoto; sells own 'Matcha Yuu' powder.",
       hook: 'Intimate Japanese slow bar, whisked in front of you; signature salted-caramel-miso Caramiso.',
       scale: 'Single slow bar, ~8–10 seats', channels: 'Dine-in only · IG',
-      health: 'go', healthTxt: '🟢 Growing · long waits', url: 'https://www.instagram.com/matchalaterph/', linkLabel: '@matchalaterph' },
+      health: 'go', healthTxt: '🟢 Growing · long waits',
+      links: [{ kind: 'ig', url: 'https://www.instagram.com/matchalaterph/' }, { kind: 'fb', url: 'https://www.facebook.com/matchalaterph/' }, { kind: 'tiktok', url: 'https://www.tiktok.com/@matchalaterph' }, { kind: 'maps', url: 'https://www.google.com/maps/search/?api=1&query=Matcha%20Later%20Poblacion%20Makati' }] },
 
     { rank: 3, name: 'Matcha Go!', region: 'south', format: 'Community cafe', area: 'Pilar Village, Las Piñas', price: 250, band: 'mid', rating: 4.9, reviews: 164, open: true, ig: 1961, tt: null, star: true,
       sig: 'Premium Grade Matcha (oat latte)',
@@ -207,7 +203,8 @@ export const seed = {
       sourcing: 'Two self-labeled grades: Premium ₱250 / Ceremonial ₱310; region not named. Oat-milk default.',
       hook: 'Slow-living community cafe — journal & crochet clubs, whisking workshops, sustainability touch.',
       scale: 'Single neighborhood cafe (2nd branch teased)', channels: 'Dine-in · Foodpanda · IG/FB/TikTok',
-      health: 'go', healthTxt: '🟢 Growing · 4.9★', url: 'https://www.instagram.com/ph.matchago/', linkLabel: '@ph.matchago' },
+      health: 'go', healthTxt: '🟢 Growing · 4.9★',
+      links: [{ kind: 'ig', url: 'https://www.instagram.com/ph.matchago/' }, { kind: 'fb', url: 'https://www.facebook.com/phmatchago/' }, { kind: 'tiktok', url: 'https://www.tiktok.com/@ph.matchago' }, { kind: 'order', url: 'https://www.foodpanda.ph/restaurant/kxn4/matcha-go' }, { kind: 'maps', url: 'https://www.google.com/maps/search/?api=1&query=Matcha%20Go%20Cafe%20Pilar%20Village%20Las%20Pinas' }] },
 
     { rank: 4, name: 'OH HEY THERE', region: 'south', format: 'Cafe · founder-run', area: 'BF Homes, Aguirre Ave., Parañaque', price: 290, band: 'premium', rating: 4.9, reviews: 284, open: true, ig: 6093, tt: 5584,
       sig: 'Banana Pudding Matcha',
@@ -215,7 +212,8 @@ export const seed = {
       sourcing: 'Claims 100% Japanese green-tea matcha; no named grade/region.',
       hook: 'Queer-safe, inclusive cafe by two women creatives; playful cream-matcha flavors.',
       scale: 'Single founder-run cafe', channels: 'Dine-in · Foodpanda · Grab · rush.ph · web',
-      health: 'go', healthTxt: '🟢 Growing · 4.9★', url: 'https://ohheythere.cafe/', linkLabel: 'ohheythere.cafe' },
+      health: 'go', healthTxt: '🟢 Growing · 4.9★',
+      links: [{ kind: 'web', url: 'https://ohheythere.cafe/' }, { kind: 'ig', url: 'https://www.instagram.com/ohheythere.matchacafe/' }, { kind: 'fb', url: 'https://www.facebook.com/ohheythere.studiocafe/' }, { kind: 'tiktok', url: 'https://www.tiktok.com/@ohheythere.matchacafe' }, { kind: 'maps', url: 'https://www.google.com/maps/search/?api=1&query=OH%20HEY%20THERE%20Matcha%20Cafe%20BF%20Homes%20Paranaque' }] },
 
     { rank: 5, name: 'Little Matcha Studio', region: 'north', format: 'Slow bar · micro-indie', area: 'Sta. Mesa Heights / Banawe, QC', price: 220, band: 'mid', rating: 4.8, reviews: 18, open: true, ig: 984, tt: null,
       sig: 'Iced Matcha Latte (Uji · oat)',
@@ -223,7 +221,8 @@ export const seed = {
       sourcing: 'Uji, Kyoto matcha; oat milk by default; also sells retail powder.',
       hook: 'Cozy slow bar, everything on oat milk — the genuine small/new micro-indie of the list.',
       scale: 'Single nook · newest & smallest (2025)', channels: 'Dine-in · takeout · IG · JotForm orders',
-      health: 'go', healthTxt: '🟢 New · 18 reviews', url: 'https://www.instagram.com/littlematchastudioph/', linkLabel: '@littlematchastudioph' },
+      health: 'go', healthTxt: '🟢 New · 18 reviews',
+      links: [{ kind: 'ig', url: 'https://www.instagram.com/littlematchastudioph/' }, { kind: 'fb', url: 'https://www.facebook.com/61584763546947' }, { kind: 'maps', url: 'https://www.google.com/maps/search/?api=1&query=Little%20Matcha%20Studio%20Banawe%20Quezon%20City' }] },
 
     { rank: 6, name: 'Shizu Matcha Bar', region: 'north', format: 'Japanese tea house', area: 'Morning Breeze, Caloocan (+ QC)', price: 250, band: 'premium', rating: 4.5, reviews: 139, open: true, ig: 9822, tt: null,
       sig: 'Malted Milk Matcha',
@@ -231,7 +230,8 @@ export const seed = {
       sourcing: 'Claims premium first-flush (ichibancha) matcha, whisked to order. Spend ₱500–1,000/head.',
       hook: 'Contemporary Japanese tea house; first-flush matcha; playful cold-whisk dango.',
       scale: 'Small indie · 2 branches (Caloocan + QC)', channels: 'Dine-in · IG/FB',
-      health: 'go', healthTxt: '🟢 Growing', url: 'https://www.instagram.com/shizumatchabar/', linkLabel: '@shizumatchabar' },
+      health: 'go', healthTxt: '🟢 Growing',
+      links: [{ kind: 'ig', url: 'https://www.instagram.com/shizumatchabar/' }, { kind: 'tiktok', url: 'https://www.tiktok.com/@shizumatchabar' }, { kind: 'maps', url: 'https://www.google.com/maps/search/?api=1&query=Shizu%20Matcha%20Bar%20Morning%20Breeze%20Caloocan' }] },
 
     { rank: 7, name: 'Kokorobi Matcha', region: 'north', format: 'Slow bar · women-owned', area: 'Marikina Heights, Marikina', price: 320, band: 'premium', rating: 4.8, reviews: 56, open: true, ig: 1594, tt: null,
       sig: 'Premium Kokorobi Matcha Latte',
@@ -239,7 +239,8 @@ export const seed = {
       sourcing: 'JAS-organic first-harvest Uji/Wazuka, stone-milled; sells retail powder line.',
       hook: 'Mindfulness slow bar — single-origin JAS-organic first-harvest Uji, not a generic blend.',
       scale: 'Single cafe + powder line + pop-ups', channels: 'Cafe · ecommerce · bazaars · IG/TikTok/FB',
-      health: 'go', healthTxt: '🟢 Growing', url: 'https://kokorobimatcha.com/', linkLabel: 'kokorobimatcha.com' },
+      health: 'go', healthTxt: '🟢 Growing',
+      links: [{ kind: 'web', url: 'https://kokorobimatcha.com/' }, { kind: 'ig', url: 'https://www.instagram.com/kokorobimatcha/' }, { kind: 'fb', url: 'https://www.facebook.com/Kokorobimatcha/' }, { kind: 'tiktok', url: 'https://www.tiktok.com/@kokorobimatcha' }, { kind: 'maps', url: 'https://www.google.com/maps/search/?api=1&query=Kokorobi%20Matcha%20Marikina' }] },
 
     { rank: 8, name: 'Matcha Folk', region: 'north', format: 'Matcha-only bar', area: 'Lamp Quarters, Marikina', price: 250, band: 'mid', rating: 4.5, reviews: 13, open: true, ig: 8541, tt: null,
       sig: 'Mango Matcha',
@@ -247,7 +248,8 @@ export const seed = {
       sourcing: 'Sourcing not disclosed. Drinks ₱220–290.',
       hook: 'Matcha-only bar, rotating variations whisked daily; grew from pop-ups to a permanent shop.',
       scale: 'Single shop · new (from pop-up) · long queues', channels: 'IG · Threads · TikTok · FB',
-      health: 'go', healthTxt: '🟢 New · queues', url: 'https://www.instagram.com/matchafolk/', linkLabel: '@matchafolk' },
+      health: 'go', healthTxt: '🟢 New · queues',
+      links: [{ kind: 'ig', url: 'https://www.instagram.com/matchafolk/' }, { kind: 'fb', url: 'https://www.facebook.com/p/matcha-folk-61565357906355/' }, { kind: 'maps', url: 'https://www.google.com/maps/search/?api=1&query=Matcha%20Folk%20Lamp%20Quarters%20Marikina' }] },
 
     { rank: 9, name: 'Matcha Mama', region: 'north', format: 'Cafe · multi-location', area: 'Clubhouse: Katipunan Ave., QC', price: 160, band: 'mid', rating: 4.3, reviews: 39, open: true, ig: 15000, tt: null,
       sig: 'Spanish Matcha',
@@ -256,7 +258,8 @@ export const seed = {
       hook: 'Playful pink-green brand, cheapest entry (₱160); multi-tier Uji powder. A cautionary case.',
       scale: '~4 footprints + ecommerce — but a mall branch just closed', channels: 'Cafe/kiosks · Shopify · GrabFood · Pickup.ph',
       note: 'BGC Mitsukoshi branch PERMANENTLY CLOSED — live at the QC Clubhouse. Claimed 296K TikTok unverified (likely a different brand).',
-      health: 'warn', healthTxt: '🟡 Closed a branch', url: 'https://matchamamaclub.com/', linkLabel: 'matchamamaclub.com' },
+      health: 'warn', healthTxt: '🟡 Closed a branch',
+      links: [{ kind: 'web', url: 'https://matchamamaclub.com/' }, { kind: 'ig', url: 'https://www.instagram.com/matchamama.ph/' }, { kind: 'fb', url: 'https://www.facebook.com/matchamama.ph/' }, { kind: 'tiktok', url: 'https://www.tiktok.com/@matchamamaclub' }, { kind: 'maps', url: 'https://www.google.com/maps/search/?api=1&query=Matcha%20Mama%20Clubhouse%20Katipunan%20Quezon%20City' }] },
 
     { rank: 10, name: 'Matcha Bar', region: 'central', format: 'Vegan slow bar · est. 2018', area: 'Legazpi Village, Makati (+ Davao, Siargao)', price: 310, band: 'premium', rating: 4.5, reviews: 307, open: true, ig: 7059, tt: null,
       sig: 'Matcha Signature (+ nama chocolate)',
@@ -264,7 +267,8 @@ export const seed = {
       sourcing: 'Claims 100% premium Japanese matcha, café-imported; named cultivars; fully vegan, all house-made.',
       hook: 'Vegan slow-bar ritual — matcharistas hand-whisk tableside; the established benchmark of the set.',
       scale: 'Established mini-chain · 3 branches (1 in MM)', channels: 'Dine-in · web · phone',
-      health: 'go', healthTxt: '🟢 Established · 2018', url: 'https://www.welovematchabar.com/', linkLabel: 'welovematchabar.com' },
+      health: 'go', healthTxt: '🟢 Established · 2018',
+      links: [{ kind: 'web', url: 'https://www.welovematchabar.com/' }, { kind: 'ig', url: 'https://www.instagram.com/matchabarph/' }, { kind: 'fb', url: 'https://www.facebook.com/matchabarph' }, { kind: 'maps', url: 'https://www.google.com/maps/search/?api=1&query=Matcha%20Bar%20Legazpi%20Village%20Makati' }] },
   ],
 
   // product photos (validated, hotlinkable) — brands not listed fall back to a colour dot

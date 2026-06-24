@@ -55,6 +55,9 @@
   .sec-sub { @apply block font-body font-normal text-[.85rem] text-olive-soft mt-[3px]; }
   .rule { @apply border-0 border-t-2 border-dashed border-ink opacity-60 mt-12 max-md:mt-9; }
 
+  /* responsive auto-fill card grid (events, powders, drinks) */
+  .card-grid { @apply grid gap-[18px] [grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr))]; }
+
   /* card shells */
   .paper-card { @apply relative bg-cream-card border-[2.2px] border-forest rounded-card shadow-hard-sm overflow-hidden flex flex-col transition-transform hover:-translate-x-px hover:-translate-y-0.5; }
   .paper-card.is-star { background: linear-gradient(180deg, rgb(var(--c-star)), rgb(var(--c-cream-card))); }

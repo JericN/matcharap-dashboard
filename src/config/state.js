@@ -1,5 +1,5 @@
 import { get } from '@vercel/edge-config';
-import { z } from 'zod';
+import { StateSchema } from './schemas';
 
 // ============================================================================
 // SHARED STATE — one centralized record for everyone (NOT per-user).
@@ -8,10 +8,6 @@ import { z } from 'zod';
 // API. Locally (no creds) it falls back to .data/state.json so dev still works.
 // ============================================================================
 
-const StateSchema = z.object({
-  srp: z.record(z.string(), z.number()), // drink name -> selling price
-  saved: z.array(z.string()),            // selected powder names
-});
 const DEFAULT = { srp: {}, saved: [] };
 const FILE = '.data/state.json';
 

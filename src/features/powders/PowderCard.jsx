@@ -1,9 +1,10 @@
+import { perGramLabel } from "@/features/powders/pricing";
+
 // category swatch colours (themeable via :root --c-cat-*)
 const PDOT = { ph: "rgb(var(--c-cat-ph))", jp: "rgb(var(--c-cat-jp))", import: "rgb(var(--c-cat-import))" };
 
 export default function PowderCard({ powder, img, saved, onToggleSave }) {
-  const m = powder.price.match(/₱[\d.]+(?:[–-][\d.]+)?\s*\/\s*g/);
-  const perg = (m ? m[0] : "—").replace(/\s*\/\s*g/, "");
+  const perg = perGramLabel(powder);
 
   return (
     <article className={`paper-card${powder.star ? " is-star" : ""}`}>

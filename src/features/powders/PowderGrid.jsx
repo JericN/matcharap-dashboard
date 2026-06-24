@@ -3,7 +3,7 @@ import { useState, useTransition } from "react";
 import { toggleSaved } from "@/config/actions";
 import PowderCard from "@/features/powders/PowderCard";
 
-const GRID = "grid gap-[18px] [grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr))]";
+const GRID = "card-grid";
 
 export default function PowderGrid({ powders, images, initialSaved }) {
   const [f, setF] = useState("all");

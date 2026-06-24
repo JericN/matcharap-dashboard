@@ -1,9 +1,9 @@
-import { getSiteData } from "@/config/store";
+import { repo } from "@/config/repo";
 import SectionHeader from "@/components/SectionHeader";
 import EventsGrid from "@/features/events/EventsGrid";
 
 export default async function EventsPage() {
-  const { events } = await getSiteData();
+  const events = await repo.events();
   return (
     <section>
       <SectionHeader

@@ -12,7 +12,7 @@ export default function EventsGrid({ events }) {
         <button className={"chip" + (f === "recurring" ? " chip--active" : "")} onClick={() => setF("recurring")}>Recurring</button>
         <button className={"chip" + (f === "star" ? " chip--active" : "")} onClick={() => setF("star")}>Best fit</button>
       </div>
-      <div className="grid gap-[18px] [grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr))]">
+      <div className="card-grid">
         {events.filter((e) => f === "all" || e.tags.includes(f)).map((e) => (
           <EventCard key={e.name} event={e} />
         ))}

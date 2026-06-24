@@ -60,12 +60,14 @@ export const CompetitorSchema = z.object({
   health: z.enum(['go', 'warn', 'wait']),
   healthTxt: z.string(),
   note: z.string().optional(),
-  url: z.string().url(),
-  linkLabel: z.string(),
+  // Clickable channels for human follow-up research (rendered in array order).
+  links: z.array(z.object({
+    kind: z.enum(['web', 'ig', 'fb', 'tiktok', 'maps', 'order']),
+    url: z.string().url(),
+  })).min(1),
   star: z.boolean().optional(),
 });
 
-export const MatchaOptionSchema = z.object({ l: z.string(), g: z.number().positive() });
 export const MilkOptionSchema = z.object({ l: z.string(), ml: z.number().positive() });
 
 export const DrinkSchema = z.object({
@@ -92,10 +94,17 @@ export const SiteDataSchema = z.object({
   events: z.array(EventSchema).min(1),
   powders: z.array(PowderSchema).min(1),
   competitors: z.array(CompetitorSchema).default([]),
-  matchaOptions: z.array(MatchaOptionSchema).min(1),
+  // matchaOptions is no longer stored — the calculator derives it from `powders`
+  // (single source of truth) in app/calculator/page.js.
   milkOptions: z.array(MilkOptionSchema).min(1),
   drinks: z.array(DrinkSchema).min(1),
   ingredients: z.array(IngredientSchema).min(1),
   pricing: PricingSchema,
   powderImages: z.record(z.string(), z.string().url()),
+});
+
+// Shared mutable state (Edge Config `state` key) — saved prices + selections.
+export const StateSchema = z.object({
+  srp: z.record(z.string(), z.number()), // drink name -> selling price
+  saved: z.array(z.string()),            // selected powder names
 });

@@ -1,4 +1,4 @@
-import { getSiteData } from "@/config/store";
+import { repo } from "@/config/repo";
 import SectionHeader from "@/components/SectionHeader";
 import CompetitorsGrid from "@/features/competitors/CompetitorsGrid";
 
@@ -8,7 +8,7 @@ export const metadata = {
 };
 
 export default async function CompetitorsPage() {
-  const { competitors } = await getSiteData();
+  const competitors = await repo.competitors();
   return (
     <section>
       <SectionHeader
