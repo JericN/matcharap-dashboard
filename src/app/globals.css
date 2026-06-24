@@ -1,0 +1,70 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ---------- base: paper texture + scaffolding utilities can't express ---------- */
+@layer base {
+  body {
+    @apply font-body text-forest bg-cream leading-relaxed antialiased;
+    background-image:
+      radial-gradient(rgba(107,79,47,.05) 1px, transparent 1.4px),
+      radial-gradient(rgba(63,80,49,.045) 1px, transparent 1.4px),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.045'/%3E%3C/svg%3E"),
+      linear-gradient(125deg, rgba(255,255,255,.28), rgba(255,255,255,0) 45%),
+      radial-gradient(120% 120% at 80% 0%, #f3ecdb, #e9e0c9);
+    background-size: 7px 7px, 11px 11px, 180px 180px, 100% 100%, 100% 100%;
+    background-position: 0 0, 3px 4px, 0 0, 0 0, 0 0;
+    background-attachment: fixed;
+  }
+}
+
+/* ---------- the hand-drawn design-system primitives ---------- */
+@layer components {
+  /* section headers */
+  .section-tag { @apply inline-flex items-center gap-2 font-mono text-[.62rem] tracking-[.2em] uppercase text-brown bg-cream-light border-2 border-brown rounded-pill px-[13px] py-1 mb-3 -rotate-[1.2deg]; }
+  .sec-title { @apply font-doodle font-bold text-2xl text-forest leading-tight mb-4 max-md:text-xl; }
+  .sec-sub { @apply block font-body font-normal text-[.85rem] text-olive-soft mt-[3px]; }
+  .rule { @apply border-0 border-t-2 border-dashed border-ink opacity-60 mt-12 max-md:mt-9; }
+
+  /* card shells */
+  .paper-card { @apply relative bg-cream-card border-[2.2px] border-forest rounded-card shadow-hard-sm overflow-hidden flex flex-col transition-transform hover:-translate-x-px hover:-translate-y-0.5; }
+
+  /* chips (filters) */
+  .chip { @apply font-mono text-[.64rem] tracking-[.1em] uppercase text-brown bg-cream-light border-2 border-brown rounded-pill px-[15px] py-[7px] cursor-pointer leading-tight text-center transition-transform hover:-translate-y-0.5; }
+  .chip--active { @apply bg-forest text-cream-light border-forest; }
+
+  /* meta line (mono row with leading icon) */
+  .meta-line { @apply font-mono text-[.64rem] text-brown flex gap-[7px] items-center my-[3px] uppercase; }
+
+  /* stamp status badge */
+  .stamp { @apply absolute top-[11px] right-[11px] z-[2] font-mono font-medium uppercase tracking-[.08em] text-[.55rem] text-clay border-2 border-clay rounded-[8px_13px_9px_12px] px-2 py-[5px] -rotate-[7deg] leading-none; background: rgba(185,84,45,.07); box-shadow: inset 0 0 0 1px rgba(185,84,45,.2); }
+  .stamp--live::before { content: "●"; font-size: .45rem; margin-right: 5px; vertical-align: middle; }
+  .stamp--soon { @apply text-olive border-olive; background: rgba(86,104,63,.07); box-shadow: inset 0 0 0 1px rgba(86,104,63,.2); }
+  .stamp--ended { @apply text-brown-soft border-brown-soft shadow-none; background: rgba(138,108,69,.06); }
+
+  /* form controls (appearance resets utilities can't do) */
+  .field-label { @apply block font-mono text-[.58rem] tracking-[.12em] uppercase text-brown mb-[5px]; }
+  .field-select { @apply w-full font-body text-[.85rem] text-forest bg-cream-card border-2 border-olive rounded-[10px_8px_11px_8px] py-2 pl-[11px] pr-7 cursor-pointer appearance-none bg-no-repeat; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='%233f5031' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M2 4l4 4 4-4'/%3E%3C/svg%3E"); background-position: right 10px center; }
+  .range-input { @apply w-full appearance-none h-1.5 rounded-md bg-cream-card border border-olive outline-none cursor-pointer mt-1.5; }
+  .range-input::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: #3f5031; border: 2px solid #f3ecdb; cursor: pointer; }
+  .range-input::-moz-range-thumb { width: 18px; height: 18px; border-radius: 50%; background: #3f5031; border: 2px solid #f3ecdb; cursor: pointer; }
+  .srp-input { @apply font-mono font-medium text-[1.05rem] text-clay bg-transparent border-0 w-full text-center mt-[3px] pb-px outline-none border-b-[1.6px] border-dashed border-clay; -moz-appearance: textfield; }
+  .srp-input:focus { @apply border-solid; }
+  .srp-input::-webkit-outer-spin-button, .srp-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+  /* drink cost cells */
+  .cost-cell { @apply text-center border-2 border-brown rounded-cell px-1 py-2 bg-cream-card; }
+  .cost-cell--hl { @apply bg-forest border-forest; }
+
+  /* powder per-gram badge */
+  .perg-box { @apply flex items-center gap-[11px] mx-4 mb-[11px] px-[14px] py-2 bg-forest rounded-[13px_10px_14px_9px] shadow-hard-sm; }
+
+  /* buy link / ingredient tile */
+  .buylink { @apply mt-auto mx-4 mb-4 font-mono text-[.58rem] tracking-[.04em] uppercase text-cream-light bg-forest rounded-[12px_9px_13px_9px] px-[13px] py-[9px] no-underline flex flex-col gap-0.5 hover:bg-olive; }
+  .ing-tile { @apply bg-cream-light border-[1.8px] border-ink rounded-soft px-[13px] py-[11px] flex flex-col gap-[3px]; }
+
+  /* navbar + landing */
+  .nav-link { @apply font-mono text-[.62rem] tracking-[.1em] uppercase text-brown no-underline px-[13px] py-[7px] border-2 border-transparent rounded-pill transition-transform whitespace-nowrap hover:-translate-y-px hover:border-ink; }
+  .nav-link--active { @apply bg-forest text-cream-light border-forest; }
+  .home-card { @apply relative flex flex-col gap-[9px] bg-cream-card border-[2.2px] border-forest rounded-card shadow-hard p-6 no-underline text-inherit transition-transform hover:-translate-x-0.5 hover:-translate-y-[3px]; }
+}
