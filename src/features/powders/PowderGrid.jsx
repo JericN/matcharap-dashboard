@@ -1,17 +1,20 @@
 "use client";
-import { useState } from "react";
-import { useLocalStorage } from "@/lib/useLocalStorage";
+import { useState, useTransition } from "react";
+import { toggleSaved } from "@/config/actions";
 import PowderCard from "@/features/powders/PowderCard";
 
 const GRID = "grid gap-[18px] [grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr))]";
 
-export default function PowderGrid({ powders, images }) {
+export default function PowderGrid({ powders, images, initialSaved }) {
   const [f, setF] = useState("all");
-  const [saved, setSaved] = useLocalStorage("mre:savedPowders", []);
+  const [saved, setSaved] = useState(initialSaved); // shared state, seeded from Edge Config
+  const [, startTransition] = useTransition();
 
   const savedSet = new Set(saved);
-  const toggle = (name) =>
-    setSaved((s) => (s.includes(name) ? s.filter((n) => n !== name) : [...s, name]));
+  const toggle = (name) => {
+    setSaved((s) => (s.includes(name) ? s.filter((n) => n !== name) : [...s, name])); // optimistic
+    startTransition(() => toggleSaved(name)); // persist to the centralized store
+  };
 
   const card = (p) => (
     <PowderCard
@@ -32,7 +35,7 @@ export default function PowderGrid({ powders, images }) {
       {selected.length > 0 && (
         <section className="mb-9">
           <div className="flex items-baseline gap-2 mb-3">
-            <h3 className="font-doodle font-bold text-[1.2rem] text-forest">♥ Your selection</h3>
+            <h3 className="font-doodle font-bold text-[1.2rem] text-forest">♥ Our selection</h3>
             <span className="font-mono text-[.6rem] tracking-[.08em] uppercase text-brown-soft">{selected.length} saved</span>
           </div>
           <div className={GRID}>{selected.map(card)}</div>

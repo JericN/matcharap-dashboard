@@ -36,6 +36,35 @@ export const PowderSchema = z.object({
   url: z.string().url(),
 });
 
+// Indie matcha-drink competitors (Metro Manila). Ratings/open-status are
+// Google-Maps-verified; follower counts are research-sourced.
+export const CompetitorSchema = z.object({
+  rank: z.number().int().positive(),
+  name: z.string(),
+  region: z.enum(['north', 'central', 'south']),
+  format: z.string(),
+  area: z.string(),
+  price: z.number().nonnegative(),        // signature ~16oz matcha latte, PHP
+  band: z.enum(['budget', 'mid', 'premium']),
+  rating: z.number(),                     // Google Maps stars
+  reviews: z.number().int().nonnegative(),
+  open: z.boolean(),                      // currently operating
+  ig: z.number().int().nullable(),        // Instagram followers (research-sourced)
+  tt: z.number().int().nullable(),        // TikTok followers
+  sig: z.string(),
+  menu: z.array(z.object({ i: z.string(), p: z.number().nullable() })),
+  sourcing: z.string(),
+  hook: z.string(),
+  scale: z.string(),
+  channels: z.string(),
+  health: z.enum(['go', 'warn', 'wait']),
+  healthTxt: z.string(),
+  note: z.string().optional(),
+  url: z.string().url(),
+  linkLabel: z.string(),
+  star: z.boolean().optional(),
+});
+
 export const MatchaOptionSchema = z.object({ l: z.string(), g: z.number().positive() });
 export const MilkOptionSchema = z.object({ l: z.string(), ml: z.number().positive() });
 
@@ -62,6 +91,7 @@ export const PricingSchema = z.object({
 export const SiteDataSchema = z.object({
   events: z.array(EventSchema).min(1),
   powders: z.array(PowderSchema).min(1),
+  competitors: z.array(CompetitorSchema).default([]),
   matchaOptions: z.array(MatchaOptionSchema).min(1),
   milkOptions: z.array(MilkOptionSchema).min(1),
   drinks: z.array(DrinkSchema).min(1),

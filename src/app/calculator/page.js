@@ -1,9 +1,13 @@
 import { getSiteData } from "@/config/store";
+import { getState } from "@/config/state";
 import SectionHeader from "@/components/SectionHeader";
 import Calculator from "@/features/calculator/Calculator";
 
+export const dynamic = "force-dynamic"; // read the shared state fresh each request
+
 export default async function CalculatorPage() {
   const { matchaOptions, milkOptions, drinks, ingredients, pricing } = await getSiteData();
+  const { srp } = await getState();
   return (
     <section>
       <SectionHeader
@@ -18,6 +22,7 @@ export default async function CalculatorPage() {
         drinks={drinks}
         ingredients={ingredients}
         extras={pricing.extras}
+        initialSrp={srp}
       />
     </section>
   );

@@ -8,6 +8,7 @@ const LINKS = [
   { href: '/events', label: 'Events' },
   { href: '/calculator', label: 'Calculator' },
   { href: '/powders', label: 'Powders' },
+  { href: '/competitors', label: 'Competitors' },
 ];
 
 export default function Navbar() {

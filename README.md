@@ -75,18 +75,26 @@ All content (events, powders, drinks, pricing, ingredients, images) is config,
 validated by `SiteDataSchema`. The store reads it from **Vercel Edge Config**
 when connected, otherwise from `src/config/seed.js`.
 
-**Per-user state** (saved selling prices in the calculator, ♥-saved powders) is
-*not* content — it lives in the browser via `localStorage` (`src/lib/useLocalStorage.js`),
-so it persists per device without a backend. Config still supplies the default SRPs.
+**Shared state** — the saved selling prices and the ♥-selected powders are a
+single centralized record (key **`state`** = `{ srp, saved }`), so *everyone
+sees the same thing*. Reads come from Edge Config (`src/config/state.js`);
+writes go through the Vercel API behind server actions (`src/config/actions.js`).
+Locally, with no creds, it falls back to `.data/state.json` so dev still works.
+Config still supplies the default SRPs.
 
-To use Edge Config in production:
+### Setup
 
 1. Create an Edge Config store in the Vercel dashboard and connect it to the
-   project (this sets the `EDGE_CONFIG` env var automatically).
-2. Add one item with key **`siteData`** whose value is the same shape as
-   `seed` (export it from `src/config/seed.js`).
-3. Deploys then read live data from Edge Config; editing it updates the site
-   without a code change. If the key is missing, it falls back to the seed.
+   project — this sets `EDGE_CONFIG` automatically (used for **reads**).
+2. Add an item with key **`siteData`** whose value matches `seed`
+   (`src/config/seed.js`) — the site content.
+3. For **writes** (saving prices / selections), add two env vars:
+   - `EDGE_CONFIG_ID` — the store id (`ecfg_…`)
+   - `VERCEL_API_TOKEN` — a Vercel token with access (plus `VERCEL_TEAM_ID` if the project is in a team)
+   The `state` key is created automatically on first save.
+
+Missing keys fall back to defaults; `/events`, `/calculator`, `/powders` read
+fresh each request so changes show up for all users.
 
 ---
 

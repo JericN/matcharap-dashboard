@@ -1,18 +1,24 @@
 "use client";
-import { useState } from "react";
-import { useLocalStorage } from "@/lib/useLocalStorage";
+import { useState, useTransition } from "react";
+import { setSrp as setSrpAction, resetSrp as resetSrpAction } from "@/config/actions";
 import { matchaCostPerCup, milkCostPerCup, cogsForDrink, profit, marginPct, marginWord } from "@/features/calculator/cost";
 
-export default function Calculator({ matchaOptions, milkOptions, drinks, ingredients, extras }) {
+export default function Calculator({ matchaOptions, milkOptions, drinks, ingredients, extras, initialSrp }) {
   const [mi, setMi] = useState(1);
   const [ki, setKi] = useState(1);
   const [dose, setDose] = useState(3);
 
-  // Saved selling prices per product (config holds the defaults).
-  const [srpMap, setSrpMap] = useLocalStorage("mre:srp", {});
+  // Shared selling prices (one centralized record, seeded from Edge Config;
+  // config holds the defaults). Edit optimistically, persist on blur.
+  const [srpMap, setSrpMap] = useState(initialSrp);
+  const [, startTransition] = useTransition();
   const srpFor = (d) => (d.name in srpMap ? srpMap[d.name] : d.srp);
-  const setSrp = (name, v) => setSrpMap((m) => ({ ...m, [name]: v }));
-  const resetPrices = () => setSrpMap({});
+  const editSrp = (name, v) => setSrpMap((m) => ({ ...m, [name]: v }));
+  const commitSrp = (name) => startTransition(() => setSrpAction(name, srpMap[name] ?? 0));
+  const resetPrices = () => {
+    setSrpMap({});
+    startTransition(() => resetSrpAction());
+  };
 
   const pricePerGram = matchaOptions[mi].g;
   const milkPricePerMl = milkOptions[ki].ml;
@@ -81,7 +87,7 @@ export default function Calculator({ matchaOptions, milkOptions, drinks, ingredi
               </div>
               <div className="grid grid-cols-3 gap-[7px]">
                 <div className="cost-cell"><span className="block font-mono text-[.52rem] tracking-[.1em] uppercase text-brown-soft">COGS</span><span className="block font-mono font-medium text-[1.05rem] text-forest mt-[3px]">₱{cogs}</span></div>
-                <div className="cost-cell"><span className="block font-mono text-[.52rem] tracking-[.1em] uppercase text-brown-soft">SRP ✎</span><input className="srp-input" type="number" min="0" step="5" value={srp} inputMode="numeric" aria-label={"Selling price for " + d.name} onChange={(e) => setSrp(d.name, +e.target.value || 0)} /></div>
+                <div className="cost-cell"><span className="block font-mono text-[.52rem] tracking-[.1em] uppercase text-brown-soft">SRP ✎</span><input className="srp-input" type="number" min="0" step="5" value={srp} inputMode="numeric" aria-label={"Selling price for " + d.name} onChange={(e) => editSrp(d.name, +e.target.value || 0)} onBlur={() => commitSrp(d.name)} /></div>
                 <div className="cost-cell cost-cell--hl"><span className="block font-mono text-[.52rem] tracking-[.1em] uppercase text-onforest-mut">Profit</span><span className="block font-mono font-medium text-[1.05rem] text-cream-light mt-[3px]">₱{p}</span></div>
               </div>
               <div className="flex justify-between font-mono text-[.56rem] tracking-[.06em] uppercase text-brown-soft"><span>gross margin · <b className="text-clay">{mar}%</b></span><span>{marginWord(mar)}</span></div>
