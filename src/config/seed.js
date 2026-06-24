@@ -15,11 +15,17 @@ export const seed = {
       theme: 'Pride × Matcha celebration · 12+ matcha booths', date: 'Jun 26–28, 2026 · ✓ verified', venue: 'Greenhills Mall, San Juan',
       size: 'Medium–large · ~40 booths', people: '~3,000–6,000 (est.)', vendor: { c: 'wait', ic: '⏳', t: 'Likely full (days away) — follow @themanilamarketclub for the next' } },
     { name: 'Moonlit Market (Aug)', org: 'Moonlit Market Events · @themoonlitevents', tags: ['upcoming'], status: ['🌱 Upcoming', 'p-up'],
-      theme: 'Matcha / lifestyle night market', date: 'Aug 7–9, 2026 · ~ to confirm', venue: 'Assembly Grounds, The Rise, Makati',
+      theme: 'Matcha / lifestyle night market', date: 'Aug 7–9 · ✓ IG-confirmed (@themoonlitevents)', venue: 'Assembly Grounds, The Rise, Makati',
       size: 'Large · 3-day', people: '~4,000–8,000 / 3 days', vendor: { c: 'wait', ic: '⏳', t: 'Organizer-listed — watch for the merchant call, DM @themoonlitevents' } },
     { name: 'The Merry Matcha Market', org: 'Holiday Makers & Art Bazaar', tags: ['upcoming'], status: ['🌱 Upcoming', 'p-up'],
       theme: 'Holiday matcha + makers & art bazaar', date: 'Dec 19, 2026 · 11–7 · ~ to confirm', venue: 'Gimenez Gallery',
       size: 'Small–medium gallery', people: '~500–1,500 (est.)', vendor: { c: 'open', ic: '💚', t: 'Call for merchants OPEN (seen once — reconfirm nearer date)' } },
+    { name: 'Souk @ Greenhills', org: 'Souk Pop-up · @soukpopup', tags: ['upcoming', 'star'], status: ['🌱 Upcoming', 'p-up'], star: true,
+      theme: 'Souk market run (PH’s top matcha-fest organizer)', date: 'Jul 1–5 · ✓ per @soukpopup IG bio', venue: 'Greenhills, San Juan',
+      size: 'Large · Souk-scale', people: 'Thousands / run (est.)', vendor: { c: 'open', ic: '💚', t: 'Souk runs the matcha fests — sign-up link in @soukpopup bio' } },
+    { name: 'Manila Market Club (Aug editions)', org: 'The Manila Market Club · @themanilamarketclub', tags: ['upcoming'], status: ['🌱 Upcoming', 'p-up'],
+      theme: 'Themed markets by the Pride & Matcha Fest organizer', date: 'Aug 8–9 & Aug 21–23 · ✓ per IG (venues TBA)', venue: 'Metro Manila · TBA',
+      size: 'Medium–large · matcha-fest organizer', people: '~3,000–6,000 (est.)', vendor: { c: 'wait', ic: '⏳', t: 'Two Aug editions listed (venues TBA) — DM @themanilamarketclub for booths' } },
 
     // RECURRING ORGANIZERS — pitch for their next edition
     { name: 'Matcha & Hojicha Collective', org: 'The Modern Market · @themodernmarket.ph', tags: ['recurring', 'star'], status: ['🔁 Recurring', 'p-rec'], star: true,
@@ -58,6 +64,26 @@ export const seed = {
     { name: 'Matcha Mania', org: '3 Torre Lorenzo', tags: ['recurring'], status: ['🔁 Recurring', 'p-rec'],
       theme: 'Matcha + indie art, student-area pop-up', date: 'Ran Feb 23–24 · watch for next', venue: '3 Torre Lorenzo (U-belt)',
       size: 'Medium · ~10 brands + 40 artists', people: '~2,000–3,500 (est.)', vendor: { c: 'wait', ic: '⏳', t: 'Follow for the next pop-up call' } },
+
+    // SMALL / ARTY POP-UPS — great matcha-booth fits (recurring; watch for the Jul/Aug edition)
+    { name: 'Palengke Club', org: 'Palengke Club · @palengkeclub', tags: ['upcoming', 'star'], status: ['🌱 Upcoming', 'p-up'], star: true,
+      theme: 'Community thrift + makers pop-up (matcha-friendly)', date: 'Aug 3–4 · per @palengkeclub IG bio (confirm year)', venue: 'Nhue Creative Studios, Makati',
+      size: 'Small–medium · curated indie', people: '~800–2,000 (est.)', vendor: { c: 'wait', ic: '⏳', t: 'Hosts matcha booths (Chotto Matcha precedent) — DM @palengkeclub for a slot' } },
+    { name: 'The Fig Archives', org: 'The Fig Archives · @thefigarchives', tags: ['recurring'], status: ['🔁 Recurring', 'p-rec'],
+      theme: 'Vintage + antiques rooftop market (arty)', date: 'Recurring · merchant form open now', venue: 'Legaspi Village, Makati (rooftop)',
+      size: 'Small · boutique rooftop', people: '~500–1,500 (est.)', vendor: { c: 'open', ic: '💚', t: 'Merchant Interest Form OPEN — link in @thefigarchives IG bio' } },
+    { name: 'The Solana Market', org: 'The Solana Market · @thesolanamarket', tags: ['recurring', 'star'], status: ['🔁 Recurring', 'p-rec'], star: true,
+      theme: 'Curated lifestyle market — 30+ merchants incl. food', date: 'Recurring · next edition “coming soon” (verified IG)', venue: 'Makati · Katipunan (rotating)',
+      size: 'Medium–large · 30+ merchants, food vendors', people: 'Large reach · 30K+ IG following', vendor: { c: 'wait', ic: '⏳', t: 'Takes food/drink vendors — apply via linktr.ee/thesolanamarket' } },
+    { name: 'The Merkado', org: 'The Merkado · @the.merkado', tags: ['recurring'], status: ['🔁 Recurring', 'p-rec'],
+      theme: 'Local + vintage brands pop-up market', date: 'Recurring · “see you at our next” (verified IG)', venue: 'Corner House, San Juan',
+      size: 'Medium · local + vintage', people: 'Large reach · 29K+ IG following', vendor: { c: 'wait', ic: '⏳', t: 'Local + vintage + F&B — DM @the.merkado for vendor slots' } },
+    { name: 'BGC Art Mart', org: 'Arts at BGC · @artsatbgc', tags: ['recurring', 'star'], status: ['🔁 Recurring', 'p-rec'], star: true,
+      theme: 'Art & makers market at BGC Arts Center', date: 'Select weekends · watch for next', venue: 'BGC Arts Center, Bonifacio Global City',
+      size: 'Medium · artists + makers', people: 'High foot traffic', vendor: { c: 'wait', ic: '⏳', t: 'Arty, high-traffic — apply via Arts at BGC (@artsatbgc / @bgcartscenter)' } },
+    { name: 'The Crafters Marketplace', org: 'TCM · @thecraftersmarketplacemanila', tags: ['recurring'], status: ['🔁 Recurring', 'p-rec'],
+      theme: 'Craft & makers market', date: 'Recurring · watch for next', venue: 'Cubao Expo, Quezon City',
+      size: 'Small–medium · crafts', people: '~1,000–2,500 (est.)', vendor: { c: 'wait', ic: '⏳', t: 'Crafts + indie F&B — DM @thecraftersmarketplacemanila' } },
   ],
 
   // Human-navigable source links per event (keyed by name). Organizer IG handles
@@ -91,6 +117,13 @@ export const seed = {
     ],
     'Souk Matcha Fest (series)': [
       { kind: 'ig', url: 'https://www.instagram.com/soukpopup/' },
+    ],
+    'Souk @ Greenhills': [
+      { kind: 'ig', url: 'https://www.instagram.com/soukpopup/' },
+      { kind: 'maps', url: 'https://www.google.com/maps/search/?api=1&query=Greenhills+Shopping+Center+San+Juan' },
+    ],
+    'Manila Market Club (Aug editions)': [
+      { kind: 'ig', url: 'https://www.instagram.com/themanilamarketclub/' },
     ],
     'The Manila Market Club': [
       { kind: 'ig', url: 'https://www.instagram.com/themanilamarketclub/' },
@@ -128,6 +161,31 @@ export const seed = {
     'Matcha Mania': [
       { kind: 'web', url: 'https://www.google.com/search?q=Matcha+Mania+3+Torre+Lorenzo+Malate' },
       { kind: 'maps', url: 'https://www.google.com/maps/search/?api=1&query=3+Torre+Lorenzo+Malate' },
+    ],
+    'Palengke Club': [
+      { kind: 'ig', url: 'https://www.instagram.com/palengkeclub/' },
+      { kind: 'web', url: 'https://www.google.com/search?q=Palengke+Club+pop-up+Manila+2026' },
+    ],
+    'The Fig Archives': [
+      { kind: 'ig', url: 'https://www.instagram.com/thefigarchives/' },
+      { kind: 'maps', url: 'https://www.google.com/maps/search/?api=1&query=Legaspi+Village+Makati' },
+    ],
+    'The Solana Market': [
+      { kind: 'ig', url: 'https://www.instagram.com/thesolanamarket/' },
+      { kind: 'web', url: 'https://www.google.com/search?q=The+Solana+Market+Manila+2026' },
+    ],
+    'The Merkado': [
+      { kind: 'ig', url: 'https://www.instagram.com/the.merkado/' },
+      { kind: 'maps', url: 'https://www.google.com/maps/search/?api=1&query=Corner+House+San+Juan' },
+    ],
+    'BGC Art Mart': [
+      { kind: 'ig', url: 'https://www.instagram.com/artsatbgc/' },
+      { kind: 'ig', url: 'https://www.instagram.com/bgcartscenter/' },
+      { kind: 'maps', url: 'https://www.google.com/maps/search/?api=1&query=BGC+Arts+Center+Taguig' },
+    ],
+    'The Crafters Marketplace': [
+      { kind: 'ig', url: 'https://www.instagram.com/thecraftersmarketplacemanila/' },
+      { kind: 'maps', url: 'https://www.google.com/maps/search/?api=1&query=Cubao+Expo+Quezon+City' },
     ],
   },
 
