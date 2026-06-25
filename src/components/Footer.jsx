@@ -14,7 +14,7 @@ export default function Footer() {
         via each organizer&apos;s own IG/FB.
       </p>
       <p className="font-mono text-[.58rem] tracking-[.16em] uppercase text-brown-soft mt-3">
-        Matcharap Eto · a BriarBear brand · cream + forest · hand-drawn · 2026
+        Matcharap Eto · cream + forest · hand-drawn · 2026
       </p>
     </footer>
   );

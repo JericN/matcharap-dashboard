@@ -4,9 +4,9 @@ import Footer from "@/components/Footer";
 import Doodles from "@/components/Doodles";
 
 export const metadata = {
-  title: "Matcharap Eto · Vendor Board ♢ BriarBear",
+  title: "Matcharap Eto · Vendor Board",
   description:
-    "Matcharap Eto — matcha pop-up events around Metro Manila, a drink cost calculator, and a matcha powder sourcing guide. A BriarBear vendor board.",
+    "Matcharap Eto — matcha pop-up events around Metro Manila, a drink cost calculator, and a matcha powder sourcing guide.",
 };
 
 export default function RootLayout({ children }) {

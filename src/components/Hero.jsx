@@ -14,9 +14,6 @@ export default function Hero() {
       <span className="absolute bottom-4 left-[18px] font-mono text-[.58rem] tracking-[.16em] uppercase text-brown-soft max-md:hidden">
         metro manila
       </span>
-      <span className="absolute bottom-4 right-[18px] font-mono text-[.58rem] tracking-[.16em] uppercase text-brown-soft max-md:hidden">
-        by BriarBear
-      </span>
 
       <svg
         className="absolute top-3 right-[14px] w-[74px] h-[74px] rotate-[8deg] max-md:w-[54px] max-md:h-[54px] max-md:top-2 max-md:right-2"

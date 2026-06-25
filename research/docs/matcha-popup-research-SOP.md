@@ -1,6 +1,6 @@
 # SOP: Finding Matcha Pop-Up / Market Events in Metro Manila (Vendor Sourcing)
 
-**Owner:** BriarBear marketing research
+**Owner:** matcha marketing research
 **Goal:** Find UPCOMING matcha pop-up / market events in Metro Manila that we can join **as a vendor/booth**.
 **Last run:** 2026-06-23
 
@@ -8,7 +8,7 @@
 
 ## 1. Objective & Scope
 - **What we're looking for:** Single-location, multi-vendor matcha-themed selling events ("matcha pop-up", "matcha market", "matcha bazaar/fair/festival") in Metro Manila.
-- **Why:** To secure a vendor/booth slot for BriarBear.
+- **Why:** To secure a vendor/booth slot.
 - **Time window:** Upcoming only (June 2026 onward). Skip purely past events unless the organizer clearly runs a recurring series we can apply to.
 
 ## 2. Search Terms / Keywords

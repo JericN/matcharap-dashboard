@@ -1,6 +1,6 @@
 # Matcharap Eto — repo guide
 
-**"Matcharap Eto"** — a Philippine pop-up matcha-latte business by **BriarBear** (a vendor/research board for matcha pop-up events, drink costing, powder sourcing, and competitor study). *(Renamed from the earlier working title "Matcha ni Pou" — that name is dead; use Matcharap Eto everywhere.)* This folder holds research artifacts (root) + the live web app (`web/`).
+**"Matcharap Eto"** — a Philippine pop-up matcha-latte vendor/research board for matcha pop-up events, drink costing, powder sourcing, and competitor study. *(Renamed from the earlier working title "Matcha ni Pou" — that name is dead; use Matcharap Eto everywhere.)* This folder holds research artifacts (root) + the live web app (`web/`).
 
 ## Layout
 - **`web/`** — the live site: **Next.js 14 (app router) + Tailwind v3**. This is what to edit. It is its **own git repo** → GitHub `JericN/matcharap-eto`, **deployed on Vercel** (auto-detects Next.js). GitHub Pages is disabled. `web/README.md` documents setup.

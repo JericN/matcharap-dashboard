@@ -2,7 +2,7 @@
 
 A one-stop board for running a matcha pop-up booth in Metro Manila — pop-up
 **events**, a drink **cost calculator**, a matcha **powder sourcing guide**, a
-**drink menu**, and a **competitor** scan. A BriarBear project.
+**drink menu**, and a **competitor** scan.
 
 Built with **Next.js (App Router)**, **Tailwind**, **Zod**, and **Upstash Redis**.
 

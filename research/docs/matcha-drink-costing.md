@@ -1,6 +1,6 @@
 # Matcha Drink Costing — Metro Manila (2026)
 
-**For:** BriarBear matcha pop-up / booth · **Compiled:** 2026-06-23 · **Revised:** 2026-06-23 (milk correction)
+**For:** matcha pop-up / booth · **Compiled:** 2026-06-23 · **Revised:** 2026-06-23 (milk correction)
 **Serving basis:** 1 × 16oz iced drink. **Currency:** PHP. Retail-sourced; wholesale cuts 15–30% more.
 
 > ⚠️ **CORRECTION (this revision):** an earlier draft understated **milk by 10×** (used ~₱2/cup; correct is
