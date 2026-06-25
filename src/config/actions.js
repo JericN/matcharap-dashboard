@@ -66,6 +66,18 @@ export async function addIngredient(ingredient) {
   revalidatePath("/calculator");
 }
 
+export async function saveDrink(drink, isNew) {
+  await repo.saveDrink(drink, isNew);
+  revalidatePath("/drinks");
+  revalidatePath("/calculator");
+}
+
+export async function deleteDrink(name) {
+  await repo.deleteDrink(name);
+  revalidatePath("/drinks");
+  revalidatePath("/calculator");
+}
+
 export async function setCosts(patch) {
   await repo.setCosts(patch);
   revalidatePath("/calculator");

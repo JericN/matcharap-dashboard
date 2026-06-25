@@ -33,9 +33,12 @@ export default function DrinkCard({
   onAttach,
   onDetach,
   onToggleBase,
+  onEdit,
+  onDelete,
 }) {
   const [addOpen, setAddOpen] = useState(false);
   const [lightbox, setLightbox] = useState(null); // image index, or null
+  const [menu, setMenu] = useState(null); // right-click context menu position {x, y}, or null
   const attached = drink.ingredients;
   const unattached = catalog.filter((i) => !attached.includes(i.name));
   const emojiOf = (name) => catalog.find((i) => i.name === name)?.emoji ?? "";
@@ -73,7 +76,13 @@ export default function DrinkCard({
   }, [lightbox, images.length]);
 
   return (
-    <article className={`paper-card${saved ? " is-star" : ""}`}>
+    <article
+      className={`paper-card${saved ? " is-star" : ""}`}
+      onContextMenu={(e) => {
+        e.preventDefault();
+        setMenu({ x: e.clientX, y: e.clientY });
+      }}
+    >
       <SaveButton
         saved={saved}
         onToggle={onToggleSave}
@@ -244,6 +253,50 @@ export default function DrinkCard({
               </button>
             </div>
           </div>,
+          document.body,
+        )}
+
+      {menu &&
+        typeof document !== "undefined" &&
+        createPortal(
+          <>
+            <div
+              className="fixed inset-0 z-[55]"
+              onClick={() => setMenu(null)}
+              onContextMenu={(e) => {
+                e.preventDefault();
+                setMenu(null);
+              }}
+              aria-hidden="true"
+            />
+            <div
+              className="fixed z-[56] min-w-[150px] bg-cream-card border-2 border-forest rounded-[10px] shadow-hard-sm p-1"
+              style={{ top: menu.y, left: menu.x }}
+            >
+              <button
+                type="button"
+                onClick={() => {
+                  setMenu(null);
+                  onEdit();
+                }}
+                className="block w-full text-left px-2.5 py-1.5 rounded-[7px] font-mono text-[.66rem] text-forest hover:bg-cream-light transition"
+              >
+                ✎ Edit drink
+              </button>
+              {onDelete && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMenu(null);
+                    onDelete();
+                  }}
+                  className="block w-full text-left px-2.5 py-1.5 rounded-[7px] font-mono text-[.66rem] text-clay hover:bg-cream-light transition"
+                >
+                  🗑 Delete drink
+                </button>
+              )}
+            </div>
+          </>,
           document.body,
         )}
     </article>

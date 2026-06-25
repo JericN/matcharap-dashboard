@@ -170,6 +170,10 @@ export const StateSchema = z.object({
     .record(z.string(), z.object({ matcha: z.boolean(), milk: z.boolean() }).partial())
     .default({}), // drink name -> which base (matcha/milk) is removed (absent key = present)
   extraIngredients: z.record(z.string(), IngredientSchema.omit({ name: true })).default({}), // user-created: name -> { emoji, price, link }
+  extraDrinks: z.record(z.string(), DrinkSchema.omit({ name: true })).default({}), // user-created drinks: name -> { note, desc, milkMl, ingredients, srp }
+  drinkOverrides: z
+    .record(z.string(), DrinkSchema.pick({ note: true, desc: true, milkMl: true }).partial())
+    .default({}), // edits to a drink's text/milk fields (seed or extra) -> { note?, desc?, milkMl? }
   costs: z
     .object({
       packaging: z.number().nonnegative(),

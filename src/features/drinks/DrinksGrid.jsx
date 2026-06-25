@@ -6,14 +6,27 @@ import {
   detachIngredient,
   addIngredient,
   toggleBase,
+  saveDrink,
+  deleteDrink,
 } from "@/config/actions";
 import DrinkCard from "@/features/drinks/DrinkCard";
+import DrinkForm from "@/features/drinks/DrinkForm";
 import { TextField, NumberField } from "@/components/form";
 import SectionTitle from "@/components/SectionTitle";
 
 const GRID = "card-grid";
 const SECTION = "mb-12 max-md:mb-9";
 const EMPTY = { name: "", emoji: "", price: "", link: "" };
+const BLANK_DRINK = {
+  name: "",
+  note: "",
+  desc: "",
+  milkMl: 180,
+  srp: 150,
+  ingredients: [],
+  hasMatcha: true,
+  hasMilk: true,
+};
 const isUrl = (s) => {
   try {
     new URL(s);
@@ -25,14 +38,10 @@ const isUrl = (s) => {
 
 export default function DrinksGrid({ drinks, ingredients, initialSaved }) {
   const [saved, setSaved] = useState(initialSaved);
-  const [attachMap, setAttachMap] = useState(() =>
-    Object.fromEntries(drinks.map((d) => [d.name, d.ingredients])),
-  );
-  const [baseMap, setBaseMap] = useState(() =>
-    Object.fromEntries(drinks.map((d) => [d.name, { matcha: d.hasMatcha, milk: d.hasMilk }])),
-  );
+  const [list, setList] = useState(drinks); // full drink objects, updated optimistically
   const [catalog, setCatalog] = useState(ingredients);
-  const [form, setForm] = useState(EMPTY);
+  const [form, setForm] = useState(EMPTY); // the ingredient creator bar
+  const [editing, setEditing] = useState(null); // { drink, isNew } for the drink form, or null
   const [, startTransition] = useTransition();
 
   const toggle = (name) => {
@@ -40,21 +49,38 @@ export default function DrinksGrid({ drinks, ingredients, initialSaved }) {
     startTransition(() => toggleDrink(name));
   };
 
+  const patchDrink = (name, fn) => setList((l) => l.map((d) => (d.name === name ? fn(d) : d)));
+
   // attach/detach send a single-ingredient delta; the server merges it into the
   // fresh list (concurrent edits survive). Local state mirrors optimistically.
-  const attach = (drink, ing) => {
-    setAttachMap((m) => ({ ...m, [drink]: [...m[drink], ing] }));
-    startTransition(() => attachIngredient(drink, ing));
+  const attach = (name, ing) => {
+    patchDrink(name, (d) => ({ ...d, ingredients: [...d.ingredients, ing] }));
+    startTransition(() => attachIngredient(name, ing));
+  };
+  const detach = (name, ing) => {
+    patchDrink(name, (d) => ({ ...d, ingredients: d.ingredients.filter((n) => n !== ing) }));
+    startTransition(() => detachIngredient(name, ing));
+  };
+  const flipBase = (name, base) => {
+    const key = base === "matcha" ? "hasMatcha" : "hasMilk";
+    patchDrink(name, (d) => ({ ...d, [key]: !d[key] }));
+    startTransition(() => toggleBase(name, base));
   };
 
-  const detach = (drink, ing) => {
-    setAttachMap((m) => ({ ...m, [drink]: m[drink].filter((n) => n !== ing) }));
-    startTransition(() => detachIngredient(drink, ing));
+  // add a new drink or save edits to an existing one — both via the same form
+  const persistDrink = (drink, isNew) => {
+    setList((l) =>
+      isNew
+        ? [...l, { ...drink, images: [], custom: true }]
+        : l.map((d) => (d.name === drink.name ? { ...d, ...drink } : d)),
+    );
+    startTransition(() => saveDrink(drink, isNew));
+    setEditing(null);
   };
-
-  const flipBase = (drink, base) => {
-    setBaseMap((m) => ({ ...m, [drink]: { ...m[drink], [base]: !m[drink][base] } }));
-    startTransition(() => toggleBase(drink, base));
+  const removeDrink = (name) => {
+    setList((l) => l.filter((d) => d.name !== name));
+    setSaved((s) => s.filter((n) => n !== name));
+    startTransition(() => deleteDrink(name));
   };
 
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
@@ -76,26 +102,34 @@ export default function DrinksGrid({ drinks, ingredients, initialSaved }) {
   const card = (d) => (
     <DrinkCard
       key={d.name}
-      drink={{
-        ...d,
-        ingredients: attachMap[d.name],
-        hasMatcha: baseMap[d.name].matcha,
-        hasMilk: baseMap[d.name].milk,
-      }}
+      drink={d}
       saved={savedSet.has(d.name)}
       onToggleSave={() => toggle(d.name)}
       catalog={catalog}
       onAttach={(ing) => attach(d.name, ing)}
       onDetach={(ing) => detach(d.name, ing)}
       onToggleBase={(base) => flipBase(d.name, base)}
+      onEdit={() => setEditing({ drink: d, isNew: false })}
+      onDelete={d.custom ? () => removeDrink(d.name) : null}
     />
   );
 
-  const selected = drinks.filter((d) => savedSet.has(d.name));
-  const rest = drinks.filter((d) => !savedSet.has(d.name));
+  const selected = list.filter((d) => savedSet.has(d.name));
+  const rest = list.filter((d) => !savedSet.has(d.name));
 
   return (
     <>
+      <div className="flex items-center justify-between gap-3 mb-6 max-md:mb-4 flex-wrap">
+        <p className="sec-sub !mt-0">Right-click any drink to edit it, or add a brand-new one →</p>
+        <button
+          type="button"
+          onClick={() => setEditing({ drink: BLANK_DRINK, isNew: true })}
+          className="chip chip--active normal-case tracking-normal shrink-0"
+        >
+          ＋ New drink
+        </button>
+      </div>
+
       {selected.length > 0 && (
         <section className={SECTION}>
           <SectionTitle icon="♥" title="Our Selection" meta={`${selected.length} saved`} />
@@ -215,6 +249,17 @@ export default function DrinksGrid({ drinks, ingredients, initialSaved }) {
           </div>
         </div>
       </section>
+
+      {editing && (
+        <DrinkForm
+          drink={editing.drink}
+          isNew={editing.isNew}
+          existingNames={list.map((d) => d.name)}
+          catalog={catalog}
+          onSave={persistDrink}
+          onClose={() => setEditing(null)}
+        />
+      )}
     </>
   );
 }

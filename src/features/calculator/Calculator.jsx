@@ -364,13 +364,17 @@ export default function Calculator({
                   <div className="font-mono text-[.54rem] tracking-[.12em] uppercase text-onforest-mut">
                     Total COGS
                   </div>
-                  <div className="font-display font-bold text-2xl max-md:text-[1.2rem]">{peso(tot.cogs)}</div>
+                  <div className="font-display font-bold text-2xl max-md:text-[1.2rem]">
+                    {peso(tot.cogs)}
+                  </div>
                 </div>
                 <div>
                   <div className="font-mono text-[.54rem] tracking-[.12em] uppercase text-onforest-mut">
                     Total revenue
                   </div>
-                  <div className="font-display font-bold text-2xl max-md:text-[1.2rem]">{peso(tot.revenue)}</div>
+                  <div className="font-display font-bold text-2xl max-md:text-[1.2rem]">
+                    {peso(tot.revenue)}
+                  </div>
                 </div>
                 <div>
                   <div className="font-mono text-[.54rem] tracking-[.12em] uppercase text-onforest-mut">

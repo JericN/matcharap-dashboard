@@ -38,19 +38,26 @@ export const repo = {
   },
   milkOptions: async () => (await getSiteData()).milkOptions,
 
-  // drinks, with per-drink ingredient attachments + base (matcha/milk) toggles
-  // overlaid from shared state, and reference photos overlaid from seed.
+  // drinks = seed built-ins ∪ user-created (extraDrinks), each with overlays
+  // applied from shared state: text/milk edits (drinkOverrides), attached
+  // ingredients (drinkIngredients), base toggles (drinkBases), reference photos.
   drinks: async () => {
     const { drinks, drinkImages } = await getSiteData();
-    const { drinkIngredients, drinkBases } = await getState();
-    return drinks.map((d) => {
+    const { drinkIngredients, drinkBases, extraDrinks, drinkOverrides } = await getState();
+    const created = Object.entries(extraDrinks).map(([name, d]) => ({ name, ...d }));
+    return [...drinks, ...created].map((d) => {
+      const ov = drinkOverrides[d.name] ?? {};
       const base = drinkBases[d.name] ?? {};
       return {
         ...d,
+        note: ov.note ?? d.note,
+        desc: ov.desc ?? d.desc,
+        milkMl: ov.milkMl ?? d.milkMl,
         ingredients: drinkIngredients[d.name] ?? d.ingredients,
         images: drinkImages[d.name] ?? [],
         hasMatcha: base.matcha ?? true, // absent key ⇒ base present
         hasMilk: base.milk ?? true,
+        custom: d.name in extraDrinks, // user-created (deletable)
       };
     });
   },
@@ -132,6 +139,41 @@ export const repo = {
     mutate((s) => ({
       ...s,
       extraIngredients: { ...s.extraIngredients, [name]: { emoji, price, link } },
+    })),
+
+  // Add or edit a drink. New drink -> stored whole in extraDrinks. Editing any
+  // drink (built-in or custom) -> writes the same overlays the inline UI uses
+  // (drinkOverrides for text/milk, drinkIngredients, drinkBases, srp) so there
+  // is one home per field and no precedence conflicts.
+  saveDrink: ({ name, note, desc, milkMl, srp, ingredients, hasMatcha, hasMilk }, isNew) =>
+    mutate((s) => {
+      const drinkBases = { ...s.drinkBases, [name]: { matcha: hasMatcha, milk: hasMilk } };
+      if (isNew) {
+        return {
+          ...s,
+          extraDrinks: { ...s.extraDrinks, [name]: { note, desc, milkMl, ingredients, srp } },
+          drinkBases,
+        };
+      }
+      return {
+        ...s,
+        drinkOverrides: { ...s.drinkOverrides, [name]: { note, desc, milkMl } },
+        drinkIngredients: { ...s.drinkIngredients, [name]: ingredients },
+        srp: { ...s.srp, [name]: srp },
+        drinkBases,
+      };
+    }),
+
+  // delete a user-created drink + all its overlays (built-ins can't be deleted)
+  deleteDrink: (name) =>
+    mutate((s) => ({
+      ...s,
+      extraDrinks: without(s.extraDrinks, name),
+      drinkOverrides: without(s.drinkOverrides, name),
+      drinkIngredients: without(s.drinkIngredients, name),
+      drinkBases: without(s.drinkBases, name),
+      srp: without(s.srp, name),
+      savedDrinks: s.savedDrinks.filter((n) => n !== name),
     })),
 
   setCosts: (patch) => mutate((s) => ({ ...s, costs: { ...s.costs, ...patch } })),
