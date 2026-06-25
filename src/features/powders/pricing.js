@@ -4,7 +4,6 @@
 
 const PER_G = /₱([\d.]+)(?:[–-][\d.]+)?\s*\/\s*g/;
 const PER_G_LABEL = /₱[\d.]+(?:[–-][\d.]+)?\s*\/\s*g/;
-const PACK_G = /(\d[\d,]*)\s*g\b/;
 
 // numeric ₱/g (lower bound of any range) — for cost math
 export function perGram(powder) {
@@ -18,17 +17,11 @@ export function perGramLabel(powder) {
   return m ? m[0].replace(/\s*\/\s*g/, '') : '—';
 }
 
-// tin/pack size in grams, if stated
-export function packGrams(powder) {
-  const m = powder.price.match(PACK_G);
-  return m ? parseInt(m[1].replace(/,/g, ''), 10) : null;
-}
-
 // Matcha choices for the calculator, derived from the powder list (single
 // source of truth). Skips sweetened latte mixes; cheapest-first.
 export function toMatchaOptions(powders) {
   return powders
     .filter((p) => !/sweeten|mix/i.test(p.price) && perGram(p) != null)
-    .map((p) => ({ l: p.name, g: perGram(p), packG: packGrams(p), cat: p.cat }))
+    .map((p) => ({ l: p.name, g: perGram(p), cat: p.cat }))
     .sort((a, b) => a.g - b.g);
 }

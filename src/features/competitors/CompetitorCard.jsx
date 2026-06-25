@@ -1,3 +1,5 @@
+import SaveButton from "@/components/SaveButton";
+
 // region swatch colours reuse the powder-category greens (themeable via :root --c-cat-*)
 const RDOT = { north: "rgb(var(--c-cat-ph))", central: "rgb(var(--c-cat-jp))", south: "rgb(var(--c-cat-import))" };
 const BAND = { budget: "₱", mid: "₱₱", premium: "₱₱₱" };
@@ -56,18 +58,7 @@ export default function CompetitorCard({ c, saved, onToggleSave }) {
           <span className={PILL}>{c.healthTxt}</span>
           <span title="Verified · Jun 2026" aria-label="Verified June 2026" className="shrink-0 grid place-items-center w-[19px] h-[19px] rounded-full border-2 border-forest bg-cream-card text-forest text-[.62rem] font-bold leading-none">✓</span>
         </div>
-        <button
-          type="button"
-          onClick={onToggleSave}
-          aria-pressed={saved}
-          aria-label={saved ? `Remove ${c.name} from saved` : `Save ${c.name}`}
-          title={saved ? "Saved — click to remove" : "Save to your shortlist"}
-          className={`shrink-0 w-8 h-8 grid place-items-center rounded-full border-2 border-clay transition hover:scale-110 ${saved ? "bg-clay text-cream-light" : "bg-cream-card text-clay"}`}
-        >
-          <svg width="15" height="15" viewBox="0 0 24 24" fill={saved ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinejoin="round">
-            <path d="M12 21s-7-4.6-9.5-9C1 9 2.5 5.5 6 5.5c2 0 3.2 1.2 4 2.3.8-1.1 2-2.3 4-2.3 3.5 0 5 3.5 3.5 6.5C19 16.4 12 21 12 21z" />
-          </svg>
-        </button>
+        <SaveButton saved={saved} onToggle={onToggleSave} label={c.name} className="shrink-0" />
       </div>
 
       <div className="flex gap-[13px] items-center px-4 pt-1 pb-1.5">

@@ -1,4 +1,5 @@
 import { perGramLabel } from "@/features/powders/pricing";
+import SaveButton from "@/components/SaveButton";
 
 // category swatch colours (themeable via :root --c-cat-*)
 const PDOT = { ph: "rgb(var(--c-cat-ph))", jp: "rgb(var(--c-cat-jp))", import: "rgb(var(--c-cat-import))" };
@@ -8,18 +9,7 @@ export default function PowderCard({ powder, img, saved, onToggleSave }) {
 
   return (
     <article className={`paper-card${powder.star ? " is-star" : ""}`}>
-      <button
-        type="button"
-        onClick={onToggleSave}
-        aria-pressed={saved}
-        aria-label={saved ? `Remove ${powder.name} from your selection` : `Save ${powder.name} to your selection`}
-        title={saved ? "Saved — click to remove" : "Save to your selection"}
-        className={`absolute top-[10px] right-[10px] z-[3] w-8 h-8 grid place-items-center rounded-full border-2 border-clay transition hover:scale-110 ${saved ? "bg-clay text-cream-light" : "bg-cream-card text-clay"}`}
-      >
-        <svg width="15" height="15" viewBox="0 0 24 24" fill={saved ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinejoin="round">
-          <path d="M12 21s-7-4.6-9.5-9C1 9 2.5 5.5 6 5.5c2 0 3.2 1.2 4 2.3.8-1.1 2-2.3 4-2.3 3.5 0 5 3.5 3.5 6.5C19 16.4 12 21 12 21z" />
-        </svg>
-      </button>
+      <SaveButton saved={saved} onToggle={onToggleSave} label={powder.name} className="absolute top-[10px] right-[10px] z-[3]" />
 
       <div className="flex gap-[13px] items-start px-4 pt-4 pb-2.5">
         <span

@@ -23,9 +23,7 @@
     --c-matcha: 138 161 90;
     --c-matcha-bright: 167 192 106;
     --c-matcha-fill: 169 192 138;
-    --c-clay: 185 84 45;
-    --c-blush: 217 138 99;
-    --c-star: 249 243 228;        /* star-card highlight */
+    --c-clay: 185 84 45;    --c-star: 249 243 228;        /* star-card highlight */
     --c-onforest-mut: 205 217 189; /* muted text on forest */
     --c-onforest-soft: 223 230 210;/* soft text on forest */
     --c-cat-ph: 94 123 58;        /* powder category swatches */
@@ -77,10 +75,7 @@
 
   /* stamp status badge */
   .stamp { @apply absolute top-[11px] right-[11px] z-[2] font-mono font-medium uppercase tracking-[.08em] text-[.55rem] text-clay border-2 border-clay rounded-[8px_13px_9px_12px] px-2 py-[5px] -rotate-[7deg] leading-none; background: rgb(var(--c-clay) / .07); box-shadow: inset 0 0 0 1px rgb(var(--c-clay) / .2); }
-  .stamp--live::before { content: "●"; font-size: .45rem; margin-right: 5px; vertical-align: middle; }
-  .stamp--soon { @apply text-olive border-olive; background: rgb(var(--c-olive) / .07); box-shadow: inset 0 0 0 1px rgb(var(--c-olive) / .2); }
   .stamp--rec { @apply text-olive-soft border-olive-soft; background: rgb(var(--c-olive-soft) / .09); box-shadow: inset 0 0 0 1px rgb(var(--c-olive-soft) / .2); }
-  .stamp--ended { @apply text-brown-soft border-brown-soft shadow-none; background: rgb(var(--c-brown-soft) / .06); }
 
   /* form controls (appearance resets utilities can't do).
      Three field skins, consumed by the <Field*> components in components/form:
@@ -93,11 +88,7 @@
   .field-box::placeholder { @apply text-brown-soft; opacity: .65; }
   .field-box::-webkit-outer-spin-button, .field-box::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
   .field-select { @apply w-full font-mono text-[.8rem] text-forest bg-cream-card border-2 border-olive rounded-[10px_8px_11px_8px] py-2 pl-[11px] pr-7 cursor-pointer appearance-none bg-no-repeat outline-none transition-colors; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='%233f5031' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M2 4l4 4 4-4'/%3E%3C/svg%3E"); background-position: right 10px center; }
-  .field-select:focus { @apply border-forest; }
-  .range-input { @apply w-full appearance-none h-1.5 rounded-md bg-cream-card border border-olive outline-none cursor-pointer mt-1.5; }
-  .range-input::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: rgb(var(--c-forest)); border: 2px solid rgb(var(--c-cream-light)); cursor: pointer; }
-  .range-input::-moz-range-thumb { width: 18px; height: 18px; border-radius: 50%; background: rgb(var(--c-forest)); border: 2px solid rgb(var(--c-cream-light)); cursor: pointer; }
-  .field-underline { @apply font-mono font-medium text-[1.05rem] text-clay bg-transparent border-0 w-full text-center mt-[3px] pb-px outline-none border-b-[1.6px] border-dashed border-clay; -moz-appearance: textfield; }
+  .field-select:focus { @apply border-forest; }  .field-underline { @apply font-mono font-medium text-[1.05rem] text-clay bg-transparent border-0 w-full text-center mt-[3px] pb-px outline-none border-b-[1.6px] border-dashed border-clay; -moz-appearance: textfield; }
   .field-underline:focus { @apply border-solid; }
   .field-underline::-webkit-outer-spin-button, .field-underline::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 

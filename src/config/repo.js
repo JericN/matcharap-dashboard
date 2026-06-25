@@ -78,7 +78,6 @@ export const repo = {
   toggleCompetitor: (name) => mutate((s) => ({ ...s, savedCompetitors: toggle(s.savedCompetitors, name) })),
 
   setSrp: (drink, price) => mutate((s) => ({ ...s, srp: { ...s.srp, [drink]: price } })),
-  resetSrp: (drink) => mutate((s) => ({ ...s, srp: without(s.srp, drink) })),
 
   setPriceOverride: (key, price) => mutate((s) => ({ ...s, priceOverrides: { ...s.priceOverrides, [key]: price } })),
   resetPriceOverride: (key) => mutate((s) => ({ ...s, priceOverrides: without(s.priceOverrides, key) })),

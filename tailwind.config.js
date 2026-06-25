@@ -17,7 +17,6 @@ module.exports = {
         brown: { DEFAULT: c('--c-brown'), soft: c('--c-brown-soft') },
         matcha: { DEFAULT: c('--c-matcha'), bright: c('--c-matcha-bright'), fill: c('--c-matcha-fill') },
         clay: c('--c-clay'),
-        blush: c('--c-blush'),
         star: c('--c-star'),
         onforest: { mut: c('--c-onforest-mut'), soft: c('--c-onforest-soft') },
         cat: { ph: c('--c-cat-ph'), jp: c('--c-cat-jp'), import: c('--c-cat-import') },

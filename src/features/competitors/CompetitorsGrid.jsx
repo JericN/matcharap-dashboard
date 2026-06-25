@@ -39,6 +39,7 @@ export default function CompetitorsGrid({ competitors, initialSaved = [] }) {
   }, []);
 
   const savedSet = new Set(saved);
+  const savedRank = new Map(saved.map((n, i) => [n, i])); // heart order: first-hearted = 0
   const toggleSave = (name) => {
     setSaved((s) => (s.includes(name) ? s.filter((n) => n !== name) : [...s, name])); // optimistic
     startTransition(() => toggleCompetitor(name)); // persist centrally
@@ -68,7 +69,14 @@ export default function CompetitorsGrid({ competitors, initialSaved = [] }) {
       {SECTIONS.map((s) => {
         const cards = competitors
           .filter((c) => c.tier === s.tier && match(c))
-          .sort((a, b) => a.rank - b.rank);
+          // hearted brands sort to the front of their tier (in heart order); the rest by rank
+          .sort((a, b) => {
+            const aH = savedRank.has(a.name);
+            const bH = savedRank.has(b.name);
+            if (aH && bH) return savedRank.get(a.name) - savedRank.get(b.name);
+            if (aH !== bH) return aH ? -1 : 1;
+            return a.rank - b.rank;
+          });
         if (!cards.length) return null;
         // round-robin into columns → reads left-to-right (1,2,3 / 4,5,6 …) AND packs
         // with no row gaps (each column flows at its own natural height).
