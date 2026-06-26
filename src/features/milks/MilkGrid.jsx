@@ -1,8 +1,8 @@
 "use client";
 import { useState, useTransition } from "react";
-import { toggleMilk, setPriceOverride, resetPriceOverride } from "@/config/actions";
-import { perLiter, milkOptionLabel } from "@/features/milks/pricing";
+import { toggleMilk, saveMilk } from "@/config/actions";
 import MilkCard from "@/features/milks/MilkCard";
+import PriceSizeForm from "@/components/PriceSizeForm";
 import SectionTitle from "@/components/SectionTitle";
 
 const GRID = "card-grid";
@@ -15,9 +15,10 @@ const BUCKETS = [
   ["unique", "✨ Unique / specialty"],
 ];
 
-export default function MilkGrid({ milks, images, initialSaved, initialOverrides }) {
+export default function MilkGrid({ milks, images, initialSaved }) {
   const [saved, setSaved] = useState(initialSaved); // shared state, seeded from the server
-  const [overrides, setOverrides] = useState(initialOverrides); // priceOverrides, seeded from server
+  const [edits, setEdits] = useState({}); // optimistic price/liters edits: name -> { price, liters }
+  const [editing, setEditing] = useState(null); // the milk being edited
   const [, startTransition] = useTransition();
 
   const savedSet = new Set(saved);
@@ -26,28 +27,17 @@ export default function MilkGrid({ milks, images, initialSaved, initialOverrides
     startTransition(() => toggleMilk(name));
   };
 
-  // Edit a milk's ₱/L — same "milk:<label>" override the calculator reads, so it
-  // flows straight into costing. Empty / unchanged-from-default ⇒ clear it.
-  const commitPrice = (m, raw) => {
-    const label = milkOptionLabel(m);
-    if (!label) return; // no parseable ₱/L (concentrates) → not editable
-    const key = "milk:" + label;
-    const n = parseFloat(raw);
-    if (raw === "" || !Number.isFinite(n) || n < 0 || n === perLiter(m)) {
-      setOverrides((o) => {
-        const c = { ...o };
-        delete c[key];
-        return c;
-      });
-      startTransition(() => resetPriceOverride(key));
-    } else {
-      setOverrides((o) => ({ ...o, [key]: n }));
-      startTransition(() => setPriceOverride(key, n));
-    }
+  const eff = (m) => (edits[m.name] ? { ...m, ...edits[m.name] } : m);
+
+  const persistEdit = (patch) => {
+    const name = editing.name;
+    setEdits((o) => ({ ...o, [name]: patch }));
+    setEditing(null);
+    startTransition(() => saveMilk(name, patch));
   };
 
-  const card = (m) => {
-    const label = milkOptionLabel(m);
+  const card = (m0) => {
+    const m = eff(m0);
     return (
       <MilkCard
         key={m.name}
@@ -55,8 +45,7 @@ export default function MilkGrid({ milks, images, initialSaved, initialOverrides
         img={images[m.name]}
         saved={savedSet.has(m.name)}
         onToggleSave={() => toggle(m.name)}
-        override={label ? overrides["milk:" + label] : undefined}
-        onCommitPrice={(raw) => commitPrice(m, raw)}
+        onEdit={() => setEditing(m)}
       />
     );
   };
@@ -84,6 +73,15 @@ export default function MilkGrid({ milks, images, initialSaved, initialOverrides
           </section>
         );
       })}
+
+      {editing && (
+        <PriceSizeForm
+          kind="milk"
+          item={editing}
+          onSave={persistEdit}
+          onClose={() => setEditing(null)}
+        />
+      )}
     </>
   );
 }

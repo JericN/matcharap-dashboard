@@ -22,6 +22,18 @@ export async function toggleMilk(name) {
   revalidatePath("/calculator");
 }
 
+export async function savePowder(name, patch) {
+  await repo.savePowder(name, patch);
+  revalidatePath("/powders");
+  revalidatePath("/calculator"); // matcha ₱/g derives from price/grams
+}
+
+export async function saveMilk(name, patch) {
+  await repo.saveMilk(name, patch);
+  revalidatePath("/milks");
+  revalidatePath("/calculator");
+}
+
 export async function toggleDrink(name) {
   await repo.toggleDrink(name);
   revalidatePath("/drinks");

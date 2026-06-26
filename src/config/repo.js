@@ -30,18 +30,34 @@ export const repo = {
     const { events, eventLinks } = await getSiteData();
     return events.map((e) => ({ ...e, links: eventLinks[e.name] ?? [] }));
   },
-  powders: async () => (await getSiteData()).powders,
+  // powders with per-item price/grams edits overlaid from state (powderOverrides)
+  powders: async () => {
+    const { powders } = await getSiteData();
+    const { powderOverrides } = await getState();
+    return powders.map((p) => {
+      const ov = powderOverrides[p.name] ?? {};
+      return { ...p, price: ov.price ?? p.price, grams: ov.grams ?? p.grams };
+    });
+  },
   powderImages: async () => (await getSiteData()).powderImages,
   // competitors, with brand logo overlaid from seed (img = null ⇒ colored numbered circle)
   competitors: async () => {
     const { competitors, competitorImages } = await getSiteData();
     return competitors.map((c) => ({ ...c, img: competitorImages[c.name] ?? null }));
   },
-  milks: async () => (await getSiteData()).milks,
+  // milks with per-item price/liters edits overlaid from state (milkOverrides)
+  milks: async () => {
+    const { milks } = await getSiteData();
+    const { milkOverrides } = await getState();
+    return milks.map((m) => {
+      const ov = milkOverrides[m.name] ?? {};
+      return { ...m, price: ov.price ?? m.price, liters: ov.liters ?? m.liters };
+    });
+  },
   milkImages: async () => (await getSiteData()).milkImages,
-  // calculator milk dropdown, DERIVED from the milk catalog (single source of truth,
-  // mirrors toMatchaOptions): [{ l, ml }] cheapest-first, so Calculator.jsx is unchanged.
-  milkOptions: async () => toMilkOptions((await getSiteData()).milks),
+  // calculator milk dropdown, DERIVED from the OVERLAID milk catalog (single source
+  // of truth, mirrors toMatchaOptions): [{ l, ml }] cheapest-first.
+  milkOptions: async () => toMilkOptions(await repo.milks()),
 
   // drinks = seed built-ins ∪ user-created (extraDrinks), each with overlays
   // applied from shared state: text edits (drinkOverrides), attached
@@ -114,6 +130,13 @@ export const repo = {
     mutate((s) => ({ ...s, savedCompetitors: toggle(s.savedCompetitors, name) })),
 
   setSrp: (drink, price) => mutate((s) => ({ ...s, srp: { ...s.srp, [drink]: price } })),
+
+  // edit a powder's price (₱ pack) + grams — overlay on seed, keyed by name
+  savePowder: (name, { price, grams }) =>
+    mutate((s) => ({ ...s, powderOverrides: { ...s.powderOverrides, [name]: { price, grams } } })),
+  // edit a milk's price (₱ pack) + liters — overlay on seed, keyed by name
+  saveMilk: (name, { price, liters }) =>
+    mutate((s) => ({ ...s, milkOverrides: { ...s.milkOverrides, [name]: { price, liters } } })),
 
   setPriceOverride: (key, price) =>
     mutate((s) => ({ ...s, priceOverrides: { ...s.priceOverrides, [key]: price } })),

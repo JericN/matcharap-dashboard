@@ -34,8 +34,8 @@ export const PowderSchema = z.object({
   name: z.string(),
   origin: z.string(),
   taste: z.string(),
-  price: z.string(),
-  serving: z.string(),
+  price: z.number().nonnegative(), // ₱ for the standard retail pack
+  grams: z.number().positive(), // pack size in grams; ₱/g + ~₱/2g are DERIVED (pricing.js)
   hype: z.string(),
   buy: z.string(),
   url: z.string().url(),
@@ -92,7 +92,8 @@ export const MilkSchema = z.object({
   type: z.string(), // "Oat · barista" / "Fresh dairy · full cream" — shown as kicker
   origin: z.string(),
   taste: z.string(), // flavor + how it behaves in a matcha latte (foam / split risk)
-  price: z.string(), // carries a "₱NN/L" token, e.g. "₱114 / 1L · ₱114/L (Landers)"
+  price: z.number().nonnegative(), // ₱ for the retail pack
+  liters: z.number().positive(), // pack size in liters (0.37 = 370ml can); ₱/L + ≈₱/cup DERIVED
   hype: z.string(),
   buy: z.string(),
   url: z.string().url(),
@@ -213,6 +214,12 @@ export const StateSchema = z.object({
     .record(z.string(), IngredientSchema.omit({ name: true }).partial())
     .default({}), // edits to a SEED ingredient's emoji/price/link (overlay)
   deletedIngredients: z.array(z.string()).default([]), // tombstoned SEED ingredient names (hidden from the catalog)
+  powderOverrides: z
+    .record(z.string(), PowderSchema.pick({ price: true, grams: true }).partial())
+    .default({}), // edits to a powder's price/grams (overlay on seed) -> { price?, grams? }
+  milkOverrides: z
+    .record(z.string(), MilkSchema.pick({ price: true, liters: true }).partial())
+    .default({}), // edits to a milk's price/liters (overlay on seed) -> { price?, liters? }
   // Expense-planner sheets/tabs — ordered list grouping expense rows by tabId.
   expenseTabs: z
     .array(z.object({ id: z.string(), name: z.string().default("") }))

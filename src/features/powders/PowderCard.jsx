@@ -1,6 +1,8 @@
-import { perGram, perGramLabel } from "@/features/powders/pricing";
+"use client";
+import { useState } from "react";
+import { createPortal } from "react-dom";
+import { perGramLabel, priceLabel, servingLabel } from "@/features/powders/pricing";
 import SaveButton from "@/components/SaveButton";
-import EditablePrice from "@/components/EditablePrice";
 
 // category swatch colours (themeable via :root --c-cat-*)
 const PDOT = {
@@ -9,11 +11,16 @@ const PDOT = {
   import: "rgb(var(--c-cat-import))",
 };
 
-export default function PowderCard({ powder, img, saved, onToggleSave, override, onCommitPrice }) {
-  const ref = perGram(powder); // numeric ₱/g default (null ⇒ no parseable price)
-  const overridden = override != null;
+export default function PowderCard({ powder, img, saved, onToggleSave, onEdit }) {
+  const [menu, setMenu] = useState(null); // {x,y} right-click context menu
   return (
-    <article className={`paper-card${powder.star ? " is-star" : ""}`}>
+    <article
+      className={`paper-card${powder.star ? " is-star" : ""}`}
+      onContextMenu={(e) => {
+        e.preventDefault();
+        setMenu({ x: e.clientX, y: e.clientY });
+      }}
+    >
       <SaveButton
         saved={saved}
         onToggle={onToggleSave}
@@ -53,30 +60,57 @@ export default function PowderCard({ powder, img, saved, onToggleSave, override,
         </div>
       </div>
       <div className="perg-box">
-        <EditablePrice
-          display={overridden ? `₱${override}` : perGramLabel(powder)}
-          value={overridden ? override : ref}
-          editable={ref != null}
-          onCommit={onCommitPrice}
-        />
+        <span className="font-display font-bold text-[2rem] leading-[.9] text-cream-light whitespace-nowrap">
+          {perGramLabel(powder)}
+        </span>
         <span className="flex flex-col gap-px">
           <span className="font-mono text-[.5rem] tracking-[.18em] uppercase text-matcha-bright">
-            per gram{overridden ? " · ✎ edited" : ""}
+            per gram
           </span>
           <span className="font-mono text-[.58rem] tracking-[.02em] text-onforest-soft">
-            {overridden ? `↩︎ was ${perGramLabel(powder)}` : `☕ ${powder.serving} / serving`}
+            ☕ {servingLabel(powder)} / 2g
           </span>
         </span>
       </div>
       <p className="text-[.82rem] text-olive px-4 mb-2">{powder.taste}</p>
       <div className="px-4 pb-3 flex flex-col gap-[5px]">
-        <div className="meta-line normal-case tracking-normal items-start">💴 {powder.price}</div>
+        <div className="meta-line normal-case tracking-normal items-start">💴 {priceLabel(powder)}</div>
         <div className="meta-line normal-case tracking-normal items-start">🔥 {powder.hype}</div>
       </div>
       <a className="buylink" href={powder.url} target="_blank" rel="noopener">
         🛒 Where to buy ↗
         <span className="opacity-80 normal-case tracking-normal text-[.55rem]">{powder.buy}</span>
       </a>
+
+      {menu &&
+        createPortal(
+          <>
+            <div
+              className="fixed inset-0 z-[55]"
+              onClick={() => setMenu(null)}
+              onContextMenu={(e) => {
+                e.preventDefault();
+                setMenu(null);
+              }}
+            />
+            <div
+              className="fixed z-[56] paper-card !static p-1.5 min-w-[150px]"
+              style={{ top: menu.y, left: menu.x }}
+            >
+              <button
+                type="button"
+                onClick={() => {
+                  setMenu(null);
+                  onEdit();
+                }}
+                className="w-full text-left px-3 py-1.5 rounded-[7px] font-mono text-[.66rem] text-forest hover:bg-cream-light transition"
+              >
+                ✎ Edit price &amp; size
+              </button>
+            </div>
+          </>,
+          document.body,
+        )}
     </article>
   );
 }

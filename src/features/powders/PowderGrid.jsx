@@ -1,8 +1,8 @@
 "use client";
 import { useState, useTransition } from "react";
-import { togglePowder, setPriceOverride, resetPriceOverride } from "@/config/actions";
-import { perGram } from "@/features/powders/pricing";
+import { togglePowder, savePowder } from "@/config/actions";
 import PowderCard from "@/features/powders/PowderCard";
+import PriceSizeForm from "@/components/PriceSizeForm";
 import SectionTitle from "@/components/SectionTitle";
 
 const GRID = "card-grid";
@@ -14,10 +14,11 @@ const CATS = [
   ["import", "🌏 Imported"],
 ];
 
-export default function PowderGrid({ powders, images, initialSaved, initialOverrides }) {
+export default function PowderGrid({ powders, images, initialSaved }) {
   const [cat, setCat] = useState("all");
   const [saved, setSaved] = useState(initialSaved); // shared state, seeded from the server
-  const [overrides, setOverrides] = useState(initialOverrides); // priceOverrides, seeded from server
+  const [edits, setEdits] = useState({}); // optimistic price/grams edits: name -> { price, grams }
+  const [editing, setEditing] = useState(null); // the powder being edited
   const [, startTransition] = useTransition();
 
   const savedSet = new Set(saved);
@@ -26,35 +27,28 @@ export default function PowderGrid({ powders, images, initialSaved, initialOverr
     startTransition(() => togglePowder(name));
   };
 
-  // Edit a powder's ₱/g — same "matcha:<name>" override the calculator reads, so
-  // it flows straight into costing. Empty / unchanged-from-default ⇒ clear it.
-  const commitPrice = (p, raw) => {
-    const key = "matcha:" + p.name;
-    const n = parseFloat(raw);
-    if (raw === "" || !Number.isFinite(n) || n < 0 || n === perGram(p)) {
-      setOverrides((o) => {
-        const c = { ...o };
-        delete c[key];
-        return c;
-      });
-      startTransition(() => resetPriceOverride(key));
-    } else {
-      setOverrides((o) => ({ ...o, [key]: n }));
-      startTransition(() => setPriceOverride(key, n));
-    }
+  const eff = (p) => (edits[p.name] ? { ...p, ...edits[p.name] } : p);
+
+  const persistEdit = (patch) => {
+    const name = editing.name;
+    setEdits((m) => ({ ...m, [name]: patch }));
+    setEditing(null);
+    startTransition(() => savePowder(name, patch));
   };
 
-  const card = (p) => (
-    <PowderCard
-      key={p.name}
-      powder={p}
-      img={images[p.name]}
-      saved={savedSet.has(p.name)}
-      onToggleSave={() => toggle(p.name)}
-      override={overrides["matcha:" + p.name]}
-      onCommitPrice={(raw) => commitPrice(p, raw)}
-    />
-  );
+  const card = (p0) => {
+    const p = eff(p0);
+    return (
+      <PowderCard
+        key={p.name}
+        powder={p}
+        img={images[p.name]}
+        saved={savedSet.has(p.name)}
+        onToggleSave={() => toggle(p.name)}
+        onEdit={() => setEditing(p)}
+      />
+    );
+  };
 
   const selected = powders.filter((p) => savedSet.has(p.name));
   const rest = powders.filter((p) => !savedSet.has(p.name));
@@ -84,6 +78,15 @@ export default function PowderGrid({ powders, images, initialSaved, initialOverr
         </div>
         <div className={GRID}>{shown.map(card)}</div>
       </section>
+
+      {editing && (
+        <PriceSizeForm
+          kind="powder"
+          item={editing}
+          onSave={persistEdit}
+          onClose={() => setEditing(null)}
+        />
+      )}
     </>
   );
 }

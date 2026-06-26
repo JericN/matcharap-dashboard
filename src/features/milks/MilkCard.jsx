@@ -1,6 +1,8 @@
-import { perLiter, perLiterLabel } from "@/features/milks/pricing";
+"use client";
+import { useState } from "react";
+import { createPortal } from "react-dom";
+import { perLiterLabel, perCupLabel, priceLabel } from "@/features/milks/pricing";
 import SaveButton from "@/components/SaveButton";
-import EditablePrice from "@/components/EditablePrice";
 
 // category swatch colours (themeable via :root --c-cat-*) — fallback behind the logo
 const MDOT = {
@@ -10,13 +12,16 @@ const MDOT = {
   unique: "rgb(var(--c-cat-unique))",
 };
 
-export default function MilkCard({ milk, img, saved, onToggleSave, override, onCommitPrice }) {
-  const ref = perLiter(milk); // numeric ₱/L default (null ⇒ no parseable price)
-  const overridden = override != null;
-  const effPl = overridden ? override : ref; // effective ₱/L drives the per-cup line
-  const perCup = effPl != null ? `₱${Math.round((effPl / 1000) * 180)}` : "—";
+export default function MilkCard({ milk, img, saved, onToggleSave, onEdit }) {
+  const [menu, setMenu] = useState(null); // {x,y} right-click context menu
   return (
-    <article className={`paper-card${milk.star ? " is-star" : ""}`}>
+    <article
+      className={`paper-card${milk.star ? " is-star" : ""}`}
+      onContextMenu={(e) => {
+        e.preventDefault();
+        setMenu({ x: e.clientX, y: e.clientY });
+      }}
+    >
       <SaveButton
         saved={saved}
         onToggle={onToggleSave}
@@ -56,31 +61,58 @@ export default function MilkCard({ milk, img, saved, onToggleSave, override, onC
         </div>
       </div>
       <div className="perg-box">
-        <EditablePrice
-          display={overridden ? `₱${override}` : perLiterLabel(milk)}
-          value={overridden ? override : ref}
-          editable={ref != null}
-          onCommit={onCommitPrice}
-        />
+        <span className="font-display font-bold text-[2rem] leading-[.9] text-cream-light whitespace-nowrap">
+          {perLiterLabel(milk)}
+        </span>
         <span className="flex flex-col gap-px">
           <span className="font-mono text-[.5rem] tracking-[.18em] uppercase text-matcha-bright">
-            per liter{overridden ? " · ✎ edited" : ""}
+            per liter
           </span>
           <span className="font-mono text-[.58rem] tracking-[.02em] text-onforest-soft">
-            {overridden ? `↩︎ was ${perLiterLabel(milk)} · ≈${perCup}/cup` : `☕ ≈${perCup} / cup`}
+            ☕ ≈{perCupLabel(milk)} / cup
           </span>
         </span>
       </div>
       <p className="text-[.82rem] text-olive px-4 mb-2">{milk.taste}</p>
       <div className="px-4 pb-3 flex flex-col gap-[5px]">
         <div className="meta-line normal-case tracking-normal items-start">🌿 {milk.origin}</div>
-        <div className="meta-line normal-case tracking-normal items-start">💴 {milk.price}</div>
+        <div className="meta-line normal-case tracking-normal items-start">💴 {priceLabel(milk)}</div>
         <div className="meta-line normal-case tracking-normal items-start">🔥 {milk.hype}</div>
       </div>
       <a className="buylink" href={milk.url} target="_blank" rel="noopener">
         🛒 Where to buy ↗
         <span className="opacity-80 normal-case tracking-normal text-[.55rem]">{milk.buy}</span>
       </a>
+
+      {menu &&
+        createPortal(
+          <>
+            <div
+              className="fixed inset-0 z-[55]"
+              onClick={() => setMenu(null)}
+              onContextMenu={(e) => {
+                e.preventDefault();
+                setMenu(null);
+              }}
+            />
+            <div
+              className="fixed z-[56] paper-card !static p-1.5 min-w-[150px]"
+              style={{ top: menu.y, left: menu.x }}
+            >
+              <button
+                type="button"
+                onClick={() => {
+                  setMenu(null);
+                  onEdit();
+                }}
+                className="w-full text-left px-3 py-1.5 rounded-[7px] font-mono text-[.66rem] text-forest hover:bg-cream-light transition"
+              >
+                ✎ Edit price &amp; size
+              </button>
+            </div>
+          </>,
+          document.body,
+        )}
     </article>
   );
 }
