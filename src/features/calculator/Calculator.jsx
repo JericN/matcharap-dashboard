@@ -12,6 +12,7 @@ import {
 } from "@/features/calculator/cost";
 import { SelectField, NumberField } from "@/components/form";
 import SectionTitle from "@/components/SectionTitle";
+import { useLocalState } from "@/lib/useLocalState";
 
 const CAT_EMOJI = { ph: "🇵🇭", jp: "🇯🇵", import: "🌏" };
 const peso = (n) => "₱" + Math.round(n).toLocaleString("en-US");
@@ -28,8 +29,8 @@ export default function Calculator({
   srp,
   priceOverrides,
 }) {
-  // ---- local (session) selections — not synced ----
-  const [mLabel, setMLabel] = useState(() => {
+  // ---- local selections — per-browser, remembered in localStorage (not shared) ----
+  const [mLabel, setMLabel] = useLocalState("calc:matcha", () => {
     let best = matchaOptions[0],
       bd = Infinity;
     for (const o of matchaOptions) {
@@ -41,9 +42,11 @@ export default function Calculator({
     }
     return best.l;
   });
-  const [ki, setKi] = useState(1);
-  const [dose, setDose] = useState(3);
-  const [cups, setCups] = useState(() => Object.fromEntries(savedDrinks.map((n) => [n, 10])));
+  const [ki, setKi] = useLocalState("calc:milk", 1);
+  const [dose, setDose] = useLocalState("calc:dose", 3);
+  const [cups, setCups] = useLocalState("calc:cups", () =>
+    Object.fromEntries(savedDrinks.map((n) => [n, 10])),
+  );
 
   // ---- shared (synced) overrides — seeded from the store, persist on blur ----
   const [srpMap, setSrpMap] = useState(srp);
@@ -56,7 +59,7 @@ export default function Calculator({
   const selIndex = matchaOptions.findIndex((o) => o.l === mLabel);
   useEffect(() => {
     if (selIndex === -1) setMLabel(matchaOptions[0].l);
-  }, [selIndex, matchaOptions]);
+  }, [selIndex, matchaOptions, setMLabel]);
   const sel = matchaOptions[selIndex === -1 ? 0 : selIndex];
 
   // ---- derived prices ----
