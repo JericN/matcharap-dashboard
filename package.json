@@ -10,9 +10,13 @@
     "lint:fix": "next lint --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "check:redis": "node --env-file=.env.local scripts/check-redis.mjs"
+    "check:redis": "node --env-file=.env.local scripts/check-redis.mjs",
+    "check:docs": "node scripts/check-docs.mjs"
   },
   "dependencies": {
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/sortable": "^10.0.0",
+    "@dnd-kit/utilities": "^3.2.2",
     "@tiptap/extension-placeholder": "^3.27.1",
     "@tiptap/extension-task-item": "^3.27.1",
     "@tiptap/extension-task-list": "^3.27.1",
