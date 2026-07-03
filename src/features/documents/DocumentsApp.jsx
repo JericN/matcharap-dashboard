@@ -1,24 +1,35 @@
 "use client";
 import { useState, useRef, useEffect, useTransition } from "react";
-import { createDoc, updateDoc, deleteDoc, getDoc } from "@/config/actions";
+import {
+  createDoc,
+  updateDoc,
+  deleteDoc,
+  getDoc,
+  createFolder,
+  renameFolder,
+  deleteFolder,
+  moveDoc,
+  moveFolder,
+} from "@/config/actions";
+import { placeDoc, moveBefore, removeFolder } from "@/config/docIndex.mjs";
 import DocSidebar from "./DocSidebar";
 import DocEditor from "./DocEditor";
 
 const SAVE_DELAY = 600;
 
-export default function DocumentsApp({ initialDocs }) {
-  const [docs, setDocs] = useState(initialDocs); // meta list [{ id, title, updatedAt }]
-  const [selectedId, setSelectedId] = useState(initialDocs[0]?.id ?? null);
-  const [bodies, setBodies] = useState({}); // { [id]: { title, body } } — lazily loaded cache
-  const timer = useRef(null); // pending debounce-save handle
+export default function DocumentsApp({ initialIndex }) {
+  const [index, setIndex] = useState(initialIndex); // { folders, docs }
+  const [selectedId, setSelectedId] = useState(initialIndex.docs[0]?.id ?? null);
+  const [bodies, setBodies] = useState({}); // { [id]: { title, body } } — lazy cache
+  const timer = useRef(null);
   const [, startTransition] = useTransition();
 
-  // LAZY LOAD — fetch the selected doc's full body the first time it's opened.
+  // LAZY LOAD the selected doc's body the first time it's opened.
   useEffect(() => {
     if (!selectedId || bodies[selectedId] !== undefined) return;
     let cancelled = false;
     getDoc(selectedId).then((doc) => {
-      if (cancelled || !doc) return; // doc may have been deleted meanwhile
+      if (cancelled || !doc) return;
       setBodies((b) => ({ ...b, [selectedId]: { title: doc.title, body: doc.body } }));
     });
     return () => {
@@ -26,36 +37,34 @@ export default function DocumentsApp({ initialDocs }) {
     };
   }, [selectedId, bodies]);
 
-  // Immediately persist a pending edit (used before we navigate away from a doc).
   const flushPending = () => {
     if (!timer.current) return;
     clearTimeout(timer.current);
     timer.current = null;
     const prev = selectedId;
     const cached = prev && bodies[prev];
-    if (cached) {
-      startTransition(() => updateDoc(prev, { title: cached.title, body: cached.body }));
-    }
+    if (cached) startTransition(() => updateDoc(prev, { title: cached.title, body: cached.body }));
   };
 
   const selectDoc = (id) => {
     if (id === selectedId) return;
-    flushPending(); // don't lose unsaved edits when clicking away
+    flushPending();
     setSelectedId(id);
   };
 
-  const createDocument = () => {
+  // ---- documents ----
+  const newDocument = (folderId = null) => {
     flushPending();
     const id = crypto.randomUUID();
-    const meta = { id, title: "Untitled", updatedAt: Date.now() };
-    setDocs((d) => [meta, ...d]);
+    const meta = { id, title: "Untitled", updatedAt: Date.now(), folderId };
+    setIndex((ix) => ({ ...ix, docs: [meta, ...ix.docs] }));
     setBodies((b) => ({ ...b, [id]: { title: "Untitled", body: "" } }));
     setSelectedId(id);
-    startTransition(() => createDoc(id, "Untitled"));
+    startTransition(() => createDoc(id, "Untitled", folderId));
   };
 
   const removeDocument = (id) => {
-    setDocs((d) => d.filter((x) => x.id !== id));
+    setIndex((ix) => ({ ...ix, docs: ix.docs.filter((d) => d.id !== id) }));
     setBodies((b) => {
       const next = { ...b };
       delete next[id];
@@ -63,25 +72,59 @@ export default function DocumentsApp({ initialDocs }) {
     });
     if (id === selectedId) {
       if (timer.current) {
-        clearTimeout(timer.current); // its pending save targets the doc we're deleting
+        clearTimeout(timer.current);
         timer.current = null;
       }
-      const remaining = docs.filter((x) => x.id !== id);
+      const remaining = index.docs.filter((d) => d.id !== id);
       setSelectedId(remaining[0]?.id ?? null);
     }
     startTransition(() => deleteDoc(id));
   };
 
-  // EDIT — DocEditor hands back { title } or { body } for the selected doc.
+  const renameDocument = (id, title) => {
+    setIndex((ix) => ({ ...ix, docs: ix.docs.map((d) => (d.id === id ? { ...d, title } : d)) }));
+    setBodies((b) => (b[id] ? { ...b, [id]: { ...b[id], title } } : b));
+    startTransition(() => updateDoc(id, { title }));
+  };
+
+  const moveDocument = (docId, folderId, beforeId) => {
+    setIndex((ix) => ({ ...ix, docs: placeDoc(ix.docs, docId, folderId, beforeId) }));
+    startTransition(() => moveDoc(docId, folderId, beforeId));
+  };
+
+  // ---- folders ----
+  const newFolder = () => {
+    const id = crypto.randomUUID();
+    setIndex((ix) => ({ ...ix, folders: [{ id, name: "New folder" }, ...ix.folders] }));
+    startTransition(() => createFolder(id, "New folder"));
+  };
+
+  const renameFolderLocal = (id, name) => {
+    setIndex((ix) => ({ ...ix, folders: ix.folders.map((f) => (f.id === id ? { ...f, name } : f)) }));
+    startTransition(() => renameFolder(id, name));
+  };
+
+  const deleteFolderLocal = (id) => {
+    setIndex((ix) => removeFolder(ix, id)); // promotes its docs to root
+    startTransition(() => deleteFolder(id));
+  };
+
+  const moveFolderLocal = (folderId, beforeId) => {
+    setIndex((ix) => ({ ...ix, folders: moveBefore(ix.folders, folderId, beforeId) }));
+    startTransition(() => moveFolder(folderId, beforeId));
+  };
+
+  // EDIT from the editor — { title } or { body } for the selected doc.
   const onEdit = (patch) => {
     const id = selectedId;
     const merged = { ...bodies[id], ...patch };
     setBodies((b) => ({ ...b, [id]: merged }));
     if (patch.title !== undefined) {
-      // keep the sidebar title in sync live
-      setDocs((d) => d.map((x) => (x.id === id ? { ...x, title: patch.title } : x)));
+      setIndex((ix) => ({
+        ...ix,
+        docs: ix.docs.map((d) => (d.id === id ? { ...d, title: patch.title } : d)),
+      }));
     }
-    // debounce-save the freshest merged values
     if (timer.current) clearTimeout(timer.current);
     timer.current = setTimeout(() => {
       timer.current = null;
@@ -93,11 +136,18 @@ export default function DocumentsApp({ initialDocs }) {
     <div className="flex gap-5 max-md:flex-col items-start">
       <div className="w-[240px] max-md:w-full shrink-0 sticky top-[74px] max-md:static">
         <DocSidebar
-          docs={docs}
+          index={index}
           selectedId={selectedId}
           onSelect={selectDoc}
-          onCreate={createDocument}
-          onDelete={removeDocument}
+          onNewDoc={newDocument}
+          onNewFolder={newFolder}
+          onRenameDoc={renameDocument}
+          onDeleteDoc={removeDocument}
+          onRenameFolder={renameFolderLocal}
+          onDeleteFolder={deleteFolderLocal}
+          onNewDocInFolder={newDocument}
+          onMoveDoc={moveDocument}
+          onMoveFolder={moveFolderLocal}
         />
       </div>
       <div className="flex-1 min-w-0">
