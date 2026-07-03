@@ -3,12 +3,10 @@ import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { TextField, NumberField } from "@/components/form";
 
-// Edit an add-on ingredient. The name is the key (name-keyed catalog +
-// overlays) → read-only; renaming would orphan references.
+// Edit an add-on ingredient — the name is the catalog key (read-only); only the
+// shared ₱ price is editable.
 export default function IngredientForm({ ingredient, onSave, onClose }) {
-  const [emoji, setEmoji] = useState(ingredient.emoji);
   const [price, setPrice] = useState(ingredient.price);
-  const [link, setLink] = useState(ingredient.link ?? "");
 
   useEffect(() => {
     const onKey = (e) => e.key === "Escape" && onClose();
@@ -16,27 +14,7 @@ export default function IngredientForm({ ingredient, onSave, onClose }) {
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
 
-  const trimmedLink = link.trim();
-  const linkValid =
-    trimmedLink === "" ||
-    (() => {
-      try {
-        new URL(trimmedLink);
-        return true;
-      } catch {
-        return false;
-      }
-    })();
-  const valid = linkValid;
-
-  const submit = () => {
-    if (!valid) return;
-    onSave({
-      emoji: emoji.trim(),
-      price: Number(price) || 0,
-      link: trimmedLink || null,
-    });
-  };
+  const submit = () => onSave({ price: Number(price) || 0 });
 
   if (typeof document === "undefined") return null;
   return createPortal(
@@ -68,13 +46,6 @@ export default function IngredientForm({ ingredient, onSave, onClose }) {
             disabled
             inputClassName="opacity-60 cursor-not-allowed"
           />
-          <TextField
-            label="Emoji"
-            id="if-emoji"
-            value={emoji}
-            onChange={(e) => setEmoji(e.target.value)}
-            placeholder="🍓"
-          />
           <NumberField
             label="Price"
             id="if-price"
@@ -84,19 +55,6 @@ export default function IngredientForm({ ingredient, onSave, onClose }) {
             value={price}
             onChange={(e) => setPrice(e.target.value)}
           />
-          <TextField
-            label="Reference link"
-            id="if-link"
-            type="url"
-            value={link}
-            onChange={(e) => setLink(e.target.value)}
-            placeholder="https://… (optional)"
-          />
-          {!linkValid && (
-            <p className="font-mono text-[.58rem] text-clay -mt-2">
-              Enter a valid URL or leave it blank.
-            </p>
-          )}
         </div>
 
         <div className="flex justify-end gap-2 mt-5">
@@ -106,8 +64,7 @@ export default function IngredientForm({ ingredient, onSave, onClose }) {
           <button
             type="button"
             onClick={submit}
-            disabled={!valid}
-            className="chip chip--active normal-case tracking-normal disabled:opacity-40 disabled:cursor-not-allowed"
+            className="chip chip--active normal-case tracking-normal"
           >
             Save changes
           </button>
