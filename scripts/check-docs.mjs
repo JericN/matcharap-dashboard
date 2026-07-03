@@ -57,6 +57,10 @@ const p3 = placeDoc(D, "2", null, null);
 assert.equal(p3.find((d) => d.id === "2").folderId, null);
 ok("placeDoc moves a doc back to root");
 
+// --- placeDoc: unknown docId is a no-op (never splices undefined) ---
+assert.deepEqual(placeDoc(D, "nope", "f", null).map((d) => d.id), ["1", "2", "3"]);
+ok("placeDoc ignores an unknown docId instead of splicing undefined");
+
 // --- removeFolder promotes its docs ---
 const idx = {
   folders: [{ id: "f", name: "F" }, { id: "g", name: "G" }],

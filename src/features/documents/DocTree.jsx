@@ -34,8 +34,12 @@ export default function DocTree({
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   );
 
+  const folderIdSet = new Set(index.folders.map((f) => f.id));
   const docsIn = (fid) => index.docs.filter((d) => d.folderId === fid);
-  const rootDocs = docsIn(null);
+  // Root shows unfiled docs AND any doc whose folder no longer exists (e.g. a
+  // concurrent folder-delete raced a move-into-that-folder) — self-healing so a
+  // doc is never hidden; also hardens against any legacy/bad folderId on read.
+  const rootDocs = index.docs.filter((d) => d.folderId == null || !folderIdSet.has(d.folderId));
   const { setNodeRef: setRootRef, isOver: rootOver } = useDroppable({
     id: "container:__root__",
     data: { type: "container", folderId: null },

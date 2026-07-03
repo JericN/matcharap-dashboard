@@ -41,6 +41,7 @@ export function placeDoc(docs, docId, folderId, beforeId) {
   const withFolder = docs.map((d) => (d.id === docId ? { ...d, folderId } : d));
   if (beforeId != null) return moveBefore(withFolder, docId, beforeId);
   const moving = withFolder.find((d) => d.id === docId);
+  if (!moving) return docs; // unknown docId — nothing to place (never splice undefined)
   const rest = withFolder.filter((d) => d.id !== docId);
   const last = findLastIndex(rest, (d) => d.folderId === folderId);
   if (last === -1) return [...rest, moving];
