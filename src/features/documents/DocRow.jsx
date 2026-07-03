@@ -61,22 +61,33 @@ export default function DocRow({ doc, indent, active, onSelect, onRename, onDele
 
   return (
     <li ref={setNodeRef} style={style} {...attributes} {...listeners}>
-      <button
-        type="button"
-        onClick={() => onSelect(doc.id)}
-        onContextMenu={(e) => {
-          e.preventDefault();
-          setMenu({ x: e.clientX, y: e.clientY });
-        }}
-        title={doc.title}
-        className={
-          "w-full text-left truncate font-doodle text-[.95rem] rounded-cell pr-2 py-1.5 transition " +
-          (active ? "bg-matcha-fill text-forest" : "hover:bg-cream-light")
-        }
-        style={{ paddingLeft: 8 }}
-      >
-        {doc.title || "Untitled"}
-      </button>
+      <div className="flex items-center gap-0.5">
+        <button
+          type="button"
+          onClick={() => onSelect(doc.id)}
+          onContextMenu={(e) => {
+            e.preventDefault();
+            setMenu({ x: e.clientX, y: e.clientY });
+          }}
+          title={doc.title}
+          className={
+            "flex-1 min-w-0 text-left truncate font-doodle text-[.95rem] rounded-cell pr-2 py-1.5 transition " +
+            (active ? "bg-matcha-fill text-forest" : "hover:bg-cream-light")
+          }
+          style={{ paddingLeft: 8 }}
+        >
+          {doc.title || "Untitled"}
+        </button>
+        <button
+          type="button"
+          onPointerDown={(e) => e.stopPropagation()}
+          onClick={(e) => setMenu({ x: e.clientX, y: e.clientY })}
+          aria-label={"Actions for " + (doc.title || "Untitled")}
+          className="shrink-0 px-1 text-brown-soft hover:text-forest transition leading-none"
+        >
+          ⋯
+        </button>
+      </div>
       {menu && (
         <RowMenu
           pos={menu}

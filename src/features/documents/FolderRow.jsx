@@ -104,6 +104,15 @@ export default function FolderRow({
             >
               ＋
             </button>
+            <button
+              type="button"
+              onPointerDown={(e) => e.stopPropagation()}
+              onClick={(e) => setMenu({ x: e.clientX, y: e.clientY })}
+              aria-label={"Actions for " + (folder.name || "folder")}
+              className="shrink-0 px-1 text-brown-soft hover:text-forest transition leading-none"
+            >
+              ⋯
+            </button>
           </div>
         )}
       </div>
