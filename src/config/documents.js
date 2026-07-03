@@ -68,15 +68,14 @@ export async function getDoc(id) {
 
 export async function createDoc(id, title, folderId = null) {
   const now = Date.now();
+  const index = await readIndex();
+  if (index.docs.some((d) => d.id === id)) return getDoc(id); // idempotent: existing id is a no-op
   const doc = DocBodySchema.parse({ id, title: title || "Untitled", body: "", updatedAt: now });
   await client().set(docKey(id), doc);
-  const index = await readIndex();
-  if (!index.docs.some((d) => d.id === id)) {
-    await writeIndex({
-      ...index,
-      docs: [{ id, title: doc.title, updatedAt: now, folderId }, ...index.docs], // newest first
-    });
-  }
+  await writeIndex({
+    ...index,
+    docs: [{ id, title: doc.title, updatedAt: now, folderId }, ...index.docs], // newest first
+  });
   return doc;
 }
 
