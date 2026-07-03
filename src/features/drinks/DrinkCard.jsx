@@ -13,7 +13,7 @@ function Pill({ emoji, label, base, onRemove }) {
     <span
       className={`font-mono text-[.58rem] uppercase tracking-[.04em] border-2 ${skin} rounded-pill px-[9px] py-[4px] inline-flex items-center gap-[5px]`}
     >
-      {emoji} {label}
+      {emoji ? emoji + " " : ""}{label}
       <button
         aria-label={"Remove " + label}
         onClick={onRemove}
@@ -59,7 +59,6 @@ export default function DrinkCard({
   };
   const attached = drink.ingredients;
   const unattached = catalog.filter((i) => !attached.includes(i.name));
-  const emojiOf = (name) => catalog.find((i) => i.name === name)?.emoji ?? "";
 
   // the "+ add" menu: removed bases first (to re-add), then unattached add-ons
   const addItems = [
@@ -71,7 +70,7 @@ export default function DrinkCard({
       : []),
     ...unattached.map((i) => ({
       key: "i:" + i.name,
-      label: `${i.emoji} ${i.name} — ₱${i.price}`,
+      label: `${i.name} — ₱${i.price}`,
       pick: () => onAttach(i.name),
     })),
   ];
@@ -132,7 +131,7 @@ export default function DrinkCard({
           <Pill emoji="🥛" label="Milk" base onRemove={() => onToggleBase("milk")} />
         )}
         {attached.map((name) => (
-          <Pill key={name} emoji={emojiOf(name)} label={name} onRemove={() => onDetach(name)} />
+          <Pill key={name} label={name} onRemove={() => onDetach(name)} />
         ))}
 
         {addItems.length > 0 && (

@@ -74,8 +74,6 @@ export default function Calculator({
   const packaging = cost.packaging;
   const additional = cost.additional;
   const refPrice = Object.fromEntries(ingredients.map((i) => [i.name, i.price]));
-  const linkOf = Object.fromEntries(ingredients.map((i) => [i.name, i.link]));
-  const emojiOf = Object.fromEntries(ingredients.map((i) => [i.name, i.emoji]));
   const priceOf = (name) => ov[`ing:${name}`] ?? refPrice[name];
 
   const ctx = { pricePerGram, doseGrams: dose, milkPricePerMl, milkMl, priceOf, packaging, additional };
@@ -238,14 +236,13 @@ export default function Calculator({
                 {usedIngredients.map((nm) => (
                   <PriceRow
                     key={nm}
-                    label={`${emojiOf[nm]} ${nm}`}
+                    label={nm}
                     unit="/cup"
                     refVal={refPrice[nm]}
                     okey={`ing:${nm}`}
                     ov={ov}
                     editOv={editOv}
                     commitOv={commitOv}
-                    link={linkOf[nm]}
                   />
                 ))}
               </div>
@@ -417,7 +414,7 @@ export default function Calculator({
                         className="flex items-center justify-between gap-2 bg-forest/40 border border-onforest-mut/25 rounded-[9px] px-2.5 py-1.5"
                       >
                         <span className="font-mono text-[.62rem] text-onforest-soft truncate">
-                          {emojiOf[nm]} {nm}
+                          {nm}
                         </span>
                         <span className="font-mono text-[.72rem] font-semibold text-cream-light shrink-0">
                           {peso(v)}
@@ -452,7 +449,7 @@ function Brk({ label, v }) {
   );
 }
 
-function PriceRow({ label, unit, refVal, okey, ov, editOv, commitOv, link }) {
+function PriceRow({ label, unit, refVal, okey, ov, editOv, commitOv }) {
   const overridden = okey in ov;
   return (
     <div className="ing-tile">
@@ -477,16 +474,6 @@ function PriceRow({ label, unit, refVal, okey, ov, editOv, commitOv, link }) {
         />
         <span className="font-mono text-[.5rem] text-brown-soft">{unit}</span>
       </div>
-      {link && (
-        <a
-          href={link}
-          target="_blank"
-          rel="noopener"
-          className="font-mono text-[.5rem] tracking-[.04em] uppercase text-clay underline underline-offset-2 mt-0.5"
-        >
-          reference ↗
-        </a>
-      )}
     </div>
   );
 }
