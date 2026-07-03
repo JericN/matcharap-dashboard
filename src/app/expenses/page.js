@@ -12,7 +12,7 @@ export default async function ExpensesPage() {
         num="06"
         kicker="expense planner"
         title="Plan the spend"
-        sub="group costs into sheets/tabs — add a line per cost (item, notes, price & qty); totals, shares & a grand total auto-calculate · shared with the team"
+        sub="group costs into sheets/tabs — add a line per cost (item, notes, date, price & qty); drag to reorder · right-click to duplicate or delete · totals, shares & a grand total auto-calculate · shared with the team"
       />
       <ExpensesPlanner initialTabs={tabs} initialExpenses={expenses} />
     </section>

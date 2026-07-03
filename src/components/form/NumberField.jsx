@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import Field, { cx } from "./Field";
 
-// Numeric input in two skins:
+// Numeric input in three skins:
 //   variant="box"        boxed, matches TextField/SelectField (default)
 //   variant="underline"  inline dashed-underline (cups / SRP / price overrides)
+//   variant="bare"       borderless inline (expenses table)
 // `prefix` (e.g. "₱") and `suffix` (e.g. "/g") render as non-interactive
 // adornments inside the box variant. Spinners are stripped via CSS.
 //
@@ -36,7 +37,12 @@ export default function NumberField({
     if (!focused) setDraft(value == null ? "" : String(value));
   }, [value, focused]);
 
-  const base = variant === "underline" ? "field-underline" : "field-box";
+  const base =
+    variant === "underline"
+      ? "field-underline"
+      : variant === "bare"
+        ? "field-bare"
+        : "field-box";
   const input = (
     <input
       id={id}

@@ -4,12 +4,24 @@ import {
   addExpense,
   updateExpense,
   removeExpense,
+  reorderExpenses,
   addExpenseTab,
   renameExpenseTab,
   removeExpenseTab,
 } from "@/config/actions";
 import TabBar from "@/features/expenses/TabBar";
 import ExpensesTable from "@/features/expenses/ExpensesTable";
+
+// Reorder one tab's rows within the global list to match `orderedIds`, leaving
+// other tabs' rows in their slots (mirrors repo.reorderExpenses on the client).
+function reorderRows(rows, tabId, orderedIds) {
+  const byId = new Map(rows.filter((r) => r.tabId === tabId).map((r) => [r.id, r]));
+  const seq = orderedIds.map((id) => byId.get(id)).filter(Boolean);
+  const seen = new Set(seq.map((r) => r.id));
+  for (const r of byId.values()) if (!seen.has(r.id)) seq.push(r);
+  let k = 0;
+  return rows.map((r) => (r.tabId === tabId ? seq[k++] : r));
+}
 
 // Top-level planner: owns optimistic tab + row state; persists each change
 // to the shared store. Local state mirrors the store; edits commit on blur,
@@ -26,7 +38,15 @@ export default function ExpensesPlanner({ initialTabs, initialExpenses }) {
 
   // --- row handlers (scoped to the active tab) ---
   const onAddRow = () => {
-    const row = { id: crypto.randomUUID(), tabId: activeId, item: "", notes: "", price: 0, qty: 1 };
+    const row = {
+      id: crypto.randomUUID(),
+      tabId: activeId,
+      item: "",
+      notes: "",
+      date: "",
+      price: 0,
+      qty: 1,
+    };
     setRows((rs) => [...rs, row]);
     startTransition(() => addExpense(row));
   };
@@ -39,6 +59,24 @@ export default function ExpensesPlanner({ initialTabs, initialExpenses }) {
   const onDeleteRow = (id) => {
     setRows((rs) => rs.filter((r) => r.id !== id));
     startTransition(() => removeExpense(id));
+  };
+  // Duplicate a row: clone it (fresh id) and drop the copy directly below.
+  const onDuplicateRow = (id) => {
+    const src = rows.find((r) => r.id === id);
+    if (!src) return;
+    const copy = { ...src, id: crypto.randomUUID() };
+    setRows((rs) => {
+      const i = rs.findIndex((r) => r.id === id);
+      const next = rs.slice();
+      next.splice(i + 1, 0, copy);
+      return next;
+    });
+    startTransition(() => addExpense(copy, id));
+  };
+  // Reorder the active tab to `orderedIds` (ids of that tab's rows, new order).
+  const onReorder = (orderedIds) => {
+    setRows((rs) => reorderRows(rs, activeId, orderedIds));
+    startTransition(() => reorderExpenses(activeId, orderedIds));
   };
 
   // --- tab handlers ---
@@ -80,6 +118,8 @@ export default function ExpensesPlanner({ initialTabs, initialExpenses }) {
         onEditField={onEditField}
         onCommitField={onCommitField}
         onDeleteRow={onDeleteRow}
+        onDuplicateRow={onDuplicateRow}
+        onReorder={onReorder}
       />
     </div>
   );
