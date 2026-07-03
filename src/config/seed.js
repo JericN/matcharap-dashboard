@@ -1314,9 +1314,7 @@ export const seed = {
     ],
   },
 
-  // Priced add-on ingredients (₱ per cup) — each self-contained: emoji, market
-  // price (reference, overridable in the calculator) + optional reference link.
-  // Matcha & milk are the selectors, not here.
+  // Priced add-on ingredients — each { name, price } (₱ per cup, shared reference). Matcha & milk are the calculator selectors, not here.
   ingredients: [
     { name: "Strawberry compote", price: 14 },
     { name: "Salted cream foam", price: 15 },

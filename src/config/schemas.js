@@ -209,7 +209,7 @@ export const StateSchema = z.object({
     .default({}), // overrides of pricing defaults
   ingredientOverrides: z
     .record(z.string(), IngredientSchema.omit({ name: true }).partial())
-    .default({}), // edits to a SEED ingredient's emoji/price/link (overlay)
+    .default({}), // edits to a SEED ingredient's price (overlay) -> { price? }
   deletedIngredients: z.array(z.string()).default([]), // tombstoned SEED ingredient names (hidden from the catalog)
   powderOverrides: z
     .record(z.string(), PowderSchema.pick({ price: true, grams: true }).partial())
