@@ -114,8 +114,8 @@ export async function setCosts(patch) {
   revalidatePath("/calculator");
 }
 
-export async function addExpense(row) {
-  await repo.addExpense(row);
+export async function addExpense(row, afterId) {
+  await repo.addExpense(row, afterId);
   revalidatePath("/expenses");
 }
 
@@ -126,6 +126,11 @@ export async function updateExpense(id, patch) {
 
 export async function removeExpense(id) {
   await repo.removeExpense(id);
+  revalidatePath("/expenses");
+}
+
+export async function reorderExpenses(tabId, orderedIds) {
+  await repo.reorderExpenses(tabId, orderedIds);
   revalidatePath("/expenses");
 }
 
@@ -144,8 +149,8 @@ export async function removeExpenseTab(id) {
   revalidatePath("/expenses");
 }
 
-export async function createDoc(id, title) {
-  const d = await docs.createDoc(id, title);
+export async function createDoc(id, title, folderId = null) {
+  const d = await docs.createDoc(id, title, folderId);
   revalidatePath("/documents");
   return d;
 }
@@ -162,4 +167,29 @@ export async function deleteDoc(id) {
 
 export async function getDoc(id) {
   return docs.getDoc(id);
+}
+
+export async function createFolder(id, name) {
+  await docs.createFolder(id, name);
+  revalidatePath("/documents");
+}
+
+export async function renameFolder(id, name) {
+  await docs.renameFolder(id, name);
+  revalidatePath("/documents");
+}
+
+export async function deleteFolder(id) {
+  await docs.deleteFolder(id);
+  revalidatePath("/documents");
+}
+
+export async function moveDoc(docId, folderId, beforeId) {
+  await docs.moveDoc(docId, folderId, beforeId);
+  revalidatePath("/documents");
+}
+
+export async function moveFolder(folderId, beforeId) {
+  await docs.moveFolder(folderId, beforeId);
+  revalidatePath("/documents");
 }
