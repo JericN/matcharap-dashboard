@@ -1,28 +1,38 @@
 import { z } from "zod";
 import { redis } from "./redis";
+import { normalizeIndex, placeDoc, moveBefore, removeFolder } from "./docIndex.mjs";
 
 // ============================================================================
-// DOCUMENTS — shared markdown notes, stored OUTSIDE the global `state` record.
+// DOCUMENTS — shared notes, stored OUTSIDE the global `state` record.
 //
-// `state.js` reads + Zod-parses ONE big record on every request, so anything
-// kept there is paid for on every page load. Docs can be many and large, so
-// each gets its own Redis key (`doc:<id>`) plus a tiny metadata index
-// (`docs:index`) for the sidebar. That keeps page loads O(1): listing reads
-// only the index, opening a doc reads only that one key — large bodies never
-// bloat the hot `state` path.
+// The sidebar tree lives in ONE key, `docs:index`, as { folders, docs } (one-level
+// folders; each doc has a nullable folderId; array position = order). Each document
+// BODY still lives under its own `doc:<id>` key, so listing/opening stay O(1) and
+// large bodies never bloat the index. Pure migration/reorder logic is in
+// docIndex.mjs (shared with the client + tested by scripts/check-docs.mjs).
 //
-// No fallback, no silent errors: if Redis isn't configured we throw loudly,
-// mirroring state.js. Validation happens at the boundary (parse on read/write);
-// @upstash/redis auto-serializes objects on `.set()` and auto-parses on `.get()`.
+// No fallback, no silent errors: if Redis isn't configured we throw loudly.
 // ============================================================================
 
+const FolderSchema = z.object({ id: z.string(), name: z.string().default("") });
 const DocMetaSchema = z.object({
   id: z.string(),
   title: z.string().default("Untitled"),
   updatedAt: z.number().default(0),
+  folderId: z.string().nullable().default(null), // null = root / unfiled
 });
-const DocSchema = DocMetaSchema.extend({ body: z.string().default("") });
-const IndexSchema = z.array(DocMetaSchema).default([]);
+// Legacy `docs:index` was a bare meta array; normalizeIndex migrates it on read.
+const IndexSchema = z.preprocess(normalizeIndex, z.object({
+  folders: z.array(FolderSchema).default([]),
+  docs: z.array(DocMetaSchema).default([]),
+}));
+// The `doc:<id>` body value — placement lives only in the index, not here.
+const DocBodySchema = z.object({
+  id: z.string(),
+  title: z.string().default("Untitled"),
+  body: z.string().default(""),
+  updatedAt: z.number().default(0),
+});
 
 const KEY_INDEX = "docs:index";
 const docKey = (id) => "doc:" + id;
@@ -38,44 +48,82 @@ function client() {
   return redis;
 }
 
-export async function listDocs() {
-  return IndexSchema.parse((await client().get(KEY_INDEX)) ?? []);
+async function readIndex() {
+  return IndexSchema.parse((await client().get(KEY_INDEX)) ?? {});
+}
+async function writeIndex(next) {
+  const value = IndexSchema.parse(next);
+  await client().set(KEY_INDEX, value);
+  return value;
+}
+
+export async function listIndex() {
+  return readIndex();
 }
 
 export async function getDoc(id) {
   const v = await client().get(docKey(id));
-  return v == null ? null : DocSchema.parse(v);
+  return v == null ? null : DocBodySchema.parse(v);
 }
 
-export async function createDoc(id, title) {
+export async function createDoc(id, title, folderId = null) {
   const now = Date.now();
-  const doc = DocSchema.parse({ id, title: title || "Untitled", body: "", updatedAt: now });
+  const doc = DocBodySchema.parse({ id, title: title || "Untitled", body: "", updatedAt: now });
   await client().set(docKey(id), doc);
-  const index = await listDocs();
-  if (!index.some((d) => d.id === id))
-    await client().set(KEY_INDEX, [{ id, title: doc.title, updatedAt: now }, ...index]); // newest first
+  const index = await readIndex();
+  if (!index.docs.some((d) => d.id === id)) {
+    await writeIndex({
+      ...index,
+      docs: [{ id, title: doc.title, updatedAt: now, folderId }, ...index.docs], // newest first
+    });
+  }
   return doc;
 }
 
 export async function updateDoc(id, patch) {
   const now = Date.now();
   const existing = (await getDoc(id)) ?? { id, title: "Untitled", body: "", updatedAt: now };
-  const doc = DocSchema.parse({ ...existing, ...patch, id, updatedAt: now });
+  const doc = DocBodySchema.parse({ ...existing, ...patch, id, updatedAt: now });
   await client().set(docKey(id), doc);
-  const index = await listDocs();
-  const meta = { id, title: doc.title, updatedAt: now };
-  const next = index.some((d) => d.id === id)
-    ? index.map((d) => (d.id === id ? meta : d))
-    : [meta, ...index];
-  await client().set(KEY_INDEX, next);
+  const index = await readIndex();
+  await writeIndex({
+    ...index,
+    docs: index.docs.map((d) => (d.id === id ? { ...d, title: doc.title, updatedAt: now } : d)),
+  });
   return doc;
 }
 
 export async function deleteDoc(id) {
   await client().del(docKey(id));
-  const index = await listDocs();
-  await client().set(
-    KEY_INDEX,
-    index.filter((d) => d.id !== id),
-  );
+  const index = await readIndex();
+  await writeIndex({ ...index, docs: index.docs.filter((d) => d.id !== id) });
+}
+
+export async function createFolder(id, name) {
+  const index = await readIndex();
+  if (index.folders.some((f) => f.id === id)) return index;
+  return writeIndex({ ...index, folders: [{ id, name: name || "" }, ...index.folders] });
+}
+
+export async function renameFolder(id, name) {
+  const index = await readIndex();
+  return writeIndex({
+    ...index,
+    folders: index.folders.map((f) => (f.id === id ? { ...f, name } : f)),
+  });
+}
+
+export async function deleteFolder(id) {
+  const index = await readIndex();
+  return writeIndex(removeFolder(index, id)); // promotes its docs to root
+}
+
+export async function moveDoc(docId, folderId, beforeId) {
+  const index = await readIndex();
+  return writeIndex({ ...index, docs: placeDoc(index.docs, docId, folderId, beforeId) });
+}
+
+export async function moveFolder(folderId, beforeId) {
+  const index = await readIndex();
+  return writeIndex({ ...index, folders: moveBefore(index.folders, folderId, beforeId) });
 }
