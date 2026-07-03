@@ -65,7 +65,9 @@ export default function FolderRow({
             autoFocus
             onChange={(e) => setDraft(e.target.value)}
             onBlur={commit}
+            onPointerDown={(e) => e.stopPropagation()}
             onKeyDown={(e) => {
+              e.stopPropagation();
               if (e.key === "Enter") commit();
               else if (e.key === "Escape") setEditing(false);
             }}
