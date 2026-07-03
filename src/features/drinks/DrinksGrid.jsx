@@ -80,10 +80,11 @@ export default function DrinksGrid({ drinks, ingredients, initialSaved }) {
   // shared catalog ops — used by the creator bar, the drink form, and the edit modal.
   const createIngredient = (name, price) => {
     const nm = String(name).trim();
-    if (!nm || catalog.some((c) => c.name === nm)) return;
+    if (!nm || catalog.some((c) => c.name === nm)) return false;
     const ing = { name: nm, price: Number(price) || 0 };
     setCatalog((c) => [...c, ing]);
     startTransition(() => addIngredient(ing));
+    return true;
   };
   const setIngredientPrice = (name, price) => {
     const patch = { price: Number(price) || 0 };
@@ -97,9 +98,7 @@ export default function DrinksGrid({ drinks, ingredients, initialSaved }) {
 
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
   const create = () => {
-    if (!form.name.trim()) return;
-    createIngredient(form.name, form.price);
-    setForm(EMPTY);
+    if (createIngredient(form.name, form.price)) setForm(EMPTY);
   };
 
   const savedSet = new Set(saved);
