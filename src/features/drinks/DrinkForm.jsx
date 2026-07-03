@@ -157,7 +157,7 @@ export default function DrinkForm({
           />
           {dup && (
             <p className="font-mono text-[.58rem] text-clay -mt-2">
-              A drink named "{trimmed}" already exists.
+              A drink named ““{trimmed}”“ already exists.
             </p>
           )}
           <TextField
