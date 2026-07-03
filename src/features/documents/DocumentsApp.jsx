@@ -84,7 +84,15 @@ export default function DocumentsApp({ initialIndex }) {
   const renameDocument = (id, title) => {
     setIndex((ix) => ({ ...ix, docs: ix.docs.map((d) => (d.id === id ? { ...d, title } : d)) }));
     setBodies((b) => (b[id] ? { ...b, [id]: { ...b[id], title } } : b));
-    startTransition(() => updateDoc(id, { title }));
+    // If a debounced editor save for this same (selected) doc is pending, it
+    // captured the OLD title and would revert this rename when it fires — cancel
+    // it and persist the new title together with the latest cached body now.
+    if (id === selectedId && timer.current) {
+      clearTimeout(timer.current);
+      timer.current = null;
+    }
+    const body = bodies[id]?.body;
+    startTransition(() => updateDoc(id, body !== undefined ? { title, body } : { title }));
   };
 
   const moveDocument = (docId, folderId, beforeId) => {
