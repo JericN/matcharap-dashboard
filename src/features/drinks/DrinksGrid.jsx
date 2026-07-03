@@ -20,7 +20,7 @@ import SectionTitle from "@/components/SectionTitle";
 
 const GRID = "card-grid";
 const SECTION = "mb-12 max-md:mb-9";
-const EMPTY = { name: "", emoji: "", price: "", link: "" };
+const EMPTY = { name: "", price: "" };
 const BLANK_DRINK = {
   name: "",
   note: "",
@@ -29,14 +29,6 @@ const BLANK_DRINK = {
   ingredients: [],
   hasMatcha: true,
   hasMilk: true,
-};
-const isUrl = (s) => {
-  try {
-    new URL(s);
-    return true;
-  } catch {
-    return false;
-  }
 };
 
 export default function DrinksGrid({ drinks, ingredients, initialSaved }) {
@@ -56,8 +48,6 @@ export default function DrinksGrid({ drinks, ingredients, initialSaved }) {
 
   const patchDrink = (name, fn) => setList((l) => l.map((d) => (d.name === name ? fn(d) : d)));
 
-  // attach/detach send a single-ingredient delta; the server merges it into the
-  // fresh list (concurrent edits survive). Local state mirrors optimistically.
   const attach = (name, ing) => {
     patchDrink(name, (d) => ({ ...d, ingredients: [...d.ingredients, ing] }));
     startTransition(() => attachIngredient(name, ing));
@@ -72,7 +62,6 @@ export default function DrinksGrid({ drinks, ingredients, initialSaved }) {
     startTransition(() => toggleBase(name, base));
   };
 
-  // add a new drink or save edits to an existing one — both via the same form
   const persistDrink = (drink, isNew) => {
     setList((l) =>
       isNew
@@ -88,28 +77,29 @@ export default function DrinksGrid({ drinks, ingredients, initialSaved }) {
     startTransition(() => deleteDrink(name));
   };
 
-  const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
-  const create = () => {
-    const ing = {
-      name: form.name.trim(),
-      emoji: form.emoji.trim(),
-      price: Number(form.price) || 0,
-      link: form.link.trim() || null,
-    };
-    if (!ing.name || (ing.link && !isUrl(ing.link)) || catalog.some((c) => c.name === ing.name))
-      return;
+  // shared catalog ops — used by the creator bar, the drink form, and the edit modal.
+  const createIngredient = (name, price) => {
+    const nm = String(name).trim();
+    if (!nm || catalog.some((c) => c.name === nm)) return;
+    const ing = { name: nm, price: Number(price) || 0 };
     setCatalog((c) => [...c, ing]);
     startTransition(() => addIngredient(ing));
-    setForm(EMPTY);
+  };
+  const setIngredientPrice = (name, price) => {
+    const patch = { price: Number(price) || 0 };
+    setCatalog((c) => c.map((i) => (i.name === name ? { ...i, ...patch } : i)));
+    startTransition(() => editIngredient(name, patch));
   };
   const removeIng = (name) => {
     setCatalog((c) => c.filter((i) => i.name !== name));
     startTransition(() => deleteIngredient(name));
   };
-  const saveIng = (name, patch) => {
-    setCatalog((c) => c.map((i) => (i.name === name ? { ...i, ...patch } : i)));
-    startTransition(() => editIngredient(name, patch));
-    setEditingIng(null);
+
+  const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
+  const create = () => {
+    if (!form.name.trim()) return;
+    createIngredient(form.name, form.price);
+    setForm(EMPTY);
   };
 
   const savedSet = new Set(saved);
@@ -161,77 +151,40 @@ export default function DrinksGrid({ drinks, ingredients, initialSaved }) {
       <section className={SECTION}>
         <SectionTitle title="Ingredients" meta={`${catalog.length} add-ons`} />
         <p className="sec-sub mb-4 -mt-3">
-          The shared add-on catalog · ₱ per cup. Attach any of these to a drink above; ones with a ↗
-          are clickable — hover for detail, click to open the reference.
+          The shared add-on catalog · ₱ per cup. Attach any of these to a drink above; right-click a
+          tile to edit its price or delete it.
         </p>
 
         <div className="flex flex-wrap gap-[9px] mb-5">
-          {catalog.map((ing) => {
-            const inner = (
-              <>
-                <span className="text-[1.05rem] leading-none">{ing.emoji}</span>
-                <span className="font-doodle font-bold text-[.92rem] text-forest leading-none">
-                  {ing.name}
-                </span>
-                <span className="font-mono text-[.7rem] text-clay leading-none">₱{ing.price}</span>
-                {ing.link && (
-                  <span className="text-[.95rem] text-olive leading-none" aria-hidden="true">
-                    ↗
-                  </span>
-                )}
-              </>
-            );
-            return ing.link ? (
-              <a
-                key={ing.name}
-                href={ing.link}
-                target="_blank"
-                rel="noopener"
-                onContextMenu={(e) => {
-                  e.preventDefault();
-                  setIngMenu({ x: e.clientX, y: e.clientY, ing });
-                }}
-                title={`${ing.emoji} ${ing.name} · ₱${ing.price}/cup — open reference ↗ · right-click to edit/delete`}
-                aria-label={`${ing.name}, ₱${ing.price} per cup — open reference`}
-                className="ing-tile flex-row items-center gap-[9px] !py-2 no-underline cursor-pointer transition hover:border-forest hover:-translate-y-0.5"
-              >
-                {inner}
-              </a>
-            ) : (
-              <div
-                key={ing.name}
-                onContextMenu={(e) => {
-                  e.preventDefault();
-                  setIngMenu({ x: e.clientX, y: e.clientY, ing });
-                }}
-                title={`${ing.emoji} ${ing.name} · ₱${ing.price}/cup — no reference link yet · right-click to edit/delete`}
-                className="ing-tile flex-row items-center gap-[9px] !py-2"
-              >
-                {inner}
-              </div>
-            );
-          })}
+          {catalog.map((ing) => (
+            <div
+              key={ing.name}
+              onContextMenu={(e) => {
+                e.preventDefault();
+                setIngMenu({ x: e.clientX, y: e.clientY, ing });
+              }}
+              title={`${ing.name} · ₱${ing.price}/cup — right-click to edit/delete`}
+              className="ing-tile flex-row items-center gap-[9px] !py-2"
+            >
+              <span className="font-doodle font-bold text-[.92rem] text-forest leading-none">
+                {ing.name}
+              </span>
+              <span className="font-mono text-[.7rem] text-clay leading-none">₱{ing.price}</span>
+            </div>
+          ))}
         </div>
 
-        {/* compact creator bar — emoji · name · URL · price · Add */}
+        {/* compact creator bar — name · price · Add */}
         <div className="paper-card !static p-[14px]">
           <div className="flex items-baseline gap-2 mb-2.5">
             <span className="font-doodle font-bold text-[.98rem] text-forest leading-none">
-              Add new ingredients
+              Add new ingredient
             </span>
             <span className="font-mono text-[.56rem] tracking-[.04em] text-brown-soft">
-              emoji + name + link + ₱/cup · all optional but the name
+              name + ₱/cup
             </span>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <TextField
-              aria-label="Emoji"
-              className="shrink-0"
-              inputClassName="text-center !w-[54px]"
-              value={form.emoji}
-              onChange={set("emoji")}
-              placeholder="🥥"
-            />
             <TextField
               aria-label="Ingredient name"
               className="flex-1 min-w-[150px]"
@@ -239,15 +192,6 @@ export default function DrinksGrid({ drinks, ingredients, initialSaved }) {
               onChange={set("name")}
               onKeyDown={(e) => e.key === "Enter" && create()}
               placeholder="Name — e.g. Oat foam"
-            />
-            <TextField
-              aria-label="Reference link"
-              type="url"
-              className="flex-1 min-w-[170px]"
-              value={form.link}
-              onChange={set("link")}
-              onKeyDown={(e) => e.key === "Enter" && create()}
-              placeholder="https://… reference (optional)"
             />
             <NumberField
               aria-label="Price per cup"
@@ -280,6 +224,8 @@ export default function DrinksGrid({ drinks, ingredients, initialSaved }) {
           catalog={catalog}
           onSave={persistDrink}
           onClose={() => setEditing(null)}
+          onCreateIngredient={createIngredient}
+          onSetIngredientPrice={setIngredientPrice}
         />
       )}
 
@@ -328,7 +274,10 @@ export default function DrinksGrid({ drinks, ingredients, initialSaved }) {
       {editingIng && (
         <IngredientForm
           ingredient={editingIng}
-          onSave={(patch) => saveIng(editingIng.name, patch)}
+          onSave={(patch) => {
+            setIngredientPrice(editingIng.name, patch.price);
+            setEditingIng(null);
+          }}
           onClose={() => setEditingIng(null)}
         />
       )}
