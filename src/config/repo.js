@@ -175,21 +175,20 @@ export const repo = {
     });
   },
 
-  // create a new add-on ingredient in the catalog (may be partially filled)
-  addIngredient: ({ name, emoji = "", price, link = null }) =>
+  // create a new add-on ingredient in the catalog (name + ₱)
+  addIngredient: ({ name, price }) =>
     mutate((s) => ({
       ...s,
-      extraIngredients: { ...s.extraIngredients, [name]: { emoji, price, link } },
+      extraIngredients: { ...s.extraIngredients, [name]: { price } },
     })),
 
-  // Edit an ingredient's display fields. Custom → update its extraIngredients
-  // record; seed (built-in) → write an ingredientOverrides overlay. The name is
-  // the key and never changes.
-  editIngredient: (name, { emoji, price, link }) =>
+  // Edit an ingredient's price. Custom → update its extraIngredients record; seed
+  // (built-in) → write an ingredientOverrides overlay. The name is the key.
+  editIngredient: (name, { price }) =>
     mutate((s) =>
       name in s.extraIngredients
-        ? { ...s, extraIngredients: { ...s.extraIngredients, [name]: { emoji, price, link } } }
-        : { ...s, ingredientOverrides: { ...s.ingredientOverrides, [name]: { emoji, price, link } } },
+        ? { ...s, extraIngredients: { ...s.extraIngredients, [name]: { price } } }
+        : { ...s, ingredientOverrides: { ...s.ingredientOverrides, [name]: { price } } },
     ),
 
   // Delete an ingredient. Custom → remove from extraIngredients. Seed →
@@ -247,7 +246,16 @@ export const repo = {
   // ---- expense-planner rows (the client builds each row's id) ----
   // Append, patch-by-id, and remove-by-id all work off the FRESH list, so a
   // teammate editing a different row concurrently is preserved.
-  addExpense: (row) => mutate((s) => ({ ...s, expenses: [...s.expenses, row] })),
+  // `afterId` inserts the new row right below an existing one (used by
+  // duplicate); omitted/unknown ⇒ append to the end.
+  addExpense: (row, afterId) =>
+    mutate((s) => {
+      const i = afterId ? s.expenses.findIndex((r) => r.id === afterId) : -1;
+      if (i < 0) return { ...s, expenses: [...s.expenses, row] };
+      const expenses = s.expenses.slice();
+      expenses.splice(i + 1, 0, row);
+      return { ...s, expenses };
+    }),
   updateExpense: (id, patch) =>
     mutate((s) => ({
       ...s,
@@ -255,6 +263,22 @@ export const repo = {
     })),
   removeExpense: (id) =>
     mutate((s) => ({ ...s, expenses: s.expenses.filter((r) => r.id !== id) })),
+  // Reorder one tab's rows to match `orderedIds`, refilling only that tab's
+  // slots in the global array so other tabs (and concurrent edits) are left in
+  // place. Unknown ids are skipped; a tab row missing from the list (e.g. a
+  // teammate just added one) is appended so nothing is dropped.
+  reorderExpenses: (tabId, orderedIds) =>
+    mutate((s) => {
+      const byId = new Map(
+        s.expenses.filter((r) => r.tabId === tabId).map((r) => [r.id, r]),
+      );
+      const seq = orderedIds.map((id) => byId.get(id)).filter(Boolean);
+      const seen = new Set(seq.map((r) => r.id));
+      for (const r of byId.values()) if (!seen.has(r.id)) seq.push(r);
+      let k = 0;
+      const expenses = s.expenses.map((r) => (r.tabId === tabId ? seq[k++] : r));
+      return { ...s, expenses };
+    }),
 
   // ---- expense-planner sheets/tabs (group rows by tabId) ----
   addExpenseTab: (tab) => mutate((s) => ({ ...s, expenseTabs: [...s.expenseTabs, tab] })),

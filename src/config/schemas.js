@@ -99,15 +99,12 @@ export const MilkSchema = z.object({
   url: z.string().url(),
 });
 
-// A priced, attachable add-on ingredient (strawberry, cream foam, …) — one
-// self-contained object: emoji + market price (₱/cup reference, overridable in
-// state) + an optional reference link. Matcha & milk are the dropdown selectors,
-// not ingredients. May be created partially-filled (e.g. no link yet).
+// A priced, attachable add-on ingredient (strawberry, cream foam, …). Exactly two
+// fields: name + a shared ₱/cup reference price (overridable in state). Matcha &
+// milk are the dropdown selectors, not ingredients.
 export const IngredientSchema = z.object({
   name: z.string(),
-  emoji: z.string().default(""),
-  price: z.number().nonnegative(), // market / reference ₱ per cup
-  link: z.string().url().nullable().default(null), // reference source URL (optional)
+  price: z.number().nonnegative(), // market / reference ₱ per cup (shared)
 });
 
 export const DrinkSchema = z.object({
@@ -142,7 +139,7 @@ export const SiteDataSchema = z.object({
   competitors: z.array(CompetitorSchema).default([]),
   milks: z.array(MilkSchema).min(1),
   drinks: z.array(DrinkSchema).min(1),
-  ingredients: z.array(IngredientSchema).min(1), // priced add-ons drinks attach (each carries its own link)
+  ingredients: z.array(IngredientSchema).min(1), // priced add-ons drinks attach (name + ₱)
   pricing: PricingSchema,
   // reference photos per drink, keyed by exact drink name (overlay, like powderImages)
   drinkImages: z.record(z.string(), z.array(DrinkImageSchema)).default({}),
@@ -198,7 +195,7 @@ export const StateSchema = z.object({
   drinkBases: z
     .record(z.string(), z.object({ matcha: z.boolean(), milk: z.boolean() }).partial())
     .default({}), // drink name -> which base (matcha/milk) is removed (absent key = present)
-  extraIngredients: z.record(z.string(), IngredientSchema.omit({ name: true })).default({}), // user-created: name -> { emoji, price, link }
+  extraIngredients: z.record(z.string(), IngredientSchema.omit({ name: true })).default({}), // user-created: name -> { price }
   extraDrinks: z.record(z.string(), DrinkSchema.omit({ name: true })).default({}), // user-created drinks: name -> { note, desc, ingredients, srp }
   drinkOverrides: z
     .record(z.string(), DrinkSchema.pick({ note: true, desc: true }).partial())
@@ -234,6 +231,7 @@ export const StateSchema = z.object({
         tabId: z.string().default("default"), // which sheet/tab this row belongs to
         item: z.string().default(""),
         notes: z.string().default(""),
+        date: z.string().default(""), // free-form ISO date (yyyy-mm-dd) or "" when unset
         price: z.number().nonnegative().default(0), // ₱ per unit
         qty: z.number().nonnegative().default(1),
       }),
