@@ -76,9 +76,10 @@ export default function FolderRow({
           />
         ) : (
           <div
-            className="flex items-center gap-1 rounded-cell px-2 py-1.5 hover:bg-cream-light transition"
+            className="flex items-center gap-1 rounded-cell px-2 py-1 hover:bg-cream-light transition"
             onContextMenu={(e) => {
               e.preventDefault();
+              e.stopPropagation(); // don't also trigger the sidebar's add-menu
               setMenu({ x: e.clientX, y: e.clientY });
             }}
           >
@@ -91,7 +92,7 @@ export default function FolderRow({
             >
               {collapsed ? "▸" : "▾"}
             </button>
-            <span className="flex-1 min-w-0 truncate font-doodle font-bold text-[.98rem] text-forest">
+            <span className="flex-1 min-w-0 truncate font-doodle font-bold text-[.85rem] text-forest">
               📁 {folder.name || "Untitled folder"}
             </span>
             <button
@@ -104,15 +105,6 @@ export default function FolderRow({
             >
               ＋
             </button>
-            <button
-              type="button"
-              onPointerDown={(e) => e.stopPropagation()}
-              onClick={(e) => setMenu({ x: e.clientX, y: e.clientY })}
-              aria-label={"Actions for " + (folder.name || "folder")}
-              className="shrink-0 px-1 text-brown-soft hover:text-forest transition leading-none"
-            >
-              ⋯
-            </button>
           </div>
         )}
       </div>
@@ -124,7 +116,7 @@ export default function FolderRow({
         >
           <ul
             ref={setDropRef}
-            className={"flex flex-col gap-1 py-1 rounded-cell " + (isOver ? "bg-matcha-fill/30" : "")}
+            className={"flex flex-col gap-px py-0.5 rounded-cell " + (isOver ? "bg-matcha-fill/30" : "")}
           >
             {docs.map((d) => (
               <DocRow

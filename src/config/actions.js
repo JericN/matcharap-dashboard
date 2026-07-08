@@ -119,8 +119,13 @@ export async function addExpense(row, afterId) {
   revalidatePath("/expenses");
 }
 
-export async function updateExpense(id, patch) {
-  await repo.updateExpense(id, patch);
+export async function setExpenseCell(rowId, colId, value) {
+  await repo.setExpenseCell(rowId, colId, value);
+  revalidatePath("/expenses");
+}
+
+export async function duplicateExpense(rowId, newId, afterId) {
+  await repo.duplicateExpense(rowId, newId, afterId);
   revalidatePath("/expenses");
 }
 
@@ -131,6 +136,58 @@ export async function removeExpense(id) {
 
 export async function reorderExpenses(tabId, orderedIds) {
   await repo.reorderExpenses(tabId, orderedIds);
+  revalidatePath("/expenses");
+}
+
+export async function addColumn(tabId, column) {
+  await repo.addColumn(tabId, column);
+  revalidatePath("/expenses");
+}
+
+export async function updateColumn(tabId, colId, patch) {
+  await repo.updateColumn(tabId, colId, patch);
+  revalidatePath("/expenses");
+}
+
+export async function reorderColumns(tabId, orderedIds) {
+  await repo.reorderColumns(tabId, orderedIds);
+  revalidatePath("/expenses");
+}
+
+export async function deleteColumn(tabId, colId) {
+  await repo.deleteColumn(tabId, colId);
+  revalidatePath("/expenses");
+}
+
+export async function addOption(tabId, colId, option) {
+  await repo.addOption(tabId, colId, option);
+  revalidatePath("/expenses");
+}
+
+export async function updateOption(tabId, colId, optionId, patch) {
+  await repo.updateOption(tabId, colId, optionId, patch);
+  revalidatePath("/expenses");
+}
+
+export async function deleteOption(tabId, colId, optionId) {
+  await repo.deleteOption(tabId, colId, optionId);
+  revalidatePath("/expenses");
+}
+
+// undo/redo restores (viewRefs re-applies the deleted column/option's filter/sort/
+// hidden footprint across the table's views)
+export async function restoreColumn(tabId, column, index, cells, viewRefs) {
+  await repo.restoreColumn(tabId, column, index, cells, viewRefs);
+  revalidatePath("/expenses");
+}
+
+export async function restoreOption(tabId, colId, option, index, cells, viewRefs) {
+  await repo.restoreOption(tabId, colId, option, index, cells, viewRefs);
+  revalidatePath("/expenses");
+}
+
+export async function restoreTab(tab, index, tabRows) {
+  await repo.restoreTab(tab, index, tabRows);
   revalidatePath("/expenses");
 }
 
@@ -146,6 +203,37 @@ export async function renameExpenseTab(id, name) {
 
 export async function removeExpenseTab(id) {
   await repo.removeExpenseTab(id);
+  revalidatePath("/expenses");
+}
+
+export async function reorderExpenseTabs(orderedIds) {
+  await repo.reorderExpenseTabs(orderedIds);
+  revalidatePath("/expenses");
+}
+
+// ---- views (per-table saved lenses) ----
+export async function addView(tabId, view) {
+  await repo.addView(tabId, view);
+  revalidatePath("/expenses");
+}
+
+export async function updateView(tabId, viewId, patch) {
+  await repo.updateView(tabId, viewId, patch);
+  revalidatePath("/expenses");
+}
+
+export async function removeView(tabId, viewId) {
+  await repo.removeView(tabId, viewId);
+  revalidatePath("/expenses");
+}
+
+export async function reorderViews(tabId, orderedIds) {
+  await repo.reorderViews(tabId, orderedIds);
+  revalidatePath("/expenses");
+}
+
+export async function restoreView(tabId, view, index) {
+  await repo.restoreView(tabId, view, index);
   revalidatePath("/expenses");
 }
 

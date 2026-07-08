@@ -1,6 +1,17 @@
 import { getSiteData } from "./store";
 import { getState, writeState } from "./state";
 import { toMilkOptions } from "@/features/milks/pricing";
+import {
+  coerceCell,
+  writeCell,
+  cloneValues,
+  stripColumn,
+  stripOption,
+  restoreColumn as restoreColumnCore,
+  restoreOption as restoreOptionCore,
+  restoreTab as restoreTabCore,
+  restoreView as restoreViewCore,
+} from "./expenseModel.mjs";
 
 // ============================================================================
 // DATA-ACCESS LAYER — the single interface the app uses for data.
@@ -256,11 +267,38 @@ export const repo = {
       expenses.splice(i + 1, 0, row);
       return { ...s, expenses };
     }),
-  updateExpense: (id, patch) =>
-    mutate((s) => ({
-      ...s,
-      expenses: s.expenses.map((r) => (r.id === id ? { ...r, ...patch } : r)),
-    })),
+  // Write a single cell as a fresh-list delta: preserves the row's other cells
+  // (concurrent edits to a different cell survive) and guards a concurrently-deleted
+  // row/column. `coerceCell` enforces the column type at the boundary; `writeCell`
+  // drops the key when the value is empty (empty cell ≡ absent key).
+  setExpenseCell: (rowId, colId, value) =>
+    mutate((s) => {
+      const row = s.expenses.find((r) => r.id === rowId);
+      if (!row) return s; // row deleted concurrently → no-op
+      const tab = s.expenseTabs.find((t) => t.id === row.tabId);
+      const col = tab?.columns.find((c) => c.id === colId);
+      if (!col) return s; // column gone → drop the write (no dangling key)
+      const v = coerceCell(col, value);
+      return {
+        ...s,
+        expenses: s.expenses.map((r) =>
+          r.id === rowId ? { ...r, values: writeCell(r.values, colId, v) } : r,
+        ),
+      };
+    }),
+  // Duplicate a row off the FRESH row with a deep-copied cell map (arrays must not
+  // alias); the client passes the pre-generated `newId` so optimistic + server ids match.
+  duplicateExpense: (rowId, newId, afterId) =>
+    mutate((s) => {
+      const src = s.expenses.find((r) => r.id === rowId);
+      if (!src) return s;
+      const copy = { ...src, id: newId, values: cloneValues(src.values) };
+      const anchor = afterId ?? rowId;
+      const i = s.expenses.findIndex((r) => r.id === anchor);
+      const expenses = s.expenses.slice();
+      expenses.splice(i < 0 ? s.expenses.length : i + 1, 0, copy);
+      return { ...s, expenses };
+    }),
   removeExpense: (id) =>
     mutate((s) => ({ ...s, expenses: s.expenses.filter((r) => r.id !== id) })),
   // Reorder one tab's rows to match `orderedIds`, refilling only that tab's
@@ -280,8 +318,112 @@ export const repo = {
       return { ...s, expenses };
     }),
 
+  // ---- expense-planner columns (per-tab; the client builds each column's id) ----
+  addColumn: (tabId, column) =>
+    mutate((s) => ({
+      ...s,
+      expenseTabs: s.expenseTabs.map((t) =>
+        t.id === tabId ? { ...t, columns: [...t.columns, column] } : t,
+      ),
+    })),
+  // patch = { name?, width?, number? } — rename, resize, or set number format
+  updateColumn: (tabId, colId, patch) =>
+    mutate((s) => ({
+      ...s,
+      expenseTabs: s.expenseTabs.map((t) =>
+        t.id === tabId
+          ? { ...t, columns: t.columns.map((c) => (c.id === colId ? { ...c, ...patch } : c)) }
+          : t,
+      ),
+    })),
+  // Reorder one tab's columns to match `orderedIds`, keeping any not listed.
+  reorderColumns: (tabId, orderedIds) =>
+    mutate((s) => ({
+      ...s,
+      expenseTabs: s.expenseTabs.map((t) => {
+        if (t.id !== tabId) return t;
+        const byId = new Map(t.columns.map((c) => [c.id, c]));
+        const seq = orderedIds.map((id) => byId.get(id)).filter(Boolean);
+        const seen = new Set(seq.map((c) => c.id));
+        for (const c of t.columns) if (!seen.has(c.id)) seq.push(c);
+        return { ...t, columns: seq };
+      }),
+    })),
+  // Delete a column + strip its key from every in-tab row (cascade core).
+  deleteColumn: (tabId, colId) =>
+    mutate((s) => {
+      const { tabs, rows } = stripColumn(s.expenseTabs, s.expenses, tabId, colId);
+      return { ...s, expenseTabs: tabs, expenses: rows };
+    }),
+
+  // ---- expense-planner select/multiSelect options (per column) ----
+  addOption: (tabId, colId, option) =>
+    mutate((s) => ({
+      ...s,
+      expenseTabs: s.expenseTabs.map((t) =>
+        t.id === tabId
+          ? {
+              ...t,
+              columns: t.columns.map((c) =>
+                c.id === colId ? { ...c, options: [...(c.options ?? []), option] } : c,
+              ),
+            }
+          : t,
+      ),
+    })),
+  // patch = { name?, color? }
+  updateOption: (tabId, colId, optionId, patch) =>
+    mutate((s) => ({
+      ...s,
+      expenseTabs: s.expenseTabs.map((t) =>
+        t.id === tabId
+          ? {
+              ...t,
+              columns: t.columns.map((c) =>
+                c.id === colId
+                  ? { ...c, options: (c.options ?? []).map((o) => (o.id === optionId ? { ...o, ...patch } : o)) }
+                  : c,
+              ),
+            }
+          : t,
+      ),
+    })),
+  // Delete an option + strip it from every in-tab cell (cascade core).
+  deleteOption: (tabId, colId, optionId) =>
+    mutate((s) => {
+      const { tabs, rows } = stripOption(s.expenseTabs, s.expenses, tabId, colId, optionId);
+      return { ...s, expenseTabs: tabs, expenses: rows };
+    }),
+
+  // ---- expense-planner undo/redo restores (re-insert deleted things + data) ----
+  // cells = [{ rowId, value }] captured before the delete.
+  restoreColumn: (tabId, column, index, cells, viewRefs) =>
+    mutate((s) => {
+      const { tabs, rows } = restoreColumnCore(s.expenseTabs, s.expenses, tabId, column, index, cells, viewRefs);
+      return { ...s, expenseTabs: tabs, expenses: rows };
+    }),
+  restoreOption: (tabId, colId, option, index, cells, viewRefs) =>
+    mutate((s) => {
+      const { tabs, rows } = restoreOptionCore(s.expenseTabs, s.expenses, tabId, colId, option, index, cells, viewRefs);
+      return { ...s, expenseTabs: tabs, expenses: rows };
+    }),
+  restoreTab: (tab, index, tabRows) =>
+    mutate((s) => {
+      const { tabs, rows } = restoreTabCore(s.expenseTabs, s.expenses, tab, index, tabRows);
+      return { ...s, expenseTabs: tabs, expenses: rows };
+    }),
+
   // ---- expense-planner sheets/tabs (group rows by tabId) ----
   addExpenseTab: (tab) => mutate((s) => ({ ...s, expenseTabs: [...s.expenseTabs, tab] })),
+  // Reorder the sheets to match `orderedIds`, keeping any not listed (mirrors reorderColumns).
+  reorderExpenseTabs: (orderedIds) =>
+    mutate((s) => {
+      const byId = new Map(s.expenseTabs.map((t) => [t.id, t]));
+      const seq = orderedIds.map((id) => byId.get(id)).filter(Boolean);
+      const seen = new Set(seq.map((t) => t.id));
+      for (const t of s.expenseTabs) if (!seen.has(t.id)) seq.push(t);
+      return { ...s, expenseTabs: seq };
+    }),
   renameExpenseTab: (id, name) =>
     mutate((s) => ({
       ...s,
@@ -298,4 +440,41 @@ export const repo = {
             expenses: s.expenses.filter((r) => r.tabId !== id),
           },
     ),
+
+  // ---- views (per-table saved lenses: filters + sorts + hidden fields) ----
+  addView: (tabId, view) =>
+    mutate((s) => ({
+      ...s,
+      expenseTabs: s.expenseTabs.map((t) => (t.id === tabId ? { ...t, views: [...(t.views ?? []), view] } : t)),
+    })),
+  // partial patch of { name?, filters?, sorts?, hiddenColumnIds? } — last-write-wins per view
+  updateView: (tabId, viewId, patch) =>
+    mutate((s) => ({
+      ...s,
+      expenseTabs: s.expenseTabs.map((t) =>
+        t.id === tabId ? { ...t, views: t.views.map((v) => (v.id === viewId ? { ...v, ...patch } : v)) } : t,
+      ),
+    })),
+  // refuse to remove a table's last remaining view (≥1 view invariant, mirrors tabs)
+  removeView: (tabId, viewId) =>
+    mutate((s) => ({
+      ...s,
+      expenseTabs: s.expenseTabs.map((t) =>
+        t.id === tabId && t.views.length > 1 ? { ...t, views: t.views.filter((v) => v.id !== viewId) } : t,
+      ),
+    })),
+  reorderViews: (tabId, orderedIds) =>
+    mutate((s) => ({
+      ...s,
+      expenseTabs: s.expenseTabs.map((t) => {
+        if (t.id !== tabId) return t;
+        const byId = new Map(t.views.map((v) => [v.id, v]));
+        const seq = orderedIds.map((id) => byId.get(id)).filter(Boolean);
+        const seen = new Set(seq.map((v) => v.id));
+        for (const v of t.views) if (!seen.has(v.id)) seq.push(v);
+        return { ...t, views: seq };
+      }),
+    })),
+  restoreView: (tabId, view, index) =>
+    mutate((s) => ({ ...s, expenseTabs: restoreViewCore(s.expenseTabs, tabId, view, index) })),
 };

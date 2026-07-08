@@ -10,11 +10,11 @@
    =========================================================================== */
 @layer base {
   :root {
-    --c-cream: 239 231 211;
-    --c-cream-light: 243 236 219;
-    --c-cream-card: 247 241 227;
-    --c-cream-deep: 233 224 201;
-    --c-kraft: 227 212 176;
+    --c-cream: 248 247 243; /* page bg — soft warm off-white */
+    --c-cream-light: 252 251 248;
+    --c-cream-card: 255 255 253; /* cards — near-white */
+    --c-cream-deep: 242 240 234;
+    --c-kraft: 234 227 211;
     --c-forest: 63 80 49;
     --c-olive: 86 104 63;
     --c-olive-soft: 111 127 84;
@@ -24,7 +24,7 @@
     --c-matcha-bright: 167 192 106;
     --c-matcha-fill: 169 192 138;
     --c-clay: 185 84 45;
-    --c-star: 249 243 228; /* star-card highlight */
+    --c-star: 255 254 250; /* star-card highlight */
     --c-onforest-mut: 205 217 189; /* muted text on forest */
     --c-onforest-soft: 223 230 210; /* soft text on forest */
     --c-cat-ph: 94 123 58; /* powder + milk category swatches */

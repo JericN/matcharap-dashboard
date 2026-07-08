@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { normalizeExpenses } from "./expenseModel.mjs";
 
 // ---- Domain schemas. This file is the single source of truth for shapes. ----
 
@@ -181,9 +182,83 @@ export const SiteDataSchema = z.object({
     .default({}),
 });
 
+// ---- Expense-planner flexible-table shapes (Airtable-style, per-sheet columns) ----
+// A cell value is one of three disjoint arms; empty cell ≡ absent key (no null).
+const CellValue = z.union([z.string(), z.number(), z.boolean(), z.array(z.string())]);
+
+// A select / multi-select option. `color` is a TOKEN NAME (e.g. "clay"), rendered
+// as rgb(var(--c-clay)/α) — never a hardcoded hex.
+const OptionSchema = z.object({
+  id: z.string(),
+  name: z.string().default(""),
+  color: z.string().default(""),
+});
+
+// A user-defined column. `id` is immutable (cells key off it); `type` is immutable
+// after creation. `number` is present only for type "number"; `options` only for
+// "select"/"multiSelect".
+const ColumnSchema = z.object({
+  id: z.string(),
+  name: z.string().default(""),
+  type: z.enum(["text", "number", "date", "select", "multiSelect", "checkbox"]).default("text"),
+  width: z.number().default(160),
+  number: z
+    .object({
+      style: z.enum(["plain", "currency"]).default("plain"),
+      precision: z.number().int().min(0).max(4).default(0),
+    })
+    .optional(),
+  options: z.array(OptionSchema).optional(),
+});
+
+// A saved view = a lens over its table's rows (filters + sorts + hidden fields).
+// `op` is the COMPLETE de-duped union of every column type's operators — omitting
+// one would brick shared getState when a stored view uses it. `value` reuses the
+// permissive CellValue union and is absent for the valueless ops.
+const FilterSchema = z.object({
+  id: z.string(),
+  columnId: z.string(),
+  op: z.enum([
+    "is", "isNot", "contains", "notContains", "isEmpty", "isNotEmpty", // text (+ shared is/isNot)
+    "eq", "neq", "gt", "gte", "lt", "lte", // number
+    "before", "after", // date
+    "isAnyOf", // select multi-pick
+    "hasAnyOf", "hasAllOf", "hasNoneOf", // multiSelect
+    "isChecked", "isUnchecked", // checkbox
+  ]),
+  value: CellValue.optional(),
+});
+const SortSchema = z.object({
+  columnId: z.string(),
+  dir: z.enum(["asc", "desc"]).default("asc"),
+});
+const ViewSchema = z.object({
+  id: z.string(),
+  name: z.string().default(""),
+  type: z.literal("grid").default("grid"),
+  filters: z.array(FilterSchema).default([]),
+  sorts: z.array(SortSchema).default([]),
+  hiddenColumnIds: z.array(z.string()).default([]),
+});
+
+const ExpenseTabSchema = z.object({
+  id: z.string(),
+  name: z.string().default(""),
+  columns: z.array(ColumnSchema).default([]), // the migration preprocess guarantees this is present
+  views: z.array(ViewSchema).default([]), // the migration injects a default `view_all` on any tab without one
+});
+
+const ExpenseRowSchema = z.object({
+  id: z.string(),
+  tabId: z.string().default("default"),
+  values: z.record(z.string(), CellValue).default({}), // { [columnId]: CellValue }; absent key = empty cell
+});
+
 // Shared mutable state (Redis `state` key) — one global record for everyone.
-// Every field defaults, so an empty/fresh store parses cleanly.
-export const StateSchema = z.object({
+// Every field defaults, so an empty/fresh store parses cleanly. Wrapped below in a
+// migration preprocess (StateSchema) that folds legacy expense rows/tabs into the
+// columns+cells model before validation.
+const StateInner = z.object({
   savedEvents: z.array(z.string()).default([]), // hearted events
   savedPowders: z.array(z.string()).default([]), // hearted powders
   savedMilks: z.array(z.string()).default([]), // hearted milks
@@ -217,24 +292,20 @@ export const StateSchema = z.object({
   milkOverrides: z
     .record(z.string(), MilkSchema.pick({ price: true, liters: true }).partial())
     .default({}), // edits to a milk's price/liters (overlay on seed) -> { price?, liters? }
-  // Expense-planner sheets/tabs — ordered list grouping expense rows by tabId.
-  expenseTabs: z
-    .array(z.object({ id: z.string(), name: z.string().default("") }))
-    .default([{ id: "default", name: "Sheet 1" }]),
-  // Expense-planner line items — an ordered array (not a name-keyed record):
-  // items repeat, may be blank while typing, and need a stable id for React
-  // keys + targeted update/delete. `id` is generated client-side.
-  expenses: z
-    .array(
-      z.object({
-        id: z.string(),
-        tabId: z.string().default("default"), // which sheet/tab this row belongs to
-        item: z.string().default(""),
-        notes: z.string().default(""),
-        date: z.string().default(""), // free-form ISO date (yyyy-mm-dd) or "" when unset
-        price: z.number().nonnegative().default(0), // ₱ per unit
-        qty: z.number().nonnegative().default(1),
-      }),
-    )
-    .default([]),
+  // Expense-planner sheets/tabs — each owns an ordered `columns` array (per-sheet
+  // schema). The migration preprocess injects the default columns onto legacy tabs.
+  expenseTabs: z.array(ExpenseTabSchema).default([]),
+  // Expense-planner rows — ordered array; each row is a { [columnId]: value } cell
+  // map keyed by its tab's column ids. `id` is generated client-side. The
+  // preprocess folds legacy { item, notes, date, price, qty } rows into `values`.
+  expenses: z.array(ExpenseRowSchema).default([]),
 });
+
+// Public boundary schema: migrate the two expense keys (cross-field: columns live
+// on tabs, cells key off them) BEFORE validation, then validate. Idempotent, so it
+// runs safely on both getState (read) and writeState (write). All 17 other state
+// fields pass through untouched.
+export const StateSchema = z.preprocess((raw) => {
+  if (!raw || typeof raw !== "object") raw = {};
+  return { ...raw, ...normalizeExpenses(raw) };
+}, StateInner);

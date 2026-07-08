@@ -1,4 +1,5 @@
 "use client";
+import { useId } from "react";
 import {
   DndContext,
   closestCorners,
@@ -29,6 +30,7 @@ export default function DocTree({
   onMoveDoc,
   onMoveFolder,
 }) {
+  const dndId = useId(); // stable DndContext id → no SSR/client aria-describedby mismatch
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }), // click still selects
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
@@ -78,12 +80,12 @@ export default function DocTree({
   const rootIds = rootDocs.map((d) => "doc:" + d.id);
 
   return (
-    <DndContext sensors={sensors} collisionDetection={closestCorners} onDragEnd={onDragEnd}>
+    <DndContext id={dndId} sensors={sensors} collisionDetection={closestCorners} onDragEnd={onDragEnd}>
       {/* Folders reorder within THIS context; each folder's docs get their own
           SortableContext inside FolderRow, so the folder header isn't trapped in
           a doc context. */}
       <SortableContext items={folderIds} strategy={verticalListSortingStrategy}>
-        <ul className="flex flex-col gap-1">
+        <ul className="flex flex-col gap-px">
           {index.folders.map((folder) => (
             <FolderRow
               key={folder.id}
@@ -107,7 +109,7 @@ export default function DocTree({
       <SortableContext items={rootIds} strategy={verticalListSortingStrategy}>
         <ul
           ref={setRootRef}
-          className={"flex flex-col gap-1 mt-1 min-h-[26px] rounded-cell " + (rootOver ? "bg-matcha-fill/30" : "")}
+          className={"flex flex-col gap-px mt-0.5 min-h-[26px] rounded-cell " + (rootOver ? "bg-matcha-fill/30" : "")}
         >
           {rootDocs.map((d) => (
             <DocRow

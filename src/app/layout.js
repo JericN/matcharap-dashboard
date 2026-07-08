@@ -1,6 +1,5 @@
 import "./globals.css";
 import Sidebar from "@/components/Sidebar";
-import Footer from "@/components/Footer";
 import Doodles from "@/components/Doodles";
 import CalculatorWidget from "@/components/CalculatorWidget";
 
@@ -27,7 +26,6 @@ export default function RootLayout({ children }) {
         <div className="md:pl-[216px]">
           <div className="max-w-[1140px] mx-auto px-5 pt-[26px] pb-[70px] max-md:px-[13px] max-md:pt-4 max-md:pb-14">
             {children}
-            <Footer />
           </div>
         </div>
         <CalculatorWidget />
