@@ -495,6 +495,12 @@ export default function DataTable({ initialTables, initialRows, adapter, storage
     applyAddColumn(tabId, col);
     record({ label: `add ${type} field`, undo: () => applyDeleteColumn(tabId, col.id), redo: () => applyAddColumn(tabId, col) });
   };
+  const addFormulaColumn = (name, expr) => {
+    const col = { id: uid(), name, type: "formula", width: 160, formula: { expr } };
+    const tabId = activeId;
+    applyAddColumn(tabId, col);
+    record({ label: "add formula field", undo: () => applyDeleteColumn(tabId, col.id), redo: () => applyAddColumn(tabId, col) });
+  };
   const onRenameColumn = (colId, name) => {
     const tabId = activeId;
     const old = columns.find((c) => c.id === colId)?.name;
@@ -807,6 +813,7 @@ export default function DataTable({ initialTables, initialRows, adapter, storage
         onAddColumn={onAddColumn}
         onAddLinkColumn={addLinkColumn}
         onCreateDerived={addDerivedColumn}
+        onCreateFormula={addFormulaColumn}
         onRenameColumn={onRenameColumn}
         onResizeColumn={onResizeColumn}
         onSetColumnFormat={onSetColumnFormat}

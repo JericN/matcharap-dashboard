@@ -2,6 +2,8 @@
 import { useState } from "react";
 import AnchoredPopover from "./AnchoredPopover";
 import LinkFieldConfig from "./LinkFieldConfig";
+import FormulaConfig from "./FormulaConfig";
+import { namesToIds } from "./formula/refs.mjs";
 
 const TYPES = [
   { type: "text", label: "Text", icon: "📝" },
@@ -13,9 +15,10 @@ const TYPES = [
   { type: "link", label: "Link to table", icon: "🔗" },
   { type: "lookup", label: "Lookup", icon: "👁" },
   { type: "rollup", label: "Rollup", icon: "∑" },
+  { type: "formula", label: "Formula", icon: "ƒ" },
 ];
 
-// Add a column: name + type picker. Link/lookup/rollup open a config step.
+// Add a column: name + type picker. Link/lookup/rollup/formula open a config step.
 export default function AddColumnPopover({
   rect,
   onClose,
@@ -25,6 +28,7 @@ export default function AddColumnPopover({
   columns = [],
   onCreateLink,
   onCreateDerived,
+  onCreateFormula,
 }) {
   const [name, setName] = useState("Column");
   const [step, setStep] = useState(null); // null = type list; "link"/"lookup" = config
@@ -48,6 +52,10 @@ export default function AddColumnPopover({
     const fn = draft.fn ?? "count";
     if (!draft.linkColumnId || (fn !== "count" && !draft.targetColumnId)) return;
     onCreateDerived("rollup", name.trim() || "Column", draft);
+    onClose();
+  };
+  const confirmFormula = () => {
+    onCreateFormula(name.trim() || "Column", namesToIds(draft.expr ?? "", columns));
     onClose();
   };
 
@@ -110,6 +118,18 @@ export default function AddColumnPopover({
             </button>
           </div>
         </>
+      ) : step === "formula" ? (
+        <>
+          <FormulaConfig columns={columns} draft={draft} setDraft={setDraft} />
+          <div className="flex gap-1 mt-2">
+            <button type="button" onClick={() => setStep(null)} className="flex-1 chip">
+              ← Back
+            </button>
+            <button type="button" onClick={confirmFormula} className="flex-1 chip chip--active">
+              Create formula
+            </button>
+          </div>
+        </>
       ) : (
         <>
           <div className="font-mono text-[.53rem] uppercase tracking-[.1em] text-brown-soft px-1 mb-1">Type</div>
@@ -118,7 +138,9 @@ export default function AddColumnPopover({
               key={t.type}
               type="button"
               onClick={() =>
-                t.type === "link" || t.type === "lookup" || t.type === "rollup" ? setStep(t.type) : createSimple(t.type)
+                t.type === "link" || t.type === "lookup" || t.type === "rollup" || t.type === "formula"
+                  ? setStep(t.type)
+                  : createSimple(t.type)
               }
               className="flex items-center gap-2 w-full text-left px-2 py-1.5 rounded-[7px] font-mono text-[.68rem] text-forest hover:bg-cream-light transition"
             >

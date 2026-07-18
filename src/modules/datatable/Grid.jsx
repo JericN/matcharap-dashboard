@@ -337,6 +337,7 @@ export default function Grid({
   onAddColumn,
   onAddLinkColumn,
   onCreateDerived,
+  onCreateFormula,
   onRenameColumn,
   onResizeColumn,
   onSetColumnFormat,
@@ -671,6 +672,7 @@ export default function Grid({
           columns={link?.columns ?? []}
           onCreateLink={(name, targetTabId, single) => onAddLinkColumn(name, targetTabId, single)}
           onCreateDerived={onCreateDerived}
+          onCreateFormula={onCreateFormula}
         />
       )}
 
