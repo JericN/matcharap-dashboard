@@ -15,6 +15,7 @@ import {
   captureOptionViewRefs,
 } from "./model.mjs";
 import { applyView, visibleColumns, seedValuesFromView } from "./viewModel.mjs";
+import { applyLinkDelta as applyLinkDeltaClient } from "./linkModel.mjs";
 import { nextOptionColor } from "./optionColors";
 import TableTabs from "./TableTabs";
 import ViewBar from "./ViewBar";
@@ -147,6 +148,14 @@ export default function DataTable({ initialTables, initialRows, adapter, storage
       rows: d.rows.map((r) => (r.id === rowId ? { ...r, values: writeCell(r.values, colId, value) } : r)),
     }));
     startTransition(() => adapter.setCell(rowId, colId, value));
+  };
+  const applyAddRef = (rowId, colId, targetId) => {
+    setData((d) => ({ ...d, rows: applyLinkDeltaClient(d.rows, d.tabs, rowId, colId, targetId, true) }));
+    startTransition(() => adapter.addRef(rowId, colId, targetId));
+  };
+  const applyRemoveRef = (rowId, colId, targetId) => {
+    setData((d) => ({ ...d, rows: applyLinkDeltaClient(d.rows, d.tabs, rowId, colId, targetId, false) }));
+    startTransition(() => adapter.removeRef(rowId, colId, targetId));
   };
   const applyAddRow = (row) => {
     setData((d) => ({ ...d, rows: [...d.rows, row] }));
@@ -350,6 +359,13 @@ export default function DataTable({ initialTables, initialRows, adapter, storage
       undo: () => applySetCell(rowId, colId, before === undefined ? "" : before),
       redo: () => applySetCell(rowId, colId, value),
     });
+  };
+  // TEMPORARY: direct (non-undoable) link handlers — undo wrapping lands in Task 9.
+  const onAddRef = (rowId, colId, targetId) => applyAddRef(rowId, colId, targetId);
+  const onRemoveRef = (rowId, colId, targetId) => applyRemoveRef(rowId, colId, targetId);
+  const onClearRefs = (rowId, colId) => {
+    const r = rows.find((x) => x.id === rowId);
+    for (const t of (Array.isArray(r?.values[colId]) ? r.values[colId] : [])) applyRemoveRef(rowId, colId, t);
   };
   const onAddRow = () => {
     const seedRaw = seedValuesFromView(columns, activeView);
@@ -671,6 +687,13 @@ export default function DataTable({ initialTables, initialRows, adapter, storage
         onAddOption={onAddOption}
         onUpdateOption={onUpdateOption}
         onDeleteOption={onDeleteOption}
+        link={{
+          tables: tabs,
+          allRows: rows,
+          onAddRef: (rowId, colId, targetId) => onAddRef(rowId, colId, targetId),
+          onRemoveRef: (rowId, colId, targetId) => onRemoveRef(rowId, colId, targetId),
+          onClearRefs: (rowId, colId) => onClearRefs(rowId, colId),
+        }}
       />
       {toast && <Toast message={toast.message} onUndo={doUndo} onClose={() => setToast(null)} />}
     </div>

@@ -27,6 +27,7 @@ import ColumnMenu from "./ColumnMenu";
 import AddColumnPopover from "./AddColumnPopover";
 import OptionsEditor from "./OptionsEditor";
 import CursorMenu from "./CursorMenu";
+import { buildCtx } from "./linkDerive.mjs";
 
 const GUTTER = 40; // row drag-handle gutter
 
@@ -136,7 +137,7 @@ function HeaderCell({ header, renaming, renameDraft, setRenameDraft, onCommitRen
 
 // One sortable body row: a drag-handle gutter then a typed cell per column.
 // RIGHT-CLICK anywhere on the row opens its menu (duplicate / delete).
-function BodyRow({ row, draggingColId, sortActive, onSetCell, onCreateOption, onRowMenu }) {
+function BodyRow({ row, draggingColId, sortActive, ctx, link, onSetCell, onCreateOption, onRowMenu }) {
   const id = row.original.id;
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id,
@@ -197,6 +198,9 @@ function BodyRow({ row, draggingColId, sortActive, onSetCell, onCreateOption, on
             <Cell
               column={col}
               value={cell.getValue()}
+              row={row.original}
+              ctx={ctx}
+              link={link}
               onCommit={(v) => onSetCell(id, col.id, v)}
               onCreateOption={(name) => onCreateOption(col.id, name)}
             />
@@ -228,8 +232,10 @@ export default function Grid({
   onAddOption,
   onUpdateOption,
   onDeleteOption,
+  link,
 }) {
   const dndId = useId(); // stable DndContext id → no SSR/client aria-describedby mismatch
+  const ctx = useMemo(() => buildCtx(link?.tables ?? [], link?.allRows ?? []), [link?.tables, link?.allRows]);
   const [sizing, setSizing] = useState({}); // live column-resize overrides (id → px)
   const [dragType, setDragType] = useState(null); // "column" | "row" | null (axis lock)
   const [activeColId, setActiveColId] = useState(null); // the column being dragged → ghost + dim source
@@ -428,6 +434,8 @@ export default function Grid({
                         row={row}
                         draggingColId={draggingColId}
                         sortActive={sortActive}
+                        ctx={ctx}
+                        link={link}
                         onSetCell={onSetCell}
                         onCreateOption={onAddOption}
                         onRowMenu={(e, rowId) => setRowMenu({ rowId, pos: { x: e.clientX, y: e.clientY } })}

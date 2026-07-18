@@ -5,26 +5,24 @@ import DateCell from "./DateCell";
 import SelectCell from "./SelectCell";
 import MultiSelectCell from "./MultiSelectCell";
 import CheckboxCell from "./CheckboxCell";
+import LinkCell from "./LinkCell";
 
-// Dispatch a cell to the right editor by column type. `onCommit(value)` writes the
-// (already typed) value for this cell; `onCreateOption(name)` (select types) mints
-// + returns a new option.
-export default function Cell({ column, value, onCommit, onCreateOption }) {
+// Dispatch a cell to the right editor by column type. Simple types use
+// (value,onCommit); linked types use (row,ctx,link) for cross-table resolution.
+export default function Cell({ column, value, row, ctx, link, onCommit, onCreateOption }) {
   switch (column.type) {
     case "number":
       return <NumberCell column={column} value={value} onCommit={onCommit} />;
     case "date":
       return <DateCell value={value} onCommit={onCommit} />;
     case "select":
-      return (
-        <SelectCell column={column} value={value} onCommit={onCommit} onCreateOption={onCreateOption} />
-      );
+      return <SelectCell column={column} value={value} onCommit={onCommit} onCreateOption={onCreateOption} />;
     case "multiSelect":
-      return (
-        <MultiSelectCell column={column} value={value} onCommit={onCommit} onCreateOption={onCreateOption} />
-      );
+      return <MultiSelectCell column={column} value={value} onCommit={onCommit} onCreateOption={onCreateOption} />;
     case "checkbox":
       return <CheckboxCell value={value} onCommit={onCommit} />;
+    case "link":
+      return <LinkCell column={column} row={row} ctx={ctx} link={link} />;
     case "text":
     default:
       return <TextCell value={value} onCommit={onCommit} />;
