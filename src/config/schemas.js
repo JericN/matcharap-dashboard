@@ -201,7 +201,7 @@ const ColumnSchema = z.object({
   id: z.string(),
   name: z.string().default(""),
   type: z
-    .enum(["text", "number", "date", "select", "multiSelect", "checkbox", "link", "lookup", "rollup"])
+    .enum(["text", "number", "date", "select", "multiSelect", "checkbox", "link", "lookup", "rollup", "formula"])
     .default("text"),
   width: z.number().default(160),
   number: z
@@ -222,6 +222,7 @@ const ColumnSchema = z.object({
       fn: z.enum(["sum", "count", "avg", "min", "max"]).default("count"),
     })
     .optional(),
+  formula: z.object({ expr: z.string().default("") }).optional(),
 });
 
 // A saved view = a lens over its table's rows (filters + sorts + hidden fields).

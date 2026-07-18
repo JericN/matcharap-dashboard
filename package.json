@@ -14,7 +14,8 @@
     "check:docs": "node scripts/check-docs.mjs",
     "check:expenses": "node scripts/check-expenses.mjs",
     "check:views": "node scripts/check-views.mjs",
-    "check:links": "node scripts/check-links.mjs"
+    "check:links": "node scripts/check-links.mjs",
+    "check:formula": "node scripts/check-formula.mjs"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

@@ -73,6 +73,7 @@ export function coerceCell(column, value) {
     }
     case "lookup":
     case "rollup":
+    case "formula":
       return undefined; // derived — never stored in a cell
     case "text":
     case "date":
