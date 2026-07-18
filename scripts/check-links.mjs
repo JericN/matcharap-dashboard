@@ -179,5 +179,37 @@ const built = () => {
   ok("stripTableCascade drops the table + inbound link/dependents on other tables");
 }
 
+import {
+  buildCtx,
+  rowLabel,
+  linkedRows,
+  lookupValues,
+  rollupValue,
+} from "../src/modules/datatable/linkDerive.mjs";
+
+{
+  const { tabs, rows } = built(); // a1 links b1(10) + b2(20)
+  rows.find((r) => r.id === "b1").values.b_name = "Alpha";
+  rows.find((r) => r.id === "b2").values.b_name = "Beta";
+  const ctx = buildCtx(tabs, rows);
+  const a1 = rows.find((r) => r.id === "a1");
+  const linkCol = tabs.find((t) => t.id === "A").columns.find((c) => c.id === "la");
+  const rollCol = tabs.find((t) => t.id === "A").columns.find((c) => c.id === "roll");
+
+  assert.equal(rowLabel(tabs.find((t) => t.id === "B"), rows.find((r) => r.id === "b1")), "Alpha");
+  assert.deepEqual(linkedRows(a1, linkCol, ctx).map((r) => r.id), ["b1", "b2"]);
+
+  const lu = lookupValues(a1, { type: "lookup", lookup: { linkColumnId: "la", targetColumnId: "b_name" } }, ctx);
+  assert.equal(lu.targetCol.id, "b_name");
+  assert.deepEqual(lu.values, ["Alpha", "Beta"]);
+
+  assert.equal(rollupValue(a1, rollCol, ctx), 30); // sum 10+20
+  assert.equal(rollupValue(a1, { type: "rollup", rollup: { linkColumnId: "la", fn: "count" } }, ctx), 2);
+  assert.equal(rollupValue(a1, { type: "rollup", rollup: { linkColumnId: "la", targetColumnId: "b_cost", fn: "avg" } }, ctx), 15);
+  // dangling: link col gone ⇒ null / []
+  assert.equal(rollupValue(a1, { type: "rollup", rollup: { linkColumnId: "nope", targetColumnId: "b_cost", fn: "sum" } }, ctx), null);
+  ok("linkDerive: rowLabel / linkedRows / lookupValues / rollupValue (+dangling safe)");
+}
+
 console.log(`\n${n} checks passed.`);
 process.exit(0);
