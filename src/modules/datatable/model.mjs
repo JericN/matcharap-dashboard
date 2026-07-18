@@ -64,6 +64,13 @@ export function coerceCell(column, value) {
       return typeof value === "string" && value !== "" ? value : undefined;
     case "checkbox":
       return value === true ? true : undefined;
+    case "link": {
+      const ids = clampIds(value, column.link?.single);
+      return ids.length ? ids : undefined;
+    }
+    case "lookup":
+    case "rollup":
+      return undefined; // derived — never stored in a cell
     case "text":
     case "date":
     default:
@@ -98,6 +105,14 @@ export function insertAt(arr, item, index) {
   const out = arr.slice();
   out.splice(i, 0, item);
   return out;
+}
+
+// Clamp a link-cell id array to the single/multi rule. Filters non-string/empty.
+// `single` keeps only the LAST id (most-recently chosen) — matches the picker's
+// replace-on-pick UX. The single source of the single/multi cap.
+export function clampIds(ids, single) {
+  const arr = (Array.isArray(ids) ? ids : []).filter((v) => typeof v === "string" && v !== "");
+  return single ? arr.slice(-1) : arr;
 }
 
 // ---- cascade cores (delete a column/option → also purge dangling VIEW refs) ----
