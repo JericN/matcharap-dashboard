@@ -224,6 +224,7 @@ export default function Grid({
   onDuplicateRow,
   onReorderRows,
   onAddColumn,
+  onAddLinkColumn,
   onRenameColumn,
   onResizeColumn,
   onSetColumnFormat,
@@ -511,6 +512,9 @@ export default function Grid({
           rect={addColRect}
           onClose={() => setAddColRect(null)}
           onCreate={(name, type) => onAddColumn(name, type)}
+          tables={link?.tables ?? []}
+          currentTabId={link?.currentTabId}
+          onCreateLink={(name, targetTabId, single) => onAddLinkColumn(name, targetTabId, single)}
         />
       )}
 

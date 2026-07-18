@@ -15,7 +15,13 @@ import {
   captureOptionViewRefs,
 } from "./model.mjs";
 import { applyView, visibleColumns, seedValuesFromView } from "./viewModel.mjs";
-import { applyLinkDelta as applyLinkDeltaClient } from "./linkModel.mjs";
+import {
+  applyLinkDelta as applyLinkDeltaClient,
+  makeLinkPair as makeLinkPairClient,
+  insertLinkPair as insertLinkPairClient,
+  deleteLinkColumnPair as deleteLinkColumnPairClient,
+  restoreLinkRemoval as restoreLinkRemovalClient,
+} from "./linkModel.mjs";
 import { nextOptionColor } from "./optionColors";
 import TableTabs from "./TableTabs";
 import ViewBar from "./ViewBar";
@@ -156,6 +162,24 @@ export default function DataTable({ initialTables, initialRows, adapter, storage
   const applyRemoveRef = (rowId, colId, targetId) => {
     setData((d) => ({ ...d, rows: applyLinkDeltaClient(d.rows, d.tabs, rowId, colId, targetId, false) }));
     startTransition(() => adapter.removeRef(rowId, colId, targetId));
+  };
+  const applyAddLinkPair = (tabAId, colA, tabBId, colB) => {
+    setData((d) => ({ ...d, tabs: insertLinkPairClient(d.tabs, tabAId, colA, tabBId, colB) }));
+    startTransition(() => adapter.addLinkPair(tabAId, colA, tabBId, colB));
+  };
+  const applyDeleteLinkPair = (tabId, colId) => {
+    setData((d) => {
+      const { tabs, rows } = deleteLinkColumnPairClient(d.tabs, d.rows, tabId, colId);
+      return { tabs, rows };
+    });
+    startTransition(() => adapter.deleteLinkColumn(tabId, colId));
+  };
+  const applyRestoreLinkPair = (removed) => {
+    setData((d) => {
+      const { tabs, rows } = restoreLinkRemovalClient(d.tabs, d.rows, removed);
+      return { tabs, rows };
+    });
+    startTransition(() => adapter.restoreLinkColumn(removed));
   };
   const applyAddRow = (row) => {
     setData((d) => ({ ...d, rows: [...d.rows, row] }));
@@ -360,12 +384,37 @@ export default function DataTable({ initialTables, initialRows, adapter, storage
       redo: () => applySetCell(rowId, colId, value),
     });
   };
-  // TEMPORARY: direct (non-undoable) link handlers — undo wrapping lands in Task 9.
-  const onAddRef = (rowId, colId, targetId) => applyAddRef(rowId, colId, targetId);
-  const onRemoveRef = (rowId, colId, targetId) => applyRemoveRef(rowId, colId, targetId);
+  const onAddRef = (rowId, colId, targetId) => {
+    applyAddRef(rowId, colId, targetId);
+    record({ label: "link record", undo: () => applyRemoveRef(rowId, colId, targetId), redo: () => applyAddRef(rowId, colId, targetId) });
+  };
+  const onRemoveRef = (rowId, colId, targetId) => {
+    applyRemoveRef(rowId, colId, targetId);
+    record({ label: "unlink record", undo: () => applyAddRef(rowId, colId, targetId), redo: () => applyRemoveRef(rowId, colId, targetId) });
+  };
   const onClearRefs = (rowId, colId) => {
     const r = rows.find((x) => x.id === rowId);
-    for (const t of (Array.isArray(r?.values[colId]) ? r.values[colId] : [])) applyRemoveRef(rowId, colId, t);
+    const ids = Array.isArray(r?.values[colId]) ? [...r.values[colId]] : [];
+    if (!ids.length) return;
+    for (const t of ids) applyRemoveRef(rowId, colId, t);
+    record({
+      label: "clear links",
+      undo: () => ids.forEach((t) => applyAddRef(rowId, colId, t)),
+      redo: () => ids.forEach((t) => applyRemoveRef(rowId, colId, t)),
+    });
+  };
+  const addLinkColumn = (name, targetTabId, single) => {
+    const idA = uid(), idB = uid();
+    const tabA = tabs.find((t) => t.id === activeId);
+    const tabB = tabs.find((t) => t.id === targetTabId);
+    if (!tabA || !tabB) return;
+    const { colA, colB } = makeLinkPairClient({ tabA, tabB, name, single, idA, idB });
+    applyAddLinkPair(activeId, colA, targetTabId, colB);
+    record({
+      label: "add link field",
+      undo: () => applyDeleteLinkPair(activeId, colA.id),
+      redo: () => applyAddLinkPair(activeId, colA, targetTabId, colB),
+    });
   };
   const onAddRow = () => {
     const seedRaw = seedValuesFromView(columns, activeView);
@@ -679,6 +728,7 @@ export default function DataTable({ initialTables, initialRows, adapter, storage
         onDuplicateRow={onDuplicateRow}
         onReorderRows={onReorderRows}
         onAddColumn={onAddColumn}
+        onAddLinkColumn={addLinkColumn}
         onRenameColumn={onRenameColumn}
         onResizeColumn={onResizeColumn}
         onSetColumnFormat={onSetColumnFormat}
@@ -689,6 +739,7 @@ export default function DataTable({ initialTables, initialRows, adapter, storage
         onDeleteOption={onDeleteOption}
         link={{
           tables: tabs,
+          currentTabId: activeId,
           allRows: rows,
           onAddRef: (rowId, colId, targetId) => onAddRef(rowId, colId, targetId),
           onRemoveRef: (rowId, colId, targetId) => onRemoveRef(rowId, colId, targetId),
