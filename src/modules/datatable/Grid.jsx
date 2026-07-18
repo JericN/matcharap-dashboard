@@ -21,70 +21,14 @@ import {
 } from "@dnd-kit/sortable";
 import { restrictToHorizontalAxis, restrictToVerticalAxis } from "@dnd-kit/modifiers";
 import { CSS } from "@dnd-kit/utilities";
-import { numberFmt } from "./model.mjs";
 import Cell from "./cells/Cell";
+import ValueView from "./cells/ValueView";
 import ColumnMenu from "./ColumnMenu";
 import AddColumnPopover from "./AddColumnPopover";
 import OptionsEditor from "./OptionsEditor";
 import CursorMenu from "./CursorMenu";
-import { formatNumber } from "./format";
-import { optionChip } from "./optionColors";
 
 const GUTTER = 40; // row drag-handle gutter
-
-// Read-only render of one cell's value for the drag ghost (no editors). Mirrors
-// each cell type's display so the floating column looks like the real one.
-function GhostValue({ column, value }) {
-  const empty = <span className="text-brown-soft/40 text-[.8rem]">—</span>;
-  switch (column.type) {
-    case "number": {
-      const text = formatNumber(value, numberFmt(column));
-      return <span className="w-full text-right font-mono text-[.82rem] text-forest truncate">{text || empty}</span>;
-    }
-    case "checkbox":
-      return (
-        <span className="w-full flex justify-center">
-          <span
-            className={
-              "w-[18px] h-[18px] rounded-[5px] border-2 flex items-center justify-center text-[.7rem] leading-none " +
-              (value === true ? "bg-forest border-forest text-cream-light" : "border-olive")
-            }
-          >
-            {value === true ? "✓" : ""}
-          </span>
-        </span>
-      );
-    case "select": {
-      const opt = (column.options ?? []).find((o) => o.id === value);
-      return opt ? (
-        <span className="font-mono text-[.67rem] px-2 py-[2px] rounded-pill border truncate max-w-full" style={optionChip(opt.color)}>
-          {opt.name}
-        </span>
-      ) : (
-        empty
-      );
-    }
-    case "multiSelect": {
-      const ids = Array.isArray(value) ? value : [];
-      const opts = ids.map((id) => (column.options ?? []).find((o) => o.id === id)).filter(Boolean);
-      return opts.length ? (
-        <span className="flex flex-wrap gap-1">
-          {opts.map((o) => (
-            <span key={o.id} className="font-mono text-[.65rem] px-[7px] py-[2px] rounded-pill border" style={optionChip(o.color)}>
-              {o.name}
-            </span>
-          ))}
-        </span>
-      ) : (
-        empty
-      );
-    }
-    case "text":
-    case "date":
-    default:
-      return value ? <span className="font-mono text-[.8rem] text-forest truncate">{String(value)}</span> : empty;
-  }
-}
 
 // The lifted "whole column" that follows the cursor during a column drag: the
 // field name atop each row's value, styled as a picked-up paper strip.
@@ -102,7 +46,7 @@ function ColumnGhost({ column, rows, width }) {
           key={r.id}
           className="px-2 py-[7px] min-h-[32px] flex items-center border-b border-dashed border-brown-soft/25 last:border-b-0"
         >
-          <GhostValue column={column} value={r.values[column.id]} />
+          <ValueView column={column} value={r.values[column.id]} />
         </div>
       ))}
     </div>
