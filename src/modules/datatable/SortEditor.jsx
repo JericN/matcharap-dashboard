@@ -2,6 +2,10 @@
 import AnchoredPopover from "./AnchoredPopover";
 import { SelectField } from "@/components/form";
 
+// Derived types (link/lookup/rollup) have no meaningful sort semantics — exclude
+// them from the field picker so a user can't add a no-op sort (still hideable).
+const FILTERABLE = (c) => c.type !== "link" && c.type !== "lookup" && c.type !== "rollup";
+
 // Sort editor for a view — an ordered list of sort keys (top row = highest
 // priority). Each row: [column] [↑ A→Z / ↓ Z→A direction toggle]. Add appends a
 // key on the first column (asc); 🗑 removes. Every edit emits the full next sorts
@@ -9,11 +13,12 @@ import { SelectField } from "@/components/form";
 export default function SortEditor({ view, columns, rect, onClose, onChange }) {
   const sorts = view.sorts ?? [];
   const byId = new Map(columns.map((c) => [c.id, c]));
+  const fieldColumns = columns.filter(FILTERABLE);
 
   const setSort = (i, patch) => onChange(sorts.map((s, idx) => (idx === i ? { ...s, ...patch } : s)));
   const removeSort = (i) => onChange(sorts.filter((_, idx) => idx !== i));
   const addSort = () => {
-    const first = columns[0];
+    const first = fieldColumns[0];
     if (!first) return;
     onChange([...sorts, { columnId: first.id, dir: "asc" }]);
   };
@@ -63,7 +68,7 @@ export default function SortEditor({ view, columns, rect, onClose, onChange }) {
                       (field removed)
                     </option>
                   )}
-                  {columns.map((c) => (
+                  {fieldColumns.map((c) => (
                     <option key={c.id} value={c.id}>
                       {c.name}
                     </option>
@@ -92,7 +97,7 @@ export default function SortEditor({ view, columns, rect, onClose, onChange }) {
       <button
         type="button"
         onClick={addSort}
-        disabled={columns.length === 0}
+        disabled={fieldColumns.length === 0}
         className="chip w-full justify-center py-1 text-[.64rem] disabled:opacity-40"
       >
         ＋ Add sort

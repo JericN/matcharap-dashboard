@@ -230,6 +230,7 @@ export default function Grid({
   onSetColumnFormat,
   onReorderColumns,
   onDeleteColumn,
+  onToggleLinkSingle,
   onAddOption,
   onUpdateOption,
   onDeleteOption,
@@ -486,6 +487,7 @@ export default function Grid({
           }}
           onRename={() => startRename(colMenu.colId)}
           onDelete={() => onDeleteColumn(colMenu.colId)}
+          onToggleSingle={() => onToggleLinkSingle(colMenu.colId)}
           onSetFormat={(number) => onSetColumnFormat(colMenu.colId, number)}
           onEditOptions={() => {
             setOptionsEditor({ colId: colMenu.colId, rect: colMenu.rect });

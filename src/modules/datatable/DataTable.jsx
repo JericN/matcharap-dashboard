@@ -21,6 +21,8 @@ import {
   insertLinkPair as insertLinkPairClient,
   deleteLinkColumnPair as deleteLinkColumnPairClient,
   restoreLinkRemoval as restoreLinkRemovalClient,
+  stripRowEverywhere as stripRowEverywhereClient,
+  stripTableCascade as stripTableCascadeClient,
 } from "./linkModel.mjs";
 import { nextOptionColor } from "./optionColors";
 import TableTabs from "./TableTabs";
@@ -196,7 +198,12 @@ export default function DataTable({ initialTables, initialRows, adapter, storage
     startTransition(() => adapter.addRow(row, afterId));
   };
   const applyRemoveRow = (id) => {
-    setData((d) => ({ ...d, rows: d.rows.filter((r) => r.id !== id) }));
+    setData((d) => {
+      const row = d.rows.find((r) => r.id === id);
+      if (!row) return d;
+      const { rows } = stripRowEverywhereClient(d.tabs, d.rows, id, row.tabId);
+      return { ...d, rows };
+    });
     startTransition(() => adapter.removeRow(id));
   };
   const applyDuplicate = (srcId, newId, copy) => {
@@ -306,7 +313,10 @@ export default function DataTable({ initialTables, initialRows, adapter, storage
     startTransition(() => adapter.addTable(tab));
   };
   const applyRemoveTab = (id) => {
-    setData((d) => ({ tabs: d.tabs.filter((t) => t.id !== id), rows: d.rows.filter((r) => r.tabId !== id) }));
+    setData((d) => {
+      const { tabs, rows } = stripTableCascadeClient(d.tabs, d.rows, id);
+      return { tabs, rows };
+    });
     startTransition(() => adapter.removeTable(id));
   };
   const applyRestoreTab = (tab, index, tabRows) => {
@@ -435,9 +445,17 @@ export default function DataTable({ initialTables, initialRows, adapter, storage
     const tabRows = rows.filter((r) => r.tabId === row.tabId);
     const pos = tabRows.findIndex((r) => r.id === id);
     const afterId = pos > 0 ? tabRows[pos - 1].id : null;
+    const { removedRefs } = stripRowEverywhereClient(tabs, rows, id, row.tabId);
     applyRemoveRow(id);
     record(
-      { label: "delete row", undo: () => applyInsertRow(row, afterId), redo: () => applyRemoveRow(id) },
+      {
+        label: "delete row",
+        undo: () => {
+          applyInsertRow(row, afterId);
+          removedRefs.forEach((r) => applyAddRef(r.rowId, r.colId, r.targetId));
+        },
+        redo: () => applyRemoveRow(id),
+      },
       { message: "Row deleted" },
     );
   };
@@ -507,10 +525,35 @@ export default function DataTable({ initialTables, initialRows, adapter, storage
       redo: () => applyReorderColumns(tabId, orderedIds),
     });
   };
+  const onToggleLinkSingle = (colId) => {
+    const col = columns.find((c) => c.id === colId);
+    if (!col?.link) return;
+    const next = !col.link.single;
+    applyUpdateColumn(activeId, colId, { link: { ...col.link, single: next } });
+    record({
+      label: "link single/multi",
+      undo: () => applyUpdateColumn(activeId, colId, { link: col.link }),
+      redo: () => applyUpdateColumn(activeId, colId, { link: { ...col.link, single: next } }),
+    });
+  };
   const onDeleteColumn = (colId) => {
     const tabId = activeId;
     const col = columns.find((c) => c.id === colId);
     if (!col) return;
+    if (col.type === "link") {
+      // capture the full removal (pair + dependents + cells + viewRefs) for undo
+      const { removed } = deleteLinkColumnPairClient(tabs, rows, tabId, colId);
+      applyDeleteLinkPair(tabId, colId);
+      record(
+        {
+          label: "delete link field",
+          undo: () => applyRestoreLinkPair(removed),
+          redo: () => applyDeleteLinkPair(tabId, colId),
+        },
+        { message: `Field "${col.name || "link"}" deleted` },
+      );
+      return;
+    }
     const index = columns.findIndex((c) => c.id === colId);
     const cells = rows
       .filter((r) => r.tabId === tabId && r.values[colId] !== undefined)
@@ -602,12 +645,16 @@ export default function DataTable({ initialTables, initialRows, adapter, storage
     const index = tabs.findIndex((t) => t.id === id);
     const tabRows = rows.filter((r) => r.tabId === id);
     const fallback = tabs.filter((t) => t.id !== id)[0]?.id;
+    const { removed } = stripTableCascadeClient(tabs, rows, id);
     applyRemoveTab(id);
     if (activeId === id) setActiveTabId(fallback);
     record(
       {
         label: "delete sheet",
-        undo: () => applyRestoreTab(tab, index, tabRows),
+        undo: () => {
+          applyRestoreTab(tab, index, tabRows);
+          applyRestoreLinkPair(removed);
+        },
         redo: () => {
           applyRemoveTab(id);
           setActiveTabId(fallback);
@@ -734,6 +781,7 @@ export default function DataTable({ initialTables, initialRows, adapter, storage
         onSetColumnFormat={onSetColumnFormat}
         onReorderColumns={onReorderColumns}
         onDeleteColumn={onDeleteColumn}
+        onToggleLinkSingle={onToggleLinkSingle}
         onAddOption={onAddOption}
         onUpdateOption={onUpdateOption}
         onDeleteOption={onDeleteOption}

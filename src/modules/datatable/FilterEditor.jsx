@@ -4,6 +4,10 @@ import { SelectField, TextField, NumberField } from "@/components/form";
 import { OPS_BY_TYPE, defaultOpFor, valueKind } from "./viewOps";
 import { optionChip } from "./optionColors";
 
+// Derived types (link/lookup/rollup) have no meaningful filter semantics — exclude
+// them from the field picker so a user can't add a no-op filter (still hideable).
+const FILTERABLE = (c) => c.type !== "link" && c.type !== "lookup" && c.type !== "rollup";
+
 // The operand widget for one filter row, driven by valueKind(type, op):
 //   text/number/date → the shared form fields; selectOne → a chip row storing a
 //   SINGLE optionId string; selectMany → a toggle chip row storing optionId[];
@@ -121,11 +125,12 @@ function ValueInput({ column, filter, onValue }) {
 export default function FilterEditor({ view, columns, rect, onClose, onChange }) {
   const filters = view.filters ?? [];
   const byId = new Map(columns.map((c) => [c.id, c]));
+  const fieldColumns = columns.filter(FILTERABLE);
 
   const setFilter = (id, patch) => onChange(filters.map((f) => (f.id === id ? { ...f, ...patch } : f)));
   const removeFilter = (id) => onChange(filters.filter((f) => f.id !== id));
   const addFilter = () => {
-    const first = columns[0];
+    const first = fieldColumns[0];
     if (!first) return;
     onChange([
       ...filters,
@@ -176,7 +181,7 @@ export default function FilterEditor({ view, columns, rect, onClose, onChange })
                         (field removed)
                       </option>
                     )}
-                    {columns.map((c) => (
+                    {fieldColumns.map((c) => (
                       <option key={c.id} value={c.id}>
                         {c.name}
                       </option>
@@ -223,7 +228,7 @@ export default function FilterEditor({ view, columns, rect, onClose, onChange })
       <button
         type="button"
         onClick={addFilter}
-        disabled={columns.length === 0}
+        disabled={fieldColumns.length === 0}
         className="chip w-full justify-center py-1 text-[.64rem] disabled:opacity-40"
       >
         ＋ Add filter

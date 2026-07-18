@@ -9,9 +9,20 @@ const itemCls =
   "block w-full text-left px-2.5 py-1.5 rounded-[7px] font-mono text-[.66rem] hover:bg-cream-light transition ";
 const divider = <div className="my-1 border-t border-dashed border-brown-soft/30" />;
 
-export default function ColumnMenu({ column, pos, onClose, onAddField, onRename, onDelete, onSetFormat, onEditOptions }) {
+export default function ColumnMenu({
+  column,
+  pos,
+  onClose,
+  onAddField,
+  onRename,
+  onDelete,
+  onSetFormat,
+  onEditOptions,
+  onToggleSingle,
+}) {
   const isNumber = column.type === "number";
   const isSelect = column.type === "select" || column.type === "multiSelect";
+  const isLink = column.type === "link";
   const fmt = numberFmt(column);
 
   return (
@@ -48,6 +59,19 @@ export default function ColumnMenu({ column, pos, onClose, onAddField, onRename,
           }}
         >
           🏷 Edit options
+        </button>
+      )}
+
+      {isLink && (
+        <button
+          type="button"
+          className={itemCls + "text-forest"}
+          onClick={() => {
+            onClose();
+            onToggleSingle();
+          }}
+        >
+          {column.link?.single ? "🔗 Allow multiple records" : "🔗 Limit to single record"}
         </button>
       )}
 
