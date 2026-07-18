@@ -79,5 +79,30 @@ assert.equal(evalExpr("SUM({a}, {b}, {c})", { a: 1, b: 2, c: 3 }).value, 6);
 assert.equal(compile("2 +").error, "unexpected end of formula"); // compile catches parse errors
 ok("evaluate/index: arithmetic, refs, ROUND, IF (incl. lazy), errors via compile/run");
 
+import { namesToIds, idsToNames, refColumnIds } from "../src/modules/datatable/formula/refs.mjs";
+import { evalFormula } from "../src/modules/datatable/formulaModel.mjs";
+
+const cols = [
+  { id: "c1", name: "Price", type: "number" },
+  { id: "c2", name: "Qty", type: "number" },
+  { id: "c3", name: "Status", type: "select", options: [{ id: "o1", name: "Done" }] },
+  { id: "c4", name: "Total", type: "formula", formula: { expr: "{c1} * {c2}" } },
+  { id: "c5", name: "Loop", type: "formula", formula: { expr: "{c5} + 1" } },
+];
+// refs
+assert.equal(namesToIds("{Price} * {Qty}", cols), "{c1} * {c2}");
+assert.equal(idsToNames("{c1} * {c2}", cols), "{Price} * {Qty}");
+assert.equal(namesToIds("{Missing} + 1", cols), "{Missing} + 1"); // unmatched left literal
+assert.deepEqual(refColumnIds("{c1} + {c2}"), ["c1", "c2"]);
+
+const row = { id: "r1", tabId: "t", values: { c1: 10, c2: 3, c3: "o1" } };
+const F = (expr) => ({ id: "cF", name: "F", type: "formula", formula: { expr } });
+assert.equal(evalFormula(F("{c1} * {c2}"), row, cols).value, 30);
+assert.equal(evalFormula(F('IF({c3} = "Done", 1, 0)'), row, cols).value, 1); // select → option name
+assert.equal(evalFormula(F("{c4} + 5"), row, cols).value, 35);       // formula→formula ref
+assert.equal(evalFormula(F("{nope}"), row, cols).error, "unknown field");
+assert.equal(evalFormula(cols[4], row, cols).error, "circular reference"); // {c5}+1 self-ref
+ok("refs + evalFormula: name↔id, typed refs, select-name, nested formula, cycle detection");
+
 console.log(`\n${n} checks passed.`);
 process.exit(0);
