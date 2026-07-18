@@ -87,5 +87,24 @@ const mkTabs = () => [
   ok("applyLinkDelta single-source replaces + cleans the evicted reverse ref");
 }
 
+// --- applyLinkDelta: reverse (pair) column single evicts the prior source ---
+{
+  let tabs = mkTabs();
+  const { colA, colB } = makeLinkPair({ tabA: tabs[0], tabB: tabs[1], single: false, idA: "la", idB: "lb" });
+  colB.link.single = true; // make the REVERSE column single-record
+  tabs = insertLinkPair(tabs, "A", colA, "B", colB);
+  let rows = [
+    { id: "a1", tabId: "A", values: {} },
+    { id: "a2", tabId: "A", values: {} },
+    { id: "b1", tabId: "B", values: {} },
+  ];
+  rows = applyLinkDelta(rows, tabs, "a1", "la", "b1", true);
+  rows = applyLinkDelta(rows, tabs, "a2", "la", "b1", true); // reverse single ⇒ b1 drops a1, keeps a2
+  assert.deepEqual(rows.find((r) => r.id === "b1").values.lb, ["a2"]);
+  assert.deepEqual(rows.find((r) => r.id === "a2").values.la, ["b1"]);
+  assert.ok(!("la" in rows.find((r) => r.id === "a1").values)); // a1 lost its forward ref on both sides
+  ok("applyLinkDelta reverse-single evicts the prior source on both sides");
+}
+
 console.log(`\n${n} checks passed.`);
 process.exit(0);
