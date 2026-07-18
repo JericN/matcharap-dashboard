@@ -40,5 +40,23 @@ assert.equal(FUNCTIONS.IF.lazy, true);
 assert.equal(FUNCTIONS.IF.fn(() => true, () => "a", () => "b"), "a"); // lazy thunks
 ok("registry: coercion + operators + unary + functions (ROUND/MAX/SUM/IF-lazy)");
 
+import { parse } from "../src/modules/datatable/formula/parse.mjs";
+const ast = (src) => parse(tokenize(src));
+
+assert.deepEqual(ast("2 + 3"), { k: "binary", op: "+", l: { k: "num", v: 2 }, r: { k: "num", v: 3 } });
+// precedence: * binds tighter than +
+assert.equal(ast("2 + 3 * 4").r.k, "binary"); // right side is (3*4)
+assert.equal(ast("2 + 3 * 4").r.op, "*");
+assert.equal(ast("(2 + 3) * 4").op, "*");     // parens override
+assert.equal(ast("-5").k, "unary");
+assert.equal(ast("true").k, "bool");
+assert.deepEqual(ast("ROUND(1.5)"), { k: "call", name: "ROUND", args: [{ k: "num", v: 1.5 }] });
+assert.equal(ast("if(1,2,3)").name, "IF");    // case-insensitive fn name → canonical upper
+assert.throws(() => parse(tokenize("2 +")), FormulaError);        // dangling op
+assert.throws(() => parse(tokenize("(2 + 3")), FormulaError);     // unmatched paren
+assert.throws(() => parse(tokenize("NOPE(1)")), FormulaError);    // unknown function
+assert.throws(() => parse(tokenize("ROUND(1,2,3)")), FormulaError); // arity
+ok("parse: precedence, parens, unary, bool, calls (case-insensitive), errors");
+
 console.log(`\n${n} checks passed.`);
 process.exit(0);
