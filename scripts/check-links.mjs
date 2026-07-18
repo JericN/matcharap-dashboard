@@ -24,5 +24,68 @@ assert.equal(coerceCell({ type: "lookup" }, ["x"]), undefined); // derived, neve
 assert.equal(coerceCell({ type: "rollup" }, 5), undefined);
 ok("coerceCell handles link (clamp) + lookup/rollup (never stored)");
 
+// --- linkModel: makeLinkPair, insertLinkPair, applyLinkDelta ---
+import {
+  makeLinkPair,
+  insertLinkPair,
+  applyLinkDelta,
+} from "../src/modules/datatable/linkModel.mjs";
+
+// two tables A (people) and B (projects)
+const mkTabs = () => [
+  { id: "A", name: "People", columns: [{ id: "a_name", name: "Name", type: "text" }], views: [] },
+  { id: "B", name: "Projects", columns: [{ id: "b_name", name: "Name", type: "text" }], views: [] },
+];
+
+// --- makeLinkPair / insertLinkPair ---
+{
+  const [tabA, tabB] = mkTabs();
+  const { colA, colB } = makeLinkPair({ tabA, tabB, name: "Projects", single: false, idA: "la", idB: "lb" });
+  assert.equal(colA.type, "link");
+  assert.deepEqual(colA.link, { tableId: "B", pairColumnId: "lb", single: false });
+  assert.deepEqual(colB.link, { tableId: "A", pairColumnId: "la", single: false });
+  assert.equal(colB.name, "People"); // reverse defaults to source table name
+  const tabs = insertLinkPair([tabA, tabB], "A", colA, "B", colB);
+  assert.equal(tabs[0].columns.at(-1).id, "la");
+  assert.equal(tabs[1].columns.at(-1).id, "lb");
+  ok("makeLinkPair builds paired columns; insertLinkPair appends both");
+}
+
+// --- applyLinkDelta: add mirrors both sides ---
+{
+  let tabs = mkTabs();
+  const { colA, colB } = makeLinkPair({ tabA: tabs[0], tabB: tabs[1], single: false, idA: "la", idB: "lb" });
+  tabs = insertLinkPair(tabs, "A", colA, "B", colB);
+  let rows = [
+    { id: "a1", tabId: "A", values: {} },
+    { id: "b1", tabId: "B", values: {} },
+  ];
+  rows = applyLinkDelta(rows, tabs, "a1", "la", "b1", true);
+  assert.deepEqual(rows.find((r) => r.id === "a1").values.la, ["b1"]);
+  assert.deepEqual(rows.find((r) => r.id === "b1").values.lb, ["a1"]); // reverse synced
+  rows = applyLinkDelta(rows, tabs, "a1", "la", "b1", false);
+  assert.ok(!("la" in rows.find((r) => r.id === "a1").values)); // empty ⇒ dropped
+  assert.ok(!("lb" in rows.find((r) => r.id === "b1").values));
+  ok("applyLinkDelta add/remove keeps both sides consistent");
+}
+
+// --- applyLinkDelta: single source evicts the prior pair on BOTH sides ---
+{
+  let tabs = mkTabs();
+  const { colA, colB } = makeLinkPair({ tabA: tabs[0], tabB: tabs[1], single: true, idA: "la", idB: "lb" });
+  tabs = insertLinkPair(tabs, "A", colA, "B", colB);
+  let rows = [
+    { id: "a1", tabId: "A", values: {} },
+    { id: "b1", tabId: "B", values: {} },
+    { id: "b2", tabId: "B", values: {} },
+  ];
+  rows = applyLinkDelta(rows, tabs, "a1", "la", "b1", true);
+  rows = applyLinkDelta(rows, tabs, "a1", "la", "b2", true); // single ⇒ replaces b1
+  assert.deepEqual(rows.find((r) => r.id === "a1").values.la, ["b2"]);
+  assert.ok(!("lb" in rows.find((r) => r.id === "b1").values)); // b1 lost its reverse ref
+  assert.deepEqual(rows.find((r) => r.id === "b2").values.lb, ["a1"]);
+  ok("applyLinkDelta single-source replaces + cleans the evicted reverse ref");
+}
+
 console.log(`\n${n} checks passed.`);
 process.exit(0);
