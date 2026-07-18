@@ -2,9 +2,9 @@
 import AnchoredPopover from "./AnchoredPopover";
 import { SelectField } from "@/components/form";
 
-// Derived types (link/lookup/rollup) have no meaningful sort semantics — exclude
-// them from the field picker so a user can't add a no-op sort (still hideable).
-const FILTERABLE = (c) => c.type !== "link" && c.type !== "lookup" && c.type !== "rollup";
+// Derived types (link/lookup/rollup/formula) have no meaningful sort semantics —
+// exclude them from the field picker so a user can't add a no-op sort (still hideable).
+const FILTERABLE = (c) => c.type !== "link" && c.type !== "lookup" && c.type !== "rollup" && c.type !== "formula";
 
 // Sort editor for a view — an ordered list of sort keys (top row = highest
 // priority). Each row: [column] [↑ A→Z / ↓ Z→A direction toggle]. Add appends a

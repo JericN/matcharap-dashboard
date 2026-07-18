@@ -21,12 +21,14 @@ export default function ColumnMenu({
   onToggleSingle,
   onEditLookup,
   onEditRollup,
+  onEditFormula,
 }) {
   const isNumber = column.type === "number";
   const isSelect = column.type === "select" || column.type === "multiSelect";
   const isLink = column.type === "link";
   const isLookup = column.type === "lookup";
   const isRollup = column.type === "rollup";
+  const isFormula = column.type === "formula";
   const fmt = numberFmt(column);
 
   return (
@@ -105,7 +107,20 @@ export default function ColumnMenu({
         </button>
       )}
 
-      {isNumber && (
+      {isFormula && (
+        <button
+          type="button"
+          className={itemCls + "text-forest"}
+          onClick={() => {
+            onClose();
+            onEditFormula();
+          }}
+        >
+          ƒ Edit formula
+        </button>
+      )}
+
+      {(isNumber || isFormula) && (
         <div className="px-2.5 py-1.5 mt-1 border-t border-dashed border-brown-soft/30">
           <div className="font-mono text-[.53rem] uppercase tracking-[.1em] text-brown-soft mb-1">Format</div>
           <div className="flex gap-1 mb-2">

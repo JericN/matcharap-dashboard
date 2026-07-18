@@ -32,6 +32,8 @@ import OptionsEditor from "./OptionsEditor";
 import CursorMenu from "./CursorMenu";
 import AnchoredPopover from "./AnchoredPopover";
 import LinkFieldConfig from "./LinkFieldConfig";
+import FormulaConfig from "./FormulaConfig";
+import { idsToNames, namesToIds } from "./formula/refs.mjs";
 import { buildCtx } from "./linkDerive.mjs";
 
 const GUTTER = 40; // row drag-handle gutter
@@ -242,6 +244,38 @@ function RollupEditPopover({ column, rect, tables, columns, onClose, onSave }) {
   );
 }
 
+// Edit an existing formula column's expression, seeded from the column's current
+// `formula.expr` (id-form, translated to name-form for editing). Mirrors
+// RollupEditPopover. Rename-proof: names ↔ ids translate at this boundary only.
+function FormulaEditPopover({ column, columns, rect, onClose, onSave }) {
+  const [draft, setDraft] = useState({ expr: idsToNames(column.formula?.expr ?? "", columns) });
+  const nextId = namesToIds(draft.expr ?? "", columns);
+  const dirty = nextId !== (column.formula?.expr ?? "");
+  return (
+    <AnchoredPopover rect={rect} onClose={onClose} width={260}>
+      <div className="font-mono text-[.53rem] uppercase tracking-[.1em] text-brown-soft px-1 mb-1.5">
+        Edit formula · {column.name || "field"}
+      </div>
+      <FormulaConfig columns={columns} draft={draft} setDraft={setDraft} />
+      <div className="flex gap-1 mt-2">
+        <button type="button" onClick={onClose} className="flex-1 chip">
+          Cancel
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            if (dirty) onSave({ expr: nextId });
+            onClose();
+          }}
+          className="flex-1 chip chip--active"
+        >
+          Save
+        </button>
+      </div>
+    </AnchoredPopover>
+  );
+}
+
 // One sortable body row: a drag-handle gutter then a typed cell per column.
 // RIGHT-CLICK anywhere on the row opens its menu (duplicate / delete).
 function BodyRow({ row, draggingColId, sortActive, ctx, link, onSetCell, onCreateOption, onRowMenu }) {
@@ -346,6 +380,7 @@ export default function Grid({
   onToggleLinkSingle,
   onUpdateLookup,
   onUpdateRollup,
+  onUpdateFormula,
   onAddOption,
   onUpdateOption,
   onDeleteOption,
@@ -360,6 +395,7 @@ export default function Grid({
   const [optionsEditor, setOptionsEditor] = useState(null); // { colId, rect }
   const [lookupEditor, setLookupEditor] = useState(null); // { colId, rect }
   const [rollupEditor, setRollupEditor] = useState(null); // { colId, rect }
+  const [formulaEditor, setFormulaEditor] = useState(null); // { colId, rect }
   const [addColRect, setAddColRect] = useState(null);
   const [rowMenu, setRowMenu] = useState(null); // { rowId, pos:{x,y} }
   const [renamingId, setRenamingId] = useState(null);
@@ -451,6 +487,7 @@ export default function Grid({
   const optionsCol = optionsEditor ? columns.find((c) => c.id === optionsEditor.colId) : null;
   const lookupEditorCol = lookupEditor ? columns.find((c) => c.id === lookupEditor.colId) : null;
   const rollupEditorCol = rollupEditor ? columns.find((c) => c.id === rollupEditor.colId) : null;
+  const formulaEditorCol = formulaEditor ? columns.find((c) => c.id === formulaEditor.colId) : null;
   const columnIds = columns.map((c) => c.id);
   const rowIds = rows.map((r) => r.id);
   const tableWidth = GUTTER + table.getTotalSize();
@@ -622,6 +659,10 @@ export default function Grid({
             setRollupEditor({ colId: colMenu.colId, rect: colMenu.rect });
             setColMenu(null);
           }}
+          onEditFormula={() => {
+            setFormulaEditor({ colId: colMenu.colId, rect: colMenu.rect });
+            setColMenu(null);
+          }}
         />
       )}
 
@@ -658,6 +699,17 @@ export default function Grid({
           columns={link?.columns ?? []}
           onClose={() => setRollupEditor(null)}
           onSave={(patch) => onUpdateRollup(rollupEditorCol.id, patch)}
+        />
+      )}
+
+      {/* formula column edit popover */}
+      {formulaEditorCol && (
+        <FormulaEditPopover
+          column={formulaEditorCol}
+          columns={link?.columns ?? []}
+          rect={formulaEditor.rect}
+          onClose={() => setFormulaEditor(null)}
+          onSave={(patch) => onUpdateFormula(formulaEditorCol.id, patch)}
         />
       )}
 

@@ -4,9 +4,9 @@ import { SelectField, TextField, NumberField } from "@/components/form";
 import { OPS_BY_TYPE, defaultOpFor, valueKind } from "./viewOps";
 import { optionChip } from "./optionColors";
 
-// Derived types (link/lookup/rollup) have no meaningful filter semantics — exclude
-// them from the field picker so a user can't add a no-op filter (still hideable).
-const FILTERABLE = (c) => c.type !== "link" && c.type !== "lookup" && c.type !== "rollup";
+// Derived types (link/lookup/rollup/formula) have no meaningful filter semantics —
+// exclude them from the field picker so a user can't add a no-op filter (still hideable).
+const FILTERABLE = (c) => c.type !== "link" && c.type !== "lookup" && c.type !== "rollup" && c.type !== "formula";
 
 // The operand widget for one filter row, driven by valueKind(type, op):
 //   text/number/date → the shared form fields; selectOne → a chip row storing a
