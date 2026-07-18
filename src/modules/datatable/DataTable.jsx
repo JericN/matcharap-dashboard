@@ -485,6 +485,16 @@ export default function DataTable({ initialTables, initialRows, adapter, storage
     applyAddColumn(tabId, col);
     record({ label: "add column", undo: () => applyDeleteColumn(tabId, col.id), redo: () => applyAddColumn(tabId, col) });
   };
+  // Lookup/rollup columns: config-only, no cells of their own — created via the
+  // same generic add/delete-column path so undo comes free.
+  const addDerivedColumn = (type, name, draft) => {
+    const col = { id: uid(), name, type, width: type === "rollup" ? 120 : 180 };
+    if (type === "lookup") col.lookup = { linkColumnId: draft.linkColumnId, targetColumnId: draft.targetColumnId };
+    if (type === "rollup") col.rollup = { linkColumnId: draft.linkColumnId, targetColumnId: draft.targetColumnId, fn: draft.fn ?? "count" };
+    const tabId = activeId;
+    applyAddColumn(tabId, col);
+    record({ label: `add ${type} field`, undo: () => applyDeleteColumn(tabId, col.id), redo: () => applyAddColumn(tabId, col) });
+  };
   const onRenameColumn = (colId, name) => {
     const tabId = activeId;
     const old = columns.find((c) => c.id === colId)?.name;
@@ -534,6 +544,16 @@ export default function DataTable({ initialTables, initialRows, adapter, storage
       label: "link single/multi",
       undo: () => applyUpdateColumn(activeId, colId, { link: col.link }),
       redo: () => applyUpdateColumn(activeId, colId, { link: { ...col.link, single: next } }),
+    });
+  };
+  const onEditLookup = (colId, lookup) => {
+    const tabId = activeId;
+    const old = columns.find((c) => c.id === colId)?.lookup;
+    applyUpdateColumn(tabId, colId, { lookup });
+    record({
+      label: "edit lookup field",
+      undo: () => applyUpdateColumn(tabId, colId, { lookup: old }),
+      redo: () => applyUpdateColumn(tabId, colId, { lookup }),
     });
   };
   const onDeleteColumn = (colId) => {
@@ -776,18 +796,21 @@ export default function DataTable({ initialTables, initialRows, adapter, storage
         onReorderRows={onReorderRows}
         onAddColumn={onAddColumn}
         onAddLinkColumn={addLinkColumn}
+        onCreateDerived={addDerivedColumn}
         onRenameColumn={onRenameColumn}
         onResizeColumn={onResizeColumn}
         onSetColumnFormat={onSetColumnFormat}
         onReorderColumns={onReorderColumns}
         onDeleteColumn={onDeleteColumn}
         onToggleLinkSingle={onToggleLinkSingle}
+        onUpdateLookup={onEditLookup}
         onAddOption={onAddOption}
         onUpdateOption={onUpdateOption}
         onDeleteOption={onDeleteOption}
         link={{
           tables: tabs,
           currentTabId: activeId,
+          columns, // FULL active-tab columns (not view-filtered) — link/lookup config needs every field
           allRows: rows,
           onAddRef: (rowId, colId, targetId) => onAddRef(rowId, colId, targetId),
           onRemoveRef: (rowId, colId, targetId) => onRemoveRef(rowId, colId, targetId),

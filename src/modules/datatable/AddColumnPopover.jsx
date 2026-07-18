@@ -11,12 +11,22 @@ const TYPES = [
   { type: "multiSelect", label: "Multi-select", icon: "🏷" },
   { type: "checkbox", label: "Checkbox", icon: "☑" },
   { type: "link", label: "Link to table", icon: "🔗" },
+  { type: "lookup", label: "Lookup", icon: "👁" },
 ];
 
 // Add a column: name + type picker. Link/lookup/rollup open a config step.
-export default function AddColumnPopover({ rect, onClose, onCreate, tables = [], currentTabId, onCreateLink }) {
+export default function AddColumnPopover({
+  rect,
+  onClose,
+  onCreate,
+  tables = [],
+  currentTabId,
+  columns = [],
+  onCreateLink,
+  onCreateDerived,
+}) {
   const [name, setName] = useState("Column");
-  const [step, setStep] = useState(null); // null = type list; "link" = config
+  const [step, setStep] = useState(null); // null = type list; "link"/"lookup" = config
   const [draft, setDraft] = useState({ single: false });
 
   const createSimple = (type) => {
@@ -26,6 +36,11 @@ export default function AddColumnPopover({ rect, onClose, onCreate, tables = [],
   const confirmLink = () => {
     if (!draft.tableId) return;
     onCreateLink(name.trim() || "Column", draft.tableId, !!draft.single);
+    onClose();
+  };
+  const confirmLookup = () => {
+    if (!draft.linkColumnId || !draft.targetColumnId) return;
+    onCreateDerived("lookup", name.trim() || "Column", draft);
     onClose();
   };
 
@@ -44,13 +59,30 @@ export default function AddColumnPopover({ rect, onClose, onCreate, tables = [],
       />
       {step === "link" ? (
         <>
-          <LinkFieldConfig tables={tables} currentTabId={currentTabId} draft={draft} setDraft={setDraft} />
+          <LinkFieldConfig mode="link" tables={tables} currentTabId={currentTabId} draft={draft} setDraft={setDraft} />
           <div className="flex gap-1 mt-2">
             <button type="button" onClick={() => setStep(null)} className="flex-1 chip">
               ← Back
             </button>
             <button type="button" onClick={confirmLink} disabled={!draft.tableId} className="flex-1 chip chip--active disabled:opacity-40">
               Create link
+            </button>
+          </div>
+        </>
+      ) : step === "lookup" ? (
+        <>
+          <LinkFieldConfig mode="lookup" tables={tables} currentTabId={currentTabId} columns={columns} draft={draft} setDraft={setDraft} />
+          <div className="flex gap-1 mt-2">
+            <button type="button" onClick={() => setStep(null)} className="flex-1 chip">
+              ← Back
+            </button>
+            <button
+              type="button"
+              onClick={confirmLookup}
+              disabled={!draft.linkColumnId || !draft.targetColumnId}
+              className="flex-1 chip chip--active disabled:opacity-40"
+            >
+              Create lookup
             </button>
           </div>
         </>
@@ -61,7 +93,7 @@ export default function AddColumnPopover({ rect, onClose, onCreate, tables = [],
             <button
               key={t.type}
               type="button"
-              onClick={() => (t.type === "link" ? setStep("link") : createSimple(t.type))}
+              onClick={() => (t.type === "link" || t.type === "lookup" ? setStep(t.type) : createSimple(t.type))}
               className="flex items-center gap-2 w-full text-left px-2 py-1.5 rounded-[7px] font-mono text-[.68rem] text-forest hover:bg-cream-light transition"
             >
               <span className="w-4 text-center">{t.icon}</span>

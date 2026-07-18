@@ -19,10 +19,12 @@ export default function ColumnMenu({
   onSetFormat,
   onEditOptions,
   onToggleSingle,
+  onEditLookup,
 }) {
   const isNumber = column.type === "number";
   const isSelect = column.type === "select" || column.type === "multiSelect";
   const isLink = column.type === "link";
+  const isLookup = column.type === "lookup";
   const fmt = numberFmt(column);
 
   return (
@@ -72,6 +74,19 @@ export default function ColumnMenu({
           }}
         >
           {column.link?.single ? "🔗 Allow multiple records" : "🔗 Limit to single record"}
+        </button>
+      )}
+
+      {isLookup && (
+        <button
+          type="button"
+          className={itemCls + "text-forest"}
+          onClick={() => {
+            onClose();
+            onEditLookup();
+          }}
+        >
+          👁 Edit lookup
         </button>
       )}
 

@@ -6,6 +6,7 @@ import SelectCell from "./SelectCell";
 import MultiSelectCell from "./MultiSelectCell";
 import CheckboxCell from "./CheckboxCell";
 import LinkCell from "./LinkCell";
+import LookupCell from "./LookupCell";
 
 // Dispatch a cell to the right editor by column type. Simple types use
 // (value,onCommit); linked types use (row,ctx,link) for cross-table resolution.
@@ -23,6 +24,8 @@ export default function Cell({ column, value, row, ctx, link, onCommit, onCreate
       return <CheckboxCell value={value} onCommit={onCommit} />;
     case "link":
       return <LinkCell column={column} row={row} ctx={ctx} link={link} />;
+    case "lookup":
+      return <LookupCell column={column} row={row} ctx={ctx} />;
     case "text":
     default:
       return <TextCell value={value} onCommit={onCommit} />;

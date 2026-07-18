@@ -23,17 +23,20 @@ import { restrictToHorizontalAxis, restrictToVerticalAxis } from "@dnd-kit/modif
 import { CSS } from "@dnd-kit/utilities";
 import Cell from "./cells/Cell";
 import ValueView from "./cells/ValueView";
+import LookupCell from "./cells/LookupCell";
 import ColumnMenu from "./ColumnMenu";
 import AddColumnPopover from "./AddColumnPopover";
 import OptionsEditor from "./OptionsEditor";
 import CursorMenu from "./CursorMenu";
+import AnchoredPopover from "./AnchoredPopover";
+import LinkFieldConfig from "./LinkFieldConfig";
 import { buildCtx } from "./linkDerive.mjs";
 
 const GUTTER = 40; // row drag-handle gutter
 
 // The lifted "whole column" that follows the cursor during a column drag: the
 // field name atop each row's value, styled as a picked-up paper strip.
-function ColumnGhost({ column, rows, width }) {
+function ColumnGhost({ column, rows, width, ctx }) {
   return (
     <div
       style={{ width }}
@@ -47,7 +50,11 @@ function ColumnGhost({ column, rows, width }) {
           key={r.id}
           className="px-2 py-[7px] min-h-[32px] flex items-center border-b border-dashed border-brown-soft/25 last:border-b-0"
         >
-          <ValueView column={column} value={r.values[column.id]} />
+          {column.type === "lookup" ? (
+            <LookupCell column={column} row={r} ctx={ctx} />
+          ) : (
+            <ValueView column={column} value={r.values[column.id]} />
+          )}
         </div>
       ))}
     </div>
@@ -132,6 +139,41 @@ function HeaderCell({ header, renaming, renameDraft, setRenameDraft, onCommitRen
         }
       />
     </th>
+  );
+}
+
+// Edit an existing lookup column's config (through-link + target-field), seeded
+// from the column's current `lookup`. Mirrors AddColumnPopover's lookup step,
+// minus the name field (renaming is a separate header action).
+function LookupEditPopover({ column, rect, tables, columns, onClose, onSave }) {
+  const [draft, setDraft] = useState({
+    linkColumnId: column.lookup?.linkColumnId ?? "",
+    targetColumnId: column.lookup?.targetColumnId ?? "",
+  });
+  return (
+    <AnchoredPopover rect={rect} onClose={onClose} width={230}>
+      <div className="font-mono text-[.53rem] uppercase tracking-[.1em] text-brown-soft px-1 mb-1.5">
+        Edit lookup · {column.name || "field"}
+      </div>
+      <LinkFieldConfig mode="lookup" tables={tables} columns={columns} draft={draft} setDraft={setDraft} />
+      <div className="flex gap-1 mt-2">
+        <button type="button" onClick={onClose} className="flex-1 chip">
+          Cancel
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            if (!draft.linkColumnId || !draft.targetColumnId) return;
+            onSave({ linkColumnId: draft.linkColumnId, targetColumnId: draft.targetColumnId });
+            onClose();
+          }}
+          disabled={!draft.linkColumnId || !draft.targetColumnId}
+          className="flex-1 chip chip--active disabled:opacity-40"
+        >
+          Save
+        </button>
+      </div>
+    </AnchoredPopover>
   );
 }
 
@@ -225,12 +267,14 @@ export default function Grid({
   onReorderRows,
   onAddColumn,
   onAddLinkColumn,
+  onCreateDerived,
   onRenameColumn,
   onResizeColumn,
   onSetColumnFormat,
   onReorderColumns,
   onDeleteColumn,
   onToggleLinkSingle,
+  onUpdateLookup,
   onAddOption,
   onUpdateOption,
   onDeleteOption,
@@ -243,6 +287,7 @@ export default function Grid({
   const [activeColId, setActiveColId] = useState(null); // the column being dragged → ghost + dim source
   const [colMenu, setColMenu] = useState(null); // { colId, rect, pos } — rect anchors the options editor, pos is the cursor
   const [optionsEditor, setOptionsEditor] = useState(null); // { colId, rect }
+  const [lookupEditor, setLookupEditor] = useState(null); // { colId, rect }
   const [addColRect, setAddColRect] = useState(null);
   const [rowMenu, setRowMenu] = useState(null); // { rowId, pos:{x,y} }
   const [renamingId, setRenamingId] = useState(null);
@@ -332,6 +377,7 @@ export default function Grid({
 
   const colMenuCol = colMenu ? columns.find((c) => c.id === colMenu.colId) : null;
   const optionsCol = optionsEditor ? columns.find((c) => c.id === optionsEditor.colId) : null;
+  const lookupEditorCol = lookupEditor ? columns.find((c) => c.id === lookupEditor.colId) : null;
   const columnIds = columns.map((c) => c.id);
   const rowIds = rows.map((r) => r.id);
   const tableWidth = GUTTER + table.getTotalSize();
@@ -456,7 +502,7 @@ export default function Grid({
           {mounted &&
             createPortal(
               <DragOverlay modifiers={[restrictToHorizontalAxis]} dropAnimation={null}>
-                {ghostCol ? <ColumnGhost column={ghostCol} rows={rows} width={ghostWidth} /> : null}
+                {ghostCol ? <ColumnGhost column={ghostCol} rows={rows} width={ghostWidth} ctx={ctx} /> : null}
               </DragOverlay>,
               document.body,
             )}
@@ -493,6 +539,10 @@ export default function Grid({
             setOptionsEditor({ colId: colMenu.colId, rect: colMenu.rect });
             setColMenu(null);
           }}
+          onEditLookup={() => {
+            setLookupEditor({ colId: colMenu.colId, rect: colMenu.rect });
+            setColMenu(null);
+          }}
         />
       )}
 
@@ -508,6 +558,18 @@ export default function Grid({
         />
       )}
 
+      {/* lookup column edit popover */}
+      {lookupEditorCol && (
+        <LookupEditPopover
+          column={lookupEditorCol}
+          rect={lookupEditor.rect}
+          tables={link?.tables ?? []}
+          columns={link?.columns ?? []}
+          onClose={() => setLookupEditor(null)}
+          onSave={(patch) => onUpdateLookup(lookupEditorCol.id, patch)}
+        />
+      )}
+
       {/* add-column popover */}
       {addColRect && (
         <AddColumnPopover
@@ -516,7 +578,9 @@ export default function Grid({
           onCreate={(name, type) => onAddColumn(name, type)}
           tables={link?.tables ?? []}
           currentTabId={link?.currentTabId}
+          columns={link?.columns ?? []}
           onCreateLink={(name, targetTabId, single) => onAddLinkColumn(name, targetTabId, single)}
+          onCreateDerived={onCreateDerived}
         />
       )}
 
