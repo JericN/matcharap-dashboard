@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useReactTable, getCoreRowModel } from "@tanstack/react-table";
 import {
   DndContext,
@@ -294,6 +295,8 @@ export default function Grid({
   const [rowMenu, setRowMenu] = useState(null); // { rowId, pos:{x,y} }
   const [renamingId, setRenamingId] = useState(null);
   const [renameDraft, setRenameDraft] = useState("");
+  const [mounted, setMounted] = useState(false); // gate the body-portaled DragOverlay until after hydration
+  useEffect(() => setMounted(true), []);
 
   const columnDefs = useMemo(
     () =>
@@ -491,10 +494,18 @@ export default function Grid({
               </tbody>
             </table>
           </div>
-          {/* the whole dragged column, lifted, following the cursor (horizontal only) */}
-          <DragOverlay modifiers={[restrictToHorizontalAxis]} dropAnimation={null}>
-            {ghostCol ? <ColumnGhost column={ghostCol} rows={rows} width={ghostWidth} /> : null}
-          </DragOverlay>
+          {/* The whole dragged column, lifted, following the cursor (horizontal only).
+              Portaled to <body>: the /expenses (and /documents) <section> uses a
+              `-translate-x-1/2` transform, which would otherwise become the containing
+              block for this overlay's `position:fixed` and offset the ghost from the
+              pointer. Kept inside DndContext in the React tree so it still gets context. */}
+          {mounted &&
+            createPortal(
+              <DragOverlay modifiers={[restrictToHorizontalAxis]} dropAnimation={null}>
+                {ghostCol ? <ColumnGhost column={ghostCol} rows={rows} width={ghostWidth} /> : null}
+              </DragOverlay>,
+              document.body,
+            )}
         </DndContext>
       )}
 
