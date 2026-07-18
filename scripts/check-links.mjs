@@ -2,7 +2,7 @@
 // cores (pairing, add/remove delta + symmetric sync, cascades) and the read
 // derivations. No env needed — all pure.  npm run check:links
 import assert from "node:assert/strict";
-import { clampIds, coerceCell } from "../src/modules/datatable/model.mjs";
+import { clampIds, coerceCell, cloneColumn } from "../src/modules/datatable/model.mjs";
 
 let n = 0;
 const ok = (msg) => console.log(`✅ ${msg}`) || n++;
@@ -209,6 +209,17 @@ import {
   // dangling: link col gone ⇒ null / []
   assert.equal(rollupValue(a1, { type: "rollup", rollup: { linkColumnId: "nope", targetColumnId: "b_cost", fn: "sum" } }, ctx), null);
   ok("linkDerive: rowLabel / linkedRows / lookupValues / rollupValue (+dangling safe)");
+}
+
+// --- cloneColumn preserves link/lookup/rollup config ---
+{
+  const linkCol = { id: "la", name: "L", type: "link", width: 200, link: { tableId: "B", pairColumnId: "lb", single: true } };
+  const cloned = cloneColumn(linkCol);
+  assert.deepEqual(cloned.link, { tableId: "B", pairColumnId: "lb", single: true });
+  assert.notEqual(cloned.link, linkCol.link); // must be a copy, not the same reference
+  const rollCol = { id: "r", name: "R", type: "rollup", width: 120, rollup: { linkColumnId: "la", targetColumnId: "c", fn: "sum" } };
+  assert.deepEqual(cloneColumn(rollCol).rollup, { linkColumnId: "la", targetColumnId: "c", fn: "sum" });
+  ok("cloneColumn preserves + copies link/lookup/rollup config");
 }
 
 console.log(`\n${n} checks passed.`);

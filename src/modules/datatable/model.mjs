@@ -22,6 +22,9 @@ export function cloneColumn(c) {
   const out = { id: c.id, name: c.name, type: c.type, width: c.width };
   if (c.number) out.number = { style: c.number.style, precision: c.number.precision };
   if (c.options) out.options = c.options.map((o) => ({ id: o.id, name: o.name, color: o.color }));
+  if (c.link) out.link = { ...c.link };
+  if (c.lookup) out.lookup = { ...c.lookup };
+  if (c.rollup) out.rollup = { ...c.rollup };
   return out;
 }
 export const cloneColumns = (cols) => cols.map(cloneColumn);
