@@ -97,7 +97,7 @@ FUNCTIONS = {
   IF:    { min:3, max:3, lazy:true, fn:(cond,a,b)=> truthy(cond()) ? a() : b() },  // lazy: args are THUNKS
 }
 ```
-`num`/`cmp`/`truthy`/`div`/`mod` are typed-coercion helpers (a shared `coerce.mjs` or top of registry). A type error (e.g. `num("abc")`) throws a `FormulaError`. **Adding a function/operator = adding one entry here.** A function marked `lazy:true` receives its args as **thunks** (`()=>value`) so it can choose which to evaluate (e.g. `IF` only evaluates the taken branch — `IF({B}=0, 0, {A}/{B})` never divides by zero when `B=0`); non-lazy functions receive already-evaluated values.
+`num`/`cmp`/`truthy`/`div`/`mod` are typed-coercion helpers (a shared `coerce.mjs` or top of registry). A type error (e.g. `num("abc")`) throws a `FormulaError`. **Adding a function/operator = adding one entry here.** A function marked `lazy:true` receives its args as **thunks** (`()=>value`) so it can choose which to evaluate (e.g. `IF` only evaluates the taken branch — `IF({B}=0, 0, {A}/{B})` never divides by zero when `B=0`; note a **blank** `{B}` is not equal to `0`, since empty coerces to `0` in arithmetic but not in equality, so the guard does not protect a blank denominator, which still shows `#ERR` — Airtable-consistent, reserved seam); non-lazy functions receive already-evaluated values.
 
 **`parse.mjs`** — `parse(tokens) -> Ast` (Pratt parser; binary precedence read from `OPERATORS[sym].prec`, so a new operator needs no parser edit). AST nodes: `{k:"num"|"str"|"bool"|"ref"|"unary"|"binary"|"call", …}`. Throws `FormulaError` on a syntax error (unexpected token, unmatched paren, unknown function name checked here or at eval).
 

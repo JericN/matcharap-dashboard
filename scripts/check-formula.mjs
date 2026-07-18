@@ -104,5 +104,23 @@ assert.equal(evalFormula(F("{nope}"), row, cols).error, "unknown field");
 assert.equal(evalFormula(cols[4], row, cols).error, "circular reference"); // {c5}+1 self-ref
 ok("refs + evalFormula: name↔id, typed refs, select-name, nested formula, cycle detection");
 
+// --- blank-cell semantics: empty=0 in arithmetic but empty≠0 in equality ---
+{
+  assert.equal(num(""), 0);              // arithmetic: blank → 0
+  assert.equal(num(undefined), 0);
+  assert.equal(eq(undefined, 0), false); // equality: blank ≠ 0 (Airtable-consistent)
+  assert.equal(eq("", 0), false);
+  // guard pattern does NOT protect a BLANK denominator (documented behavior):
+  const cLocal = [
+    { id: "n1", name: "A", type: "number" },
+    { id: "n2", name: "B", type: "number" },
+  ];
+  const rLocal = { id: "r", tabId: "t", values: { n1: 5 } }; // B (n2) is BLANK
+  const Fm = (expr) => ({ id: "cF", name: "F", type: "formula", formula: { expr } });
+  assert.equal(evalFormula(Fm("IF({n2} = 0, 0, {n1} / {n2})"), rLocal, cLocal).error, "divide by zero");
+  assert.equal(evalFormula(Fm("{n1} / {n2}"), rLocal, cLocal).error, "divide by zero");
+  ok("blank-cell: 0 in arithmetic, not-0 in equality; blank denominator → error (documented)");
+}
+
 console.log(`\n${n} checks passed.`);
 process.exit(0);
