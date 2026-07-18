@@ -114,3 +114,120 @@ export function applyLinkDelta(rows, tabs, rowId, colId, targetId, add) {
   }
   return applyEdits(rows, edits);
 }
+
+// ---- cross-table cascades ----
+
+// All lookup/rollup columns whose linkColumnId is in colIds (the dependents).
+export function dependentsOf(tabs, colIds) {
+  const set = new Set(colIds);
+  const out = [];
+  for (const t of tabs) {
+    for (const c of t.columns) {
+      const ref = c.type === "lookup" ? c.lookup?.linkColumnId : c.type === "rollup" ? c.rollup?.linkColumnId : null;
+      if (ref && set.has(ref)) out.push({ tabId: t.id, colId: c.id });
+    }
+  }
+  return out;
+}
+
+// Capture (BEFORE stripping) each target column's {column,index,cells,viewRefs}
+// in the exact shape restoreColumn consumes — for undo.
+function captureRemoval(tabs, rows, targets) {
+  const columns = [];
+  for (const { tabId, colId } of targets) {
+    const tab = tabs.find((t) => t.id === tabId);
+    if (!tab) continue;
+    const index = tab.columns.findIndex((c) => c.id === colId);
+    const column = tab.columns[index];
+    if (!column) continue;
+    const cells = rows
+      .filter((r) => r.tabId === tabId && r.values[colId] !== undefined)
+      .map((r) => ({ rowId: r.id, value: r.values[colId] }));
+    const viewRefs = captureColumnViewRefs(tab, colId);
+    columns.push({ tabId, column, index, cells, viewRefs });
+  }
+  return { columns };
+}
+
+// Strip each target column sequentially (reuses the view-aware stripColumn core).
+function applyStrip(tabs, rows, targets) {
+  let t = tabs, r = rows;
+  for (const { tabId, colId } of targets) {
+    const res = stripColumn(t, r, tabId, colId);
+    t = res.tabs; r = res.rows;
+  }
+  return { tabs: t, rows: r };
+}
+
+// Remove a row AND strip its id from every link cell that could hold it (link
+// columns whose link.tableId === the row's tab). Bounded scan. removedRefs for undo.
+export function stripRowEverywhere(tabs, rows, rowId, rowTabId) {
+  const holderCols = new Set();
+  for (const t of tabs)
+    for (const c of t.columns)
+      if (c.type === "link" && c.link?.tableId === rowTabId) holderCols.add(c.id);
+  const removedRefs = [];
+  const nextRows = [];
+  for (const r of rows) {
+    if (r.id === rowId) continue;
+    let values = r.values;
+    for (const colId of holderCols) {
+      const cur = values[colId];
+      if (Array.isArray(cur) && cur.includes(rowId)) {
+        removedRefs.push({ rowId: r.id, colId, targetId: rowId });
+        values = writeCell(values, colId, cur.filter((id) => id !== rowId));
+      }
+    }
+    nextRows.push(values === r.values ? r : { ...r, values });
+  }
+  return { rows: nextRows, removedRefs };
+}
+
+// Delete a link column + its paired column + dependent lookup/rollup on either
+// side, stripping cells + view refs. `removed` captures all of it for undo.
+export function deleteLinkColumnPair(tabs, rows, tabId, colId) {
+  const colA = findColumn(tabs, tabId, colId);
+  const targets = [{ tabId, colId }];
+  if (colA?.type === "link") {
+    targets.push({ tabId: colA.link.tableId, colId: colA.link.pairColumnId });
+    targets.push(...dependentsOf(tabs, [colId, colA.link.pairColumnId]));
+  } else {
+    targets.push(...dependentsOf(tabs, [colId]));
+  }
+  const removed = captureRemoval(tabs, rows, targets);
+  const stripped = applyStrip(tabs, rows, targets);
+  return { ...stripped, removed };
+}
+
+// Delete a whole table: drop inbound link columns (+dependents) on OTHER tables
+// first (capturing them), then drop the tab + its rows. The tab/rows themselves
+// are captured by the consumer (existing restoreTab path); `removed` is the
+// inbound-column capture that undo replays via restoreLinkRemoval.
+export function stripTableCascade(tabs, rows, tabId) {
+  const inbound = [];
+  for (const t of tabs) {
+    if (t.id === tabId) continue;
+    for (const c of t.columns)
+      if (c.type === "link" && c.link?.tableId === tabId) inbound.push({ tabId: t.id, colId: c.id });
+  }
+  const targets = [...inbound, ...dependentsOf(tabs, inbound.map((i) => i.colId))];
+  const removed = captureRemoval(tabs, rows, targets);
+  const stripped = applyStrip(tabs, rows, targets);
+  return {
+    tabs: stripped.tabs.filter((t) => t.id !== tabId),
+    rows: stripped.rows.filter((r) => r.tabId !== tabId),
+    removed,
+  };
+}
+
+// Undo of a pair/table strip: re-insert each captured column at its index (ascending
+// so shifted positions rebuild left-to-right), restoring its cells + view refs.
+export function restoreLinkRemoval(tabs, rows, removed) {
+  let t = tabs, r = rows;
+  const ordered = [...removed.columns].sort((a, b) => a.index - b.index);
+  for (const { tabId, column, index, cells, viewRefs } of ordered) {
+    const res = restoreColumn(t, r, tabId, column, index, cells, viewRefs);
+    t = res.tabs; r = res.rows;
+  }
+  return { tabs: t, rows: r };
+}
