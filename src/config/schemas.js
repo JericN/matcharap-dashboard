@@ -200,7 +200,9 @@ const OptionSchema = z.object({
 const ColumnSchema = z.object({
   id: z.string(),
   name: z.string().default(""),
-  type: z.enum(["text", "number", "date", "select", "multiSelect", "checkbox"]).default("text"),
+  type: z
+    .enum(["text", "number", "date", "select", "multiSelect", "checkbox", "link", "lookup", "rollup"])
+    .default("text"),
   width: z.number().default(160),
   number: z
     .object({
@@ -209,6 +211,17 @@ const ColumnSchema = z.object({
     })
     .optional(),
   options: z.array(OptionSchema).optional(),
+  // Linked-record configs. PERMISSIVE (no cross-ref validation) — a dangling ref
+  // (concurrent delete) must never throw here; derivation is defensive.
+  link: z.object({ tableId: z.string(), pairColumnId: z.string(), single: z.boolean().default(false) }).optional(),
+  lookup: z.object({ linkColumnId: z.string(), targetColumnId: z.string() }).optional(),
+  rollup: z
+    .object({
+      linkColumnId: z.string(),
+      targetColumnId: z.string().optional(),
+      fn: z.enum(["sum", "count", "avg", "min", "max"]).default("count"),
+    })
+    .optional(),
 });
 
 // A saved view = a lens over its table's rows (filters + sorts + hidden fields).

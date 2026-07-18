@@ -13,7 +13,8 @@
     "check:redis": "node --env-file=.env.local scripts/check-redis.mjs",
     "check:docs": "node scripts/check-docs.mjs",
     "check:expenses": "node scripts/check-expenses.mjs",
-    "check:views": "node scripts/check-views.mjs"
+    "check:views": "node scripts/check-views.mjs",
+    "check:links": "node scripts/check-links.mjs"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
