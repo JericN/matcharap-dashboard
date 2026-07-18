@@ -41,7 +41,7 @@ export default function MultiSelectCell({ column, value, onCommit, onCreateOptio
         ref={ref}
         type="button"
         onClick={openMenu}
-        className="w-full min-h-[32px] flex items-center gap-1 flex-wrap px-2 py-[5px] rounded-[8px] hover:bg-cream-light/60 transition-colors text-left"
+        className="w-full min-h-[32px] flex items-center gap-1 flex-nowrap overflow-hidden px-2 py-[5px] rounded-[8px] hover:bg-cream-light/60 transition-colors text-left"
       >
         {selectedOpts.length ? (
           selectedOpts.map((o) => (

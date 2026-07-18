@@ -39,7 +39,7 @@ export default function ValueView({ column, value }) {
       const ids = Array.isArray(value) ? value : [];
       const opts = ids.map((id) => (column.options ?? []).find((o) => o.id === id)).filter(Boolean);
       return opts.length ? (
-        <span className="flex flex-wrap gap-1">
+        <span className="flex flex-nowrap gap-1 overflow-hidden">
           {opts.map((o) => (
             <span key={o.id} className="font-mono text-[.65rem] px-[7px] py-[2px] rounded-pill border" style={optionChip(o.color)}>
               {o.name}

@@ -299,15 +299,19 @@ function BodyRow({ row, draggingColId, sortActive, ctx, link, onSetCell, onCreat
               (lifted ? "opacity-30" : "")
             }
           >
-            <Cell
-              column={col}
-              value={cell.getValue()}
-              row={row.original}
-              ctx={ctx}
-              link={link}
-              onCommit={(v) => onSetCell(id, col.id, v)}
-              onCreateOption={(name) => onCreateOption(col.id, name)}
-            />
+            {/* Fixed row height: clip overflow so a cell never expands the row —
+                content is cut, not wrapped (row height stays uniform). */}
+            <div className="flex h-9 items-stretch overflow-hidden">
+              <Cell
+                column={col}
+                value={cell.getValue()}
+                row={row.original}
+                ctx={ctx}
+                link={link}
+                onCommit={(v) => onSetCell(id, col.id, v)}
+                onCreateOption={(name) => onCreateOption(col.id, name)}
+              />
+            </div>
           </td>
         );
       })}
