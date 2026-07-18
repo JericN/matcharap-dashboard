@@ -25,6 +25,7 @@ import Cell from "./cells/Cell";
 import ValueView from "./cells/ValueView";
 import LookupCell from "./cells/LookupCell";
 import RollupCell from "./cells/RollupCell";
+import FormulaCell from "./cells/FormulaCell";
 import ColumnMenu from "./ColumnMenu";
 import AddColumnPopover from "./AddColumnPopover";
 import OptionsEditor from "./OptionsEditor";
@@ -37,7 +38,7 @@ const GUTTER = 40; // row drag-handle gutter
 
 // The lifted "whole column" that follows the cursor during a column drag: the
 // field name atop each row's value, styled as a picked-up paper strip.
-function ColumnGhost({ column, rows, width, ctx }) {
+function ColumnGhost({ column, rows, width, ctx, columns }) {
   return (
     <div
       style={{ width }}
@@ -55,6 +56,8 @@ function ColumnGhost({ column, rows, width, ctx }) {
             <LookupCell column={column} row={r} ctx={ctx} />
           ) : column.type === "rollup" ? (
             <RollupCell column={column} row={r} ctx={ctx} />
+          ) : column.type === "formula" ? (
+            <FormulaCell column={column} row={r} columns={columns} ctx={ctx} />
           ) : (
             <ValueView column={column} value={r.values[column.id]} />
           )}
@@ -571,7 +574,9 @@ export default function Grid({
           {mounted &&
             createPortal(
               <DragOverlay modifiers={[restrictToHorizontalAxis]} dropAnimation={null}>
-                {ghostCol ? <ColumnGhost column={ghostCol} rows={rows} width={ghostWidth} ctx={ctx} /> : null}
+                {ghostCol ? (
+                  <ColumnGhost column={ghostCol} rows={rows} width={ghostWidth} ctx={ctx} columns={link?.columns ?? []} />
+                ) : null}
               </DragOverlay>,
               document.body,
             )}

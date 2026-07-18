@@ -8,6 +8,7 @@ import CheckboxCell from "./CheckboxCell";
 import LinkCell from "./LinkCell";
 import LookupCell from "./LookupCell";
 import RollupCell from "./RollupCell";
+import FormulaCell from "./FormulaCell";
 
 // Dispatch a cell to the right editor by column type. Simple types use
 // (value,onCommit); linked types use (row,ctx,link) for cross-table resolution.
@@ -29,6 +30,8 @@ export default function Cell({ column, value, row, ctx, link, onCommit, onCreate
       return <LookupCell column={column} row={row} ctx={ctx} />;
     case "rollup":
       return <RollupCell column={column} row={row} ctx={ctx} />;
+    case "formula":
+      return <FormulaCell column={column} row={row} columns={link?.columns ?? []} ctx={ctx} />;
     case "text":
     default:
       return <TextCell value={value} onCommit={onCommit} />;
