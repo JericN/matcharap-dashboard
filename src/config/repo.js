@@ -12,6 +12,14 @@ import {
   restoreTab as restoreTabCore,
   restoreView as restoreViewCore,
 } from "./expenseModel.mjs";
+import {
+  insertLinkPair,
+  applyLinkDelta,
+  deleteLinkColumnPair,
+  stripRowEverywhere,
+  stripTableCascade,
+  restoreLinkRemoval,
+} from "@/modules/datatable/linkModel.mjs";
 
 // ============================================================================
 // DATA-ACCESS LAYER — the single interface the app uses for data.
@@ -300,7 +308,12 @@ export const repo = {
       return { ...s, expenses };
     }),
   removeExpense: (id) =>
-    mutate((s) => ({ ...s, expenses: s.expenses.filter((r) => r.id !== id) })),
+    mutate((s) => {
+      const row = s.expenses.find((r) => r.id === id);
+      if (!row) return s;
+      const { rows } = stripRowEverywhere(s.expenseTabs, s.expenses, id, row.tabId);
+      return { ...s, expenses: rows };
+    }),
   // Reorder one tab's rows to match `orderedIds`, refilling only that tab's
   // slots in the global array so other tabs (and concurrent edits) are left in
   // place. Unknown ids are skipped; a tab row missing from the list (e.g. a
@@ -353,6 +366,25 @@ export const repo = {
   deleteColumn: (tabId, colId) =>
     mutate((s) => {
       const { tabs, rows } = stripColumn(s.expenseTabs, s.expenses, tabId, colId);
+      return { ...s, expenseTabs: tabs, expenses: rows };
+    }),
+
+  // ---- linked-record columns (two-way symmetric) ----
+  addLinkPair: (tabAId, colA, tabBId, colB) =>
+    mutate((s) => ({ ...s, expenseTabs: insertLinkPair(s.expenseTabs, tabAId, colA, tabBId, colB) })),
+  // single-record delta off FRESH state → both sides stay consistent under concurrency
+  addRef: (rowId, colId, targetId) =>
+    mutate((s) => ({ ...s, expenses: applyLinkDelta(s.expenses, s.expenseTabs, rowId, colId, targetId, true) })),
+  removeRef: (rowId, colId, targetId) =>
+    mutate((s) => ({ ...s, expenses: applyLinkDelta(s.expenses, s.expenseTabs, rowId, colId, targetId, false) })),
+  deleteLinkColumn: (tabId, colId) =>
+    mutate((s) => {
+      const { tabs, rows } = deleteLinkColumnPair(s.expenseTabs, s.expenses, tabId, colId);
+      return { ...s, expenseTabs: tabs, expenses: rows };
+    }),
+  restoreLinkColumn: (removed) =>
+    mutate((s) => {
+      const { tabs, rows } = restoreLinkRemoval(s.expenseTabs, s.expenses, removed);
       return { ...s, expenseTabs: tabs, expenses: rows };
     }),
 
@@ -429,17 +461,14 @@ export const repo = {
       ...s,
       expenseTabs: s.expenseTabs.map((t) => (t.id === id ? { ...t, name } : t)),
     })),
-  // delete the tab AND its rows; refuse to remove the last remaining tab
+  // delete the tab AND its rows (+ cascade any inbound links from other tables);
+  // refuse to remove the last remaining tab
   removeExpenseTab: (id) =>
-    mutate((s) =>
-      s.expenseTabs.length <= 1
-        ? s
-        : {
-            ...s,
-            expenseTabs: s.expenseTabs.filter((t) => t.id !== id),
-            expenses: s.expenses.filter((r) => r.tabId !== id),
-          },
-    ),
+    mutate((s) => {
+      if (s.expenseTabs.length <= 1) return s; // last-tab protected
+      const { tabs, rows } = stripTableCascade(s.expenseTabs, s.expenses, id);
+      return { ...s, expenseTabs: tabs, expenses: rows };
+    }),
 
   // ---- views (per-table saved lenses: filters + sorts + hidden fields) ----
   addView: (tabId, view) =>

@@ -159,6 +159,28 @@ export async function deleteColumn(tabId, colId) {
   revalidatePath("/expenses");
 }
 
+// ---- linked-record columns (two-way symmetric) ----
+export async function addLinkPair(tabAId, colA, tabBId, colB) {
+  await repo.addLinkPair(tabAId, colA, tabBId, colB);
+  revalidatePath("/expenses");
+}
+export async function addRef(rowId, colId, targetId) {
+  await repo.addRef(rowId, colId, targetId);
+  revalidatePath("/expenses");
+}
+export async function removeRef(rowId, colId, targetId) {
+  await repo.removeRef(rowId, colId, targetId);
+  revalidatePath("/expenses");
+}
+export async function deleteLinkColumn(tabId, colId) {
+  await repo.deleteLinkColumn(tabId, colId);
+  revalidatePath("/expenses");
+}
+export async function restoreLinkColumn(removed) {
+  await repo.restoreLinkColumn(removed);
+  revalidatePath("/expenses");
+}
+
 export async function addOption(tabId, colId, option) {
   await repo.addOption(tabId, colId, option);
   revalidatePath("/expenses");
