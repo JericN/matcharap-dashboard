@@ -58,5 +58,26 @@ assert.throws(() => parse(tokenize("NOPE(1)")), FormulaError);    // unknown fun
 assert.throws(() => parse(tokenize("ROUND(1,2,3)")), FormulaError); // arity
 ok("parse: precedence, parens, unary, bool, calls (case-insensitive), errors");
 
+import { compile, run } from "../src/modules/datatable/formula/index.mjs";
+// evaluate an expr against a ref scope (id → value)
+const evalExpr = (expr, refs = {}) => {
+  const { ast, error } = compile(expr);
+  if (error) return { error };
+  return run(ast, { getRef: (id) => refs[id] });
+};
+
+assert.equal(evalExpr("2 + 3 * 4").value, 14);
+assert.equal(evalExpr("(2 + 3) * 4").value, 20);
+assert.equal(evalExpr("{a} * {b}", { a: 6, b: 7 }).value, 42);
+assert.equal(evalExpr("ROUND({a} / {b}, 2)", { a: 10, b: 3 }).value, 3.33);
+assert.equal(evalExpr('IF({q} > 10, "bulk", "unit")', { q: 12 }).value, "bulk");
+assert.equal(evalExpr('IF({q} > 10, "bulk", "unit")', { q: 3 }).value, "unit");
+// lazy IF: untaken div-by-zero branch is NOT evaluated
+assert.equal(evalExpr("IF({b} = 0, 0, {a} / {b})", { a: 5, b: 0 }).value, 0);
+assert.equal(evalExpr("{a} / {b}", { a: 5, b: 0 }).error, "divide by zero");
+assert.equal(evalExpr("SUM({a}, {b}, {c})", { a: 1, b: 2, c: 3 }).value, 6);
+assert.equal(compile("2 +").error, "unexpected end of formula"); // compile catches parse errors
+ok("evaluate/index: arithmetic, refs, ROUND, IF (incl. lazy), errors via compile/run");
+
 console.log(`\n${n} checks passed.`);
 process.exit(0);
