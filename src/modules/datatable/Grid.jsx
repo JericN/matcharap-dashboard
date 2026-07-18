@@ -24,6 +24,7 @@ import { CSS } from "@dnd-kit/utilities";
 import Cell from "./cells/Cell";
 import ValueView from "./cells/ValueView";
 import LookupCell from "./cells/LookupCell";
+import RollupCell from "./cells/RollupCell";
 import ColumnMenu from "./ColumnMenu";
 import AddColumnPopover from "./AddColumnPopover";
 import OptionsEditor from "./OptionsEditor";
@@ -52,6 +53,8 @@ function ColumnGhost({ column, rows, width, ctx }) {
         >
           {column.type === "lookup" ? (
             <LookupCell column={column} row={r} ctx={ctx} />
+          ) : column.type === "rollup" ? (
+            <RollupCell column={column} row={r} ctx={ctx} />
           ) : (
             <ValueView column={column} value={r.values[column.id]} />
           )}
@@ -164,10 +167,69 @@ function LookupEditPopover({ column, rect, tables, columns, onClose, onSave }) {
           type="button"
           onClick={() => {
             if (!draft.linkColumnId || !draft.targetColumnId) return;
-            onSave({ linkColumnId: draft.linkColumnId, targetColumnId: draft.targetColumnId });
+            const next = { linkColumnId: draft.linkColumnId, targetColumnId: draft.targetColumnId };
+            // No-op edit → skip the undo-stack push entirely.
+            if (JSON.stringify(next) === JSON.stringify(column.lookup ?? {})) {
+              onClose();
+              return;
+            }
+            onSave(next);
             onClose();
           }}
           disabled={!draft.linkColumnId || !draft.targetColumnId}
+          className="flex-1 chip chip--active disabled:opacity-40"
+        >
+          Save
+        </button>
+      </div>
+    </AnchoredPopover>
+  );
+}
+
+// Edit an existing rollup column's config (through-link + aggregation + target
+// field), seeded from the column's current `rollup`. Mirrors LookupEditPopover.
+function RollupEditPopover({ column, rect, tables, columns, onClose, onSave }) {
+  const [draft, setDraft] = useState({
+    linkColumnId: column.rollup?.linkColumnId ?? "",
+    fn: column.rollup?.fn ?? "count",
+    targetColumnId: column.rollup?.targetColumnId ?? "",
+  });
+  const fn = draft.fn ?? "count";
+  const valid = !!draft.linkColumnId && (fn === "count" || !!draft.targetColumnId);
+  // Normalize away the "targetColumnId is meaningless when fn is count" wrinkle
+  // before comparing, so re-saving an unchanged count rollup isn't flagged dirty.
+  const normRollup = (r) => {
+    const f = r?.fn ?? "count";
+    return JSON.stringify({
+      linkColumnId: r?.linkColumnId ?? "",
+      fn: f,
+      targetColumnId: f === "count" ? "" : (r?.targetColumnId ?? ""),
+    });
+  };
+  return (
+    <AnchoredPopover rect={rect} onClose={onClose} width={230}>
+      <div className="font-mono text-[.53rem] uppercase tracking-[.1em] text-brown-soft px-1 mb-1.5">
+        Edit rollup · {column.name || "field"}
+      </div>
+      <LinkFieldConfig mode="rollup" tables={tables} columns={columns} draft={draft} setDraft={setDraft} />
+      <div className="flex gap-1 mt-2">
+        <button type="button" onClick={onClose} className="flex-1 chip">
+          Cancel
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            if (!valid) return;
+            const next = { linkColumnId: draft.linkColumnId, targetColumnId: draft.targetColumnId, fn };
+            // No-op edit → skip the undo-stack push entirely.
+            if (normRollup(next) === normRollup(column.rollup)) {
+              onClose();
+              return;
+            }
+            onSave(next);
+            onClose();
+          }}
+          disabled={!valid}
           className="flex-1 chip chip--active disabled:opacity-40"
         >
           Save
@@ -275,6 +337,7 @@ export default function Grid({
   onDeleteColumn,
   onToggleLinkSingle,
   onUpdateLookup,
+  onUpdateRollup,
   onAddOption,
   onUpdateOption,
   onDeleteOption,
@@ -288,6 +351,7 @@ export default function Grid({
   const [colMenu, setColMenu] = useState(null); // { colId, rect, pos } — rect anchors the options editor, pos is the cursor
   const [optionsEditor, setOptionsEditor] = useState(null); // { colId, rect }
   const [lookupEditor, setLookupEditor] = useState(null); // { colId, rect }
+  const [rollupEditor, setRollupEditor] = useState(null); // { colId, rect }
   const [addColRect, setAddColRect] = useState(null);
   const [rowMenu, setRowMenu] = useState(null); // { rowId, pos:{x,y} }
   const [renamingId, setRenamingId] = useState(null);
@@ -378,6 +442,7 @@ export default function Grid({
   const colMenuCol = colMenu ? columns.find((c) => c.id === colMenu.colId) : null;
   const optionsCol = optionsEditor ? columns.find((c) => c.id === optionsEditor.colId) : null;
   const lookupEditorCol = lookupEditor ? columns.find((c) => c.id === lookupEditor.colId) : null;
+  const rollupEditorCol = rollupEditor ? columns.find((c) => c.id === rollupEditor.colId) : null;
   const columnIds = columns.map((c) => c.id);
   const rowIds = rows.map((r) => r.id);
   const tableWidth = GUTTER + table.getTotalSize();
@@ -543,6 +608,10 @@ export default function Grid({
             setLookupEditor({ colId: colMenu.colId, rect: colMenu.rect });
             setColMenu(null);
           }}
+          onEditRollup={() => {
+            setRollupEditor({ colId: colMenu.colId, rect: colMenu.rect });
+            setColMenu(null);
+          }}
         />
       )}
 
@@ -567,6 +636,18 @@ export default function Grid({
           columns={link?.columns ?? []}
           onClose={() => setLookupEditor(null)}
           onSave={(patch) => onUpdateLookup(lookupEditorCol.id, patch)}
+        />
+      )}
+
+      {/* rollup column edit popover */}
+      {rollupEditorCol && (
+        <RollupEditPopover
+          column={rollupEditorCol}
+          rect={rollupEditor.rect}
+          tables={link?.tables ?? []}
+          columns={link?.columns ?? []}
+          onClose={() => setRollupEditor(null)}
+          onSave={(patch) => onUpdateRollup(rollupEditorCol.id, patch)}
         />
       )}
 

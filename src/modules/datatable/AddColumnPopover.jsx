@@ -12,6 +12,7 @@ const TYPES = [
   { type: "checkbox", label: "Checkbox", icon: "☑" },
   { type: "link", label: "Link to table", icon: "🔗" },
   { type: "lookup", label: "Lookup", icon: "👁" },
+  { type: "rollup", label: "Rollup", icon: "∑" },
 ];
 
 // Add a column: name + type picker. Link/lookup/rollup open a config step.
@@ -41,6 +42,12 @@ export default function AddColumnPopover({
   const confirmLookup = () => {
     if (!draft.linkColumnId || !draft.targetColumnId) return;
     onCreateDerived("lookup", name.trim() || "Column", draft);
+    onClose();
+  };
+  const confirmRollup = () => {
+    const fn = draft.fn ?? "count";
+    if (!draft.linkColumnId || (fn !== "count" && !draft.targetColumnId)) return;
+    onCreateDerived("rollup", name.trim() || "Column", draft);
     onClose();
   };
 
@@ -86,6 +93,23 @@ export default function AddColumnPopover({
             </button>
           </div>
         </>
+      ) : step === "rollup" ? (
+        <>
+          <LinkFieldConfig mode="rollup" tables={tables} currentTabId={currentTabId} columns={columns} draft={draft} setDraft={setDraft} />
+          <div className="flex gap-1 mt-2">
+            <button type="button" onClick={() => setStep(null)} className="flex-1 chip">
+              ← Back
+            </button>
+            <button
+              type="button"
+              onClick={confirmRollup}
+              disabled={!draft.linkColumnId || ((draft.fn ?? "count") !== "count" && !draft.targetColumnId)}
+              className="flex-1 chip chip--active disabled:opacity-40"
+            >
+              Create rollup
+            </button>
+          </div>
+        </>
       ) : (
         <>
           <div className="font-mono text-[.53rem] uppercase tracking-[.1em] text-brown-soft px-1 mb-1">Type</div>
@@ -93,7 +117,9 @@ export default function AddColumnPopover({
             <button
               key={t.type}
               type="button"
-              onClick={() => (t.type === "link" || t.type === "lookup" ? setStep(t.type) : createSimple(t.type))}
+              onClick={() =>
+                t.type === "link" || t.type === "lookup" || t.type === "rollup" ? setStep(t.type) : createSimple(t.type)
+              }
               className="flex items-center gap-2 w-full text-left px-2 py-1.5 rounded-[7px] font-mono text-[.68rem] text-forest hover:bg-cream-light transition"
             >
               <span className="w-4 text-center">{t.icon}</span>

@@ -556,6 +556,16 @@ export default function DataTable({ initialTables, initialRows, adapter, storage
       redo: () => applyUpdateColumn(tabId, colId, { lookup }),
     });
   };
+  const onEditRollup = (colId, rollup) => {
+    const tabId = activeId;
+    const old = columns.find((c) => c.id === colId)?.rollup;
+    applyUpdateColumn(tabId, colId, { rollup });
+    record({
+      label: "edit rollup field",
+      undo: () => applyUpdateColumn(tabId, colId, { rollup: old }),
+      redo: () => applyUpdateColumn(tabId, colId, { rollup }),
+    });
+  };
   const onDeleteColumn = (colId) => {
     const tabId = activeId;
     const col = columns.find((c) => c.id === colId);
@@ -804,6 +814,7 @@ export default function DataTable({ initialTables, initialRows, adapter, storage
         onDeleteColumn={onDeleteColumn}
         onToggleLinkSingle={onToggleLinkSingle}
         onUpdateLookup={onEditLookup}
+        onUpdateRollup={onEditRollup}
         onAddOption={onAddOption}
         onUpdateOption={onUpdateOption}
         onDeleteOption={onDeleteOption}

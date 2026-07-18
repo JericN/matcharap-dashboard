@@ -20,11 +20,13 @@ export default function ColumnMenu({
   onEditOptions,
   onToggleSingle,
   onEditLookup,
+  onEditRollup,
 }) {
   const isNumber = column.type === "number";
   const isSelect = column.type === "select" || column.type === "multiSelect";
   const isLink = column.type === "link";
   const isLookup = column.type === "lookup";
+  const isRollup = column.type === "rollup";
   const fmt = numberFmt(column);
 
   return (
@@ -87,6 +89,19 @@ export default function ColumnMenu({
           }}
         >
           👁 Edit lookup
+        </button>
+      )}
+
+      {isRollup && (
+        <button
+          type="button"
+          className={itemCls + "text-forest"}
+          onClick={() => {
+            onClose();
+            onEditRollup();
+          }}
+        >
+          ∑ Edit rollup
         </button>
       )}
 
