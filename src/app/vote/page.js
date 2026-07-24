@@ -1,30 +1,23 @@
-import Link from "next/link";
 import SectionHeader from "@/components/SectionHeader";
-import VoteForm from "@/features/voting/VoteForm";
-import { CANDIDATES } from "@/config/voting";
+import HostConsole from "@/features/voting/HostConsole";
+import { getVoteState } from "@/config/voting";
 
-// The ballot is static (candidates are a const); the tally page reads Redis.
-export const metadata = { title: "Name the brand · vote" };
+export const dynamic = "force-dynamic"; // shared session, read fresh per request
 
-export default function VotePage() {
+export const metadata = { title: "Brand vote · host" };
+
+export default async function VotePage() {
+  const state = await getVoteState();
   return (
     <section className="mt-2">
       <SectionHeader
         num="★"
         kicker="brand vote"
-        title="Name the brand"
-        sub="one pick each — help choose the name · anyone can join"
+        title="Vote console"
+        sub="send everyone their link, start the vote, and drive each round"
       />
-      <div className="mt-8">
-        <VoteForm candidates={CANDIDATES} />
-        <p className="mt-5 text-center">
-          <Link
-            href="/vote/results"
-            className="font-mono text-[.62rem] tracking-[.1em] uppercase text-clay no-underline hover:text-forest"
-          >
-            see the live tally →
-          </Link>
-        </p>
+      <div className="mt-7">
+        <HostConsole state={state} />
       </div>
     </section>
   );

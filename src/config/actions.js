@@ -305,8 +305,29 @@ export async function moveFolder(folderId, beforeId) {
   revalidatePath("/documents");
 }
 
-// Brand-name vote: record one ballot, then refresh the live tally page.
-export async function castVote(name, candidate) {
-  await voting.castVote(name, candidate);
-  revalidatePath("/vote/results");
+// Live brand-name vote. Pages also poll via router.refresh(); these revalidates
+// keep a cold page load fresh. "layout" fans out to /vote, /vote/[voter] and
+// /vote/results at once.
+function revalidateVote() {
+  revalidatePath("/vote", "layout");
+}
+export async function voteStart() {
+  await voting.start();
+  revalidateVote();
+}
+export async function voteSubmit(voter, picks) {
+  await voting.submit(voter, picks);
+  revalidateVote();
+}
+export async function voteReveal() {
+  await voting.reveal();
+  revalidateVote();
+}
+export async function voteNext() {
+  await voting.next();
+  revalidateVote();
+}
+export async function voteReset() {
+  await voting.reset();
+  revalidateVote();
 }
