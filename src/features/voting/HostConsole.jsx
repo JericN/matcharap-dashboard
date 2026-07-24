@@ -122,39 +122,51 @@ export default function HostConsole({ state }) {
           </div>
         )}
 
-        {/* Reset */}
-        <div className="flex justify-end pt-2 border-t border-dashed border-ink/20">
-          {!confirmReset ? (
-            <button
-              type="button"
-              onClick={() => setConfirmReset(true)}
-              className="font-mono text-[.6rem] uppercase tracking-[.08em] text-brown-soft hover:text-clay"
-            >
-              reset
-            </button>
-          ) : (
-            <span className="flex items-center gap-2 font-mono text-[.6rem] uppercase tracking-[.08em]">
-              <span className="text-clay">reset everything?</span>
+        {/* Restart / reset — available mid-vote (abort) and after it ends
+            (start a fresh vote). Two-step confirm so nobody nukes a live vote
+            by accident. Hidden while idle (nothing to reset yet). */}
+        {phase !== "idle" && (
+          <div
+            className={`pt-2 border-t border-dashed border-ink/20 ${
+              phase === "finished" ? "flex flex-col items-center gap-2" : "flex justify-end"
+            }`}
+          >
+            {confirmReset ? (
+              <span className="flex items-center gap-2 font-mono text-[.62rem] uppercase tracking-[.08em]">
+                <span className="text-clay">
+                  {phase === "finished"
+                    ? "clear results & start a new vote?"
+                    : "reset the current vote?"}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setConfirmReset(false);
+                    run(voteReset);
+                  }}
+                  className="text-clay font-bold"
+                >
+                  yes
+                </button>
+                <button type="button" onClick={() => setConfirmReset(false)} className="text-brown">
+                  no
+                </button>
+              </span>
+            ) : phase === "finished" ? (
+              <ActionButton onClick={() => setConfirmReset(true)} busy={busy}>
+                ↻ Start a new vote
+              </ActionButton>
+            ) : (
               <button
                 type="button"
-                onClick={() => {
-                  setConfirmReset(false);
-                  run(voteReset);
-                }}
-                className="text-clay font-bold"
+                onClick={() => setConfirmReset(true)}
+                className="font-mono text-[.6rem] uppercase tracking-[.08em] text-brown-soft hover:text-clay"
               >
-                yes
+                reset &amp; start over
               </button>
-              <button
-                type="button"
-                onClick={() => setConfirmReset(false)}
-                className="text-brown"
-              >
-                no
-              </button>
-            </span>
-          )}
-        </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
