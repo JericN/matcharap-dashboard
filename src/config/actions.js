@@ -2,6 +2,7 @@
 import { revalidatePath } from "next/cache";
 import { repo } from "@/config/repo";
 import * as docs from "@/config/documents";
+import * as voting from "@/config/voting";
 
 // Client-callable boundary: write through the DAL, then revalidate the routes
 // whose server reads depend on the changed state.
@@ -302,4 +303,10 @@ export async function moveDoc(docId, folderId, beforeId) {
 export async function moveFolder(folderId, beforeId) {
   await docs.moveFolder(folderId, beforeId);
   revalidatePath("/documents");
+}
+
+// Brand-name vote: record one ballot, then refresh the live tally page.
+export async function castVote(name, candidate) {
+  await voting.castVote(name, candidate);
+  revalidatePath("/vote/results");
 }
