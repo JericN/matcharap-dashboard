@@ -132,7 +132,7 @@ export default function HostConsole({ state }) {
             }`}
           >
             {confirmReset ? (
-              <span className="flex items-center gap-2 font-mono text-[.62rem] uppercase tracking-[.08em]">
+              <span className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-center font-mono text-[.62rem] uppercase tracking-[.08em]">
                 <span className="text-clay">
                   {phase === "finished"
                     ? "clear results & start a new vote?"

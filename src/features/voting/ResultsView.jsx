@@ -36,9 +36,9 @@ function RoundCard({ round, voters }) {
         {voters.map((v) => {
           const picks = round.votes[v];
           return (
-            <div key={v} className="flex items-baseline gap-2 text-[.8rem]">
+            <div key={v} className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 text-[.8rem]">
               <span className="w-14 shrink-0 font-doodle text-forest capitalize">{v}</span>
-              <span className="font-mono text-brown">
+              <span className="min-w-0 break-words font-mono text-brown">
                 {picks && picks.length ? picks.join(", ") : "—"}
               </span>
             </div>

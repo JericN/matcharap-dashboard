@@ -38,6 +38,8 @@
      so dropping the root size shrinks it all proportionally. */
   html {
     font-size: 16px;
+    -webkit-text-size-adjust: 100%; /* stop iOS from auto-inflating text (e.g. landscape) */
+    text-size-adjust: 100%;
   }
   @media (max-width: 768px) {
     html {
@@ -81,6 +83,22 @@
 
 /* ---------- the hand-drawn design-system primitives ---------- */
 @layer components {
+  /* voting pages (/vote/*): a phone-first, tap-only flow. Kill the mobile
+     annoyances — double-tap-to-zoom + the 300ms tap delay (touch-action),
+     the grey tap flash, and accidental text selection on rapid taps. Combined
+     with the no-zoom viewport in app/vote/layout.js. No text inputs here, so
+     there's no iOS focus-zoom to worry about. */
+  .vote-root {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+  .vote-root button {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
   /* section headers */
   .section-tag {
     @apply inline-flex items-center gap-2 font-mono text-[.62rem] tracking-[.2em] uppercase text-brown bg-cream-light border-2 border-brown rounded-pill px-[13px] py-1 mb-3 -rotate-[1.2deg];
